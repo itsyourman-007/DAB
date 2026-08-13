@@ -66,7 +66,7 @@
 - [ ] Replace the configurable Android wrapper with a fixed deployed dashboard shortcut that opens `/admin` directly and relies only on the existing administrator password login.
 - [ ] Replace the Android URL entry with a native password-first login screen that validates against a fixed stable server and opens the live dashboard only after successful authentication.
 - [x] Collect and implement the user’s next requested website changes.
-- [ ] Save the completed website checkpoint and export the project to the confirmed GitHub repository.
+- [x] Save the completed website checkpoint and export the project to the confirmed GitHub repository.
 - [x] Correct the landing-page MeitY TIDE 2.0 EIR Grant and Women’s Hackathon 3.0 recognition titles.
 - [x] Replace the remaining landing-page paragraph reference with “MeitY TIDE 2.0 EIR Grant”.
 - [x] Replace the two landing-page recognition photographs with the supplied Women Startup Program and 91DAB exhibition images.
@@ -104,14 +104,16 @@
 - [x] Prepare and validate the published-site recurring cleanup schedule for expired demo orders.
 - [ ] After publishing, activate and smoke-test the hourly demo-order cleanup schedule from administrator Settings.
 - [x] Share and verify the current working 91DAB preview before GitHub export.
-- [ ] Export the verified project to the GitHub repository identifier provided by the user.
+- [x] Export the verified project to the GitHub repository identifier provided by the user.
 - [ ] Restore a preview URL that is reachable from the user’s device and verify the landing, shop, and dashboard entry routes.
 - [ ] Diagnose and resolve the renewed user-reported preview loading failure before sharing another access link.
 - [x] Confirm the target `owner/repository` identifier required for the requested GitHub export.
-- [ ] Verify access to the confirmed GitHub repository `itsyourman-007/DAB` and export the latest validated project state.
+- [x] Verify access to the confirmed GitHub repository `itsyourman-007/DAB` and export the latest validated project state.
 - [x] Provide an accessible preview alternative because the temporary preview address is not loading on the user’s device.
 - [x] Add a dedicated Delivery Tracking sidebar screen for paid orders, accessible to administrators and authorized employees.
 - [x] Send a server-side buyer email confirmation when an authorized staff member marks an eligible order as Shipped or Delivered.
 - [x] Persist and test deduplicated shipment and delivery email dispatches without exposing buyer data or generating duplicate notifications.
 - [x] Restore QR-code visibility on the buyer payment screen after checkout creation.
 - [x] Ensure each trusted checkout that reaches payment is visible in the protected dashboard as a pending order record.
+- [x] Provide a project-specific Render deployment checklist, including Resend, custom domain, performance expectations, and GitHub-based update workflow.
+- [ ] Sync the validated Render Blueprint and deployment guide update to the exported GitHub repository.

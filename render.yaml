@@ -14,6 +14,10 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: MERCHANT_VPA
+        sync: false
+      - key: MERCHANT_NAME
+        value: 91DAB
       - key: RESEND_API_KEY
         sync: false
       - key: ADMIN_OTP_RECIPIENT_EMAIL
