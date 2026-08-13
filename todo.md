@@ -137,3 +137,11 @@
 - [x] Capture direct mobile-width evidence that the isolated chart tooltip changes from hidden to visible on interaction and that the Monday-first Overview layout remains usable.
 - [x] Record explicit browser tooltip opacity values before and after focus in the isolated desktop chart session.
 - [x] Record the mobile fixture’s focused tooltip and Monday-to-Sunday labels from its rendered output before release.
+- [x] Diagnose why shop-page images are not visible in the deployed storefront and identify the correct deployment-safe image URLs.
+- [x] Repair shop product and supporting image delivery with safe visible fallbacks where needed.
+- [x] Add regression coverage and visually validate repaired shop images at desktop and mobile widths.
+- [ ] Synchronize the validated shop-image repair to GitHub for Render deployment.
+- [x] Confirm the missing shop images are caused by `/manus-storage/` URLs unavailable on Render; identify `dab_img.png` as the product source and the supplied clinic visual as the supporting source.
+- [x] Visually verify the repaired public product image in the shop hero at desktop and mobile widths.
+- [x] Confirm the live shop route renders the repaired product hero image from the external CDN rather than a missing Manus-only storage path.
+- [x] Visually verify the repaired clinic image appears in the live shop subscription section; confirm all three shop images report non-zero natural dimensions from the public CDN.
