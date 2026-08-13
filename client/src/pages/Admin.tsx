@@ -134,8 +134,9 @@ export default function Admin() {
   }, [profile.data]);
 
   useEffect(() => {
+    if (orders.data === undefined) return;
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
-    iframe?.contentWindow?.postMessage({ type: "91dab-server-orders", orders: orders.data ?? [] }, window.location.origin);
+    iframe?.contentWindow?.postMessage({ type: "91dab-server-orders", orders: orders.data }, window.location.origin);
   }, [orders.data]);
 
   useEffect(() => {
@@ -402,7 +403,7 @@ export default function Admin() {
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-employee-accounts", accounts: employeeAccounts.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-login-audits", audits: loginAudits.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-dashboard-role", role: status.data?.role ?? null }, window.location.origin);
-              event.currentTarget.contentWindow?.postMessage({ type: "91dab-server-orders", orders: orders.data ?? [] }, window.location.origin);
+              if (orders.data !== undefined) event.currentTarget.contentWindow?.postMessage({ type: "91dab-server-orders", orders: orders.data }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-inventory", inventory: inventory.data ?? null }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-subscription-deliveries", deliveries: subscriptionDeliveries.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-reminder-status", reminder: reminderStatus.data ?? null }, window.location.origin);

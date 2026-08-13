@@ -152,3 +152,10 @@
 - [x] Confirm live hero CTA labels are visible with correct explicit colors, full opacity, and non-zero dimensions; blank labels in the automated phone capture are a screenshot artifact rather than a rendered-page failure.
 - [x] Diagnose and eliminate the remaining phone-width hero CTA overflow observed in the independent Chromium capture.
 - [x] Confirm hero CTA bounds change from an overflowing 2,215 CSS pixels to a contained 453 CSS pixels after constraining the ticker’s parent grid item.
+- [x] Inspect current merchant dashboard notification and live-update behavior to identify reliable real-item arrival signals.
+- [x] Add a user-enabled, muted-by-default notification chime and accessible sound toggle for genuinely new dashboard alerts or live updates.
+- [x] Add regression coverage and validate that the chime sounds only after a new received item and never on the initial dashboard load.
+- [ ] Synchronize the validated dashboard notification-sound update to GitHub for Render deployment.
+- [x] Visually verify the new Notification sound control appears in Dashboard Settings and defaults to off with a clear muted-by-default explanation.
+- [x] Validate in an isolated dashboard session that initial order hydration produces zero chimes, a newly received UPI-reference state produces one chime, and no test order is persisted.
+- [x] Validate in an isolated dashboard session that a trusted live-message event invokes one chime without persistence, then clear all transient message, notification, and order data.

@@ -937,6 +937,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <div class="set-row"><div><div class="set-label">New order alerts</div><div class="set-sub">Get a live notification when a buyer checks out</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Payment confirmations</div><div class="set-sub">Notify when a UPI reference is submitted</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Low stock warnings</div><div class="set-sub">Alert when any product drops below 50 units</div></div><button class="switch" onclick="this.classList.toggle('on')"></button></div>
+          <div class="set-row"><div><div class="set-label">Notification sound</div><div class="set-sub">Muted by default. Turn on a gentle chime for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification sound" onclick="toggleNotificationSound()"></button></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
@@ -1029,6 +1030,44 @@ let quoteRequests = [];
 let activeQuote = null;
 const paymentEmailStates = {};
 const fulfillmentEmailStates = {};
+const NOTIFICATION_SOUND_KEY = '91dab_notification_sound_enabled';
+let notificationSoundEnabled = localStorage.getItem(NOTIFICATION_SOUND_KEY) === 'true';
+let notificationAudioContext = null;
+let serverOrdersInitialized = false;
+
+function syncNotificationSoundControl(){
+  const control=document.getElementById('notificationSoundSwitch'); if(!control||typeof control.setAttribute!=='function') return;
+  control.classList.toggle('on',notificationSoundEnabled);
+  control.setAttribute('aria-pressed',String(notificationSoundEnabled));
+  control.setAttribute('aria-label',notificationSoundEnabled?'Mute notification sound':'Enable notification sound');
+}
+async function prepareNotificationAudio(){
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass) return false;
+  notificationAudioContext=notificationAudioContext||new AudioContextClass();
+  if(notificationAudioContext.state==='suspended') await notificationAudioContext.resume();
+  return notificationAudioContext.state==='running';
+}
+async function toggleNotificationSound(){
+  notificationSoundEnabled=!notificationSoundEnabled;
+  try{localStorage.setItem(NOTIFICATION_SOUND_KEY,String(notificationSoundEnabled));}catch(err){}
+  if(notificationSoundEnabled){
+    try{await prepareNotificationAudio(); showToast('Notification sound enabled. It will chime only for new received updates.','success');}
+    catch(err){notificationSoundEnabled=false; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'false');}catch(storageErr){} showToast('Your browser blocked notification sound. Try the switch again after interacting with this page.','info');}
+  } else { showToast('Notification sound muted.','info'); }
+  syncNotificationSoundControl();
+}
+function playNotificationChime(){
+  if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
+  const now=notificationAudioContext.currentTime;
+  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.055,now+.015); gain.gain.exponentialRampToValueAtTime(0.0001,now+.32); gain.connect(notificationAudioContext.destination);
+  [880,1320].forEach((frequency,index)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+index*.1); oscillator.connect(gain); oscillator.start(now+index*.1); oscillator.stop(now+index*.1+.15);});
+  return true;
+}
+function notifyReceivedUpdate(title,text){
+  notifications.unshift({title,text,time:'Just now',unread:true}); notifications=notifications.slice(0,20);
+  renderNotifications(); playNotificationChime();
+}
 
 function readShopStorage(key){
   try{ const value = JSON.parse(localStorage.getItem(key) || '[]'); return Array.isArray(value) ? value : []; }
@@ -1079,9 +1118,20 @@ function hydrateShopData(){
   quoteSeq = quoteRequests.length + 1;
 }
 function applyServerOrders(records){
-  serverOrderRecords = Array.isArray(records) ? records.filter(record=>record?.paymentStatus==='pending'||record?.paymentStatus==='utr_submitted'||record?.paymentStatus==='paid') : [];
+  const previousStates=new Set(serverOrderRecords.map(record=>`${record.orderId}:${record.paymentStatus}`));
+  const nextRecords=Array.isArray(records) ? records.filter(record=>record?.paymentStatus==='pending'||record?.paymentStatus==='utr_submitted'||record?.paymentStatus==='paid') : [];
+  const receivedAlerts=serverOrdersInitialized?nextRecords.filter(record=>['pending','utr_submitted'].includes(record.paymentStatus)&&!previousStates.has(`${record.orderId}:${record.paymentStatus}`)):[];
+  serverOrderRecords=nextRecords;
   hydrateShopData();
   syncDashboardViews();
+  serverOrdersInitialized=true;
+  receivedAlerts.forEach(record=>notifyReceivedUpdate(record.paymentStatus==='utr_submitted'?'UPI reference submitted':'New buyer checkout',`${record.orderId} · ${record.buyerName||'Buyer'}`));
+}
+function applyTrustedLiveMessage(message){
+  if(!message?.id||!message?.name||!message?.text) return;
+  if(messages.some(item=>item.id===message.id)) return;
+  messages.unshift({id:message.id,name:message.name,msgs:[{from:'buyer',text:message.text,time:message.time||'Just now'}]});
+  renderThreads(); notifyReceivedUpdate('New buyer message',message.name);
 }
 function applyInventory(inventory){
   inventoryState=inventory;
@@ -1109,6 +1159,7 @@ function syncDashboardViews(){
   renderBars(); renderTopProducts(); renderOrders(document.getElementById('orderSearch')?.value || '');
   renderActivity(); renderTracking(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); updateShopBadges(); refreshHomeStats();
 }
+syncNotificationSoundControl();
 window.addEventListener('storage', (event)=>{
   if(event.key===SHOP_QUOTE_KEY){ hydrateShopData(); syncDashboardViews(); showToast('Shop quote data synced to dashboard','success'); }
 });
@@ -1868,6 +1919,7 @@ window.addEventListener('message',(event)=>{
     else showToast(data.message||'Profile could not be saved.','error');
   }
   if(data.type==='91dab-server-orders'){ applyServerOrders(data.orders); }
+  if(data.type==='91dab-live-message'){ applyTrustedLiveMessage(data.message); }
   if(data.type==='91dab-inventory'){ applyInventory(data.inventory); }
   if(data.type==='91dab-inventory-result'){
     if(data.success){ applyInventory(data.inventory); closeTeamModal(); showToast('DAB inventory saved','success'); }
