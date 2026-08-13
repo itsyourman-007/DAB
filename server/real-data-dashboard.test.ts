@@ -225,7 +225,7 @@ describe("real-data-only dashboard integration", () => {
   it("keeps the public landing and every purchase screen within the compact phone layout", () => {
     expect(landingHtml).toContain('.nav-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;');
     expect(landingHtml).toContain('.hero-actions.reveal,.hero-actions .reveal{opacity:1;transform:none;}');
-    expect(landingHtml).toContain('.hero-actions .btn{width:100%;justify-content:center;white-space:normal;min-height:48px;}');
+    expect(landingHtml).toContain('.hero-actions .btn{width:100%;max-width:100%;min-width:0;justify-content:center;white-space:normal;min-height:48px;line-height:1.25;}');
     expect(shopHtml).toContain('.hero-grid,.product-grid,.pay-grid{grid-template-columns:1fr;}');
     expect(shopHtml).toContain('.cart-item .remove-btn{grid-column:2;justify-self:start;}');
     expect(shopHtml).toContain('.utr-row{flex-direction:column;gap:.65rem;}');
