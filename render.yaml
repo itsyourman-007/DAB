@@ -2,7 +2,7 @@ services:
   - type: web
     runtime: node
     name: 91dab-store
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build
+    buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm build
     startCommand: node server/_core/migrateOnStart.mjs && pnpm start
     healthCheckPath: /
     envVars:

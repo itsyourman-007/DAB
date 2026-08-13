@@ -55,6 +55,20 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("persistCalendarEvents()");
   });
 
+  it("uses Monday-to-Sunday and January-to-December ordering with sales amounts shown only on a black chart tooltip", () => {
+    expect(dashboardHtml).toContain("const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']");
+    expect(dashboardHtml).toContain("date.setDate(now.getDate()-mondayOffset+index)");
+    expect(dashboardHtml).toContain("const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']");
+    expect(dashboardHtml).toContain("new Date(now.getFullYear(),index,1)");
+    expect(dashboardHtml).toContain("const first = (new Date(y,m,1).getDay()+6)%7");
+    expect(dashboardHtml).toContain("['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach");
+    expect(dashboardHtml).toContain("background:#111318;color:#fff");
+    expect(dashboardHtml).toContain(".bar-col:hover .bar-tip, .bar-col:focus-within .bar-tip{opacity:1;}");
+    expect(dashboardHtml).not.toContain(".bar-col.hi .bar-tip{opacity:1;}");
+    expect(dashboardHtml).toContain("Sales performance from Monday to Sunday");
+    expect(dashboardHtml).toContain("Sales performance from January to December");
+  });
+
   it("persists server-created UPI orders and marks only submitted trusted records paid through protected admin operations", () => {
     expect(shopHtml).toContain("fetch('/api/orders'");
     expect(shopHtml).toContain("/api/orders/${currentOrder.orderId}/utr");

@@ -13,13 +13,15 @@ This project is ready to deploy from the GitHub repository at [itsyourman-007/DA
 | Setting | Value |
 |---|---|
 | Service type | Web Service |
-| Build command | `corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build` |
+| Build command | `pnpm install --frozen-lockfile --prod=false && pnpm build` |
 | Start command | `node server/_core/migrateOnStart.mjs && pnpm start` |
 | Health-check path | `/` |
 | Runtime | Node |
 | Auto-deploy | **On Commit** on the `main` branch |
 
 Render automatically deploys a linked Git branch when changes are pushed, and a failed build leaves the most recent successful version running. [1]
+
+> **Render command note:** use the direct `pnpm` command above. Some Render Node images make system package-manager paths read-only, so `corepack enable` can fail before the build begins.
 
 At application start, 91DAB now checks the database before the web server starts. An **empty database** receives the checked-in Drizzle migrations once; a **complete existing 91DAB database** is left unchanged; and a **partially migrated database** stops with a clear error rather than risking records by applying only some migrations. Do not replace the Blueprint commands with `drizzle-kit migrate && pnpm start`.
 
@@ -60,6 +62,23 @@ The `MERCHANT_VPA` can be changed later in **Render → service → Environment 
 Resend powers administrator password-change OTPs, payment confirmations, and the new Shipped/Delivered buyer emails. In [Resend Domains](https://resend.com/domains), add a domain or subdomain you control, then place the exact DNS records Resend shows in your domain provider. Wait until the domain displays **Verified** before using it as `ADMIN_OTP_FROM_EMAIL`.
 
 Use a sender such as `91DAB <orders@yourdomain.com>`. The same verified sender supports all site emails. A buyer receives an email after payment verification and again after a staff member marks an order **Shipped** or **Delivered**. The app stores a per-order, per-status dispatch record so a status email is not duplicated; if Resend has a temporary error, the Delivery Tracking screen exposes a retry action.
+
+### Resend automatic-email setup
+
+1. In [Resend Domains](https://resend.com/domains), select **Add Domain** and add a subdomain you control, such as `mail.yourdomain.com` or `updates.yourdomain.com`. Resend recommends using a sending subdomain to separate transactional-mail reputation from the root domain. [11] [13]
+2. Open the domain’s **Records** tab. Copy every Resend-provided DNS record exactly into the DNS provider that manages your domain, including the DKIM and SPF records. Wait until the domain is shown as **Verified**; Resend states this is often about 15 minutes, though DNS propagation can take longer. [11]
+3. In [Resend API Keys](https://resend.com/api-keys), select **Create API Key**. Name it `91DAB Render`, give it **Sending access** only, and restrict it to the verified 91DAB sending domain where that option is available. Copy the value once and store it immediately in Render; Resend does not show an existing API key value again. [12]
+4. In **Render → 91dab-store → Environment**, add `RESEND_API_KEY` with that secret and set `ADMIN_OTP_FROM_EMAIL` to a real mailbox on the verified sending domain, for example `91DAB <orders@mail.yourdomain.com>`. Set `ADMIN_OTP_RECIPIENT_EMAIL` to `dantaresearch@gmail.com`.
+5. Save, rebuild, and deploy. Then request a password-change OTP from **Dashboard → Settings** to test the administrator email. Use a test buyer email during a real test checkout to verify buyer emails.
+
+| 91DAB automatic email | When it is sent |
+|---|---|
+| Administrator password OTP | The administrator requests a password change in Dashboard Settings. |
+| Buyer payment confirmation | An administrator verifies a submitted UPI reference and marks the trusted order paid. |
+| Buyer shipping confirmation | Staff marks a paid order **Shipped**. |
+| Buyer delivery confirmation | Staff marks the same order **Delivered**. |
+
+The website does **not** send a buyer “payment confirmed” email merely when a QR code opens or a UPI reference is submitted: a real payment must first be verified by an authorized administrator. This prevents false confirmations.
 
 ## 5. Use your own domain
 
@@ -130,3 +149,9 @@ After the final HTTPS domain is available, send it to me to create the fixed And
 [9] [TiDB Cloud: Connect via public endpoint](https://docs.pingcap.com/tidbcloud/connect-via-standard-connection-serverless/)
 
 [10] [TiDB Cloud: Configure public-endpoint firewall rules](https://docs.pingcap.com/tidbcloud/configure-serverless-firewall-rules-for-public-endpoints/)
+
+[11] [Resend: Add and verify a domain](https://resend.com/docs/add-a-domain)
+
+[12] [Resend: Manage API keys](https://resend.com/docs/dashboard/api-keys/introduction)
+
+[13] [Resend: Verified domains](https://resend.com/docs/dashboard/domains/introduction)

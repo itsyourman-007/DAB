@@ -10,7 +10,8 @@ describe("Render deployment configuration", () => {
     ["DATABASE_URL", "MERCHANT_VPA", "RESEND_API_KEY", "ADMIN_OTP_RECIPIENT_EMAIL", "ADMIN_OTP_FROM_EMAIL", "ADMIN_DASHBOARD_PASSWORD", "JWT_SECRET"].forEach((key) => {
       expect(blueprint).toContain(`key: ${key}`);
     });
-    expect(blueprint).toContain("buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build");
+    expect(blueprint).toContain("buildCommand: pnpm install --frozen-lockfile --prod=false && pnpm build");
+    expect(blueprint).not.toContain("corepack enable");
     expect(blueprint).toContain("startCommand: node server/_core/migrateOnStart.mjs && pnpm start");
     const bootstrap = readFileSync(resolve(process.cwd(), "server/_core/migrateOnStart.mjs"), "utf8");
     expect(bootstrap).toContain("Fresh database detected");
@@ -22,5 +23,9 @@ describe("Render deployment configuration", () => {
     expect(guide).toContain("Auto-Deploy");
     expect(guide).toContain("GoDaddy Node.js Hosting");
     expect(guide).toContain("Render paid Web Service");
+    expect(guide).toContain("Some Render Node images make system package-manager paths read-only");
+    expect(guide).toContain("Resend automatic-email setup");
+    expect(guide).toContain("Create API Key");
+    expect(guide).toContain("Buyer payment confirmation");
   });
 });

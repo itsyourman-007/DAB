@@ -124,3 +124,16 @@
 - [x] Validate and push the deployment repair to `itsyourman-007/DAB` for Render auto-deploy.
 - [x] Compare no-cold-start hosting options for the full-stack 91DAB site, including GoDaddy compatibility and a practical recommendation.
 - [x] Keep the Resend configuration regression test local and deterministic; actual email delivery remains validated by the configured key and verified sender in the deployed environment.
+- [x] Make the merchant dashboard Overview calendar begin on Monday, continue through Sunday, and use January-to-December month ordering.
+- [x] Show sales-chart values only in a black hover tooltip over the relevant chart block, with no persistent in-chart value box.
+- [x] Add regression coverage and visually validate the revised dashboard overview at desktop and mobile widths.
+- [ ] Provide secure Resend automatic-email setup steps and synchronize the validated dashboard overview update to GitHub for Render deployment.
+- [x] Remove the Render-incompatible `corepack enable` build step from the Blueprint and deployment guide, then validate the new direct-pnpm command.
+- [x] Visually inspect the standalone dashboard at desktop width: Overview states Monday-to-Sunday sales grouping and Calendar renders Mon through Sun in order.
+- [x] Visually confirm the black sales tooltip appears only on an interactive chart bar at desktop and mobile widths, using isolated non-production test data.
+- [x] Execute the exact direct-pnpm Render build command locally and record its successful completion.
+- [x] Prepare isolated browser-only aggregate sales bars for tooltip inspection without creating customer, payment, or database records.
+- [x] Verify the isolated desktop chart renders seven Monday-to-Sunday bars and keeps its black sales tooltip hidden before interaction.
+- [x] Capture direct mobile-width evidence that the isolated chart tooltip changes from hidden to visible on interaction and that the Monday-first Overview layout remains usable.
+- [x] Record explicit browser tooltip opacity values before and after focus in the isolated desktop chart session.
+- [x] Record the mobile fixture’s focused tooltip and Monday-to-Sunday labels from its rendered output before release.

@@ -154,10 +154,9 @@ svg{display:block;}
 .bar.hi{background:linear-gradient(180deg,var(--accent-2),var(--accent));border-color:transparent;}
 .bar-day{font-size:.76rem;color:var(--text-faint);margin-top:.7rem;}
 .bar-col.hi .bar-day{color:var(--text);font-weight:700;}
-.bar-tip{position:absolute;top:-52px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.45rem .65rem;border-radius:8px;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;text-align:center;z-index:3;}
-html[data-theme="dark"] .bar-tip{background:#eef0f4;color:#0e1015;}
+.bar-tip{position:absolute;top:-52px;left:50%;transform:translateX(-50%);background:#111318;color:#fff;padding:.45rem .65rem;border-radius:8px;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;text-align:center;z-index:3;}
 .bar-tip .t-amt{font-weight:700;font-family:'IBM Plex Mono',monospace;}
-.bar-col:hover .bar-tip, .bar-col.hi .bar-tip{opacity:1;}
+.bar-col:hover .bar-tip, .bar-col:focus-within .bar-tip{opacity:1;}
 
 /* top products */
 .prod-list{padding:.2rem 1.4rem 1.2rem;display:flex;flex-direction:column;gap:1.1rem;}
@@ -631,8 +630,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <div class="card sales-card">
             <div class="panel-head">
               <div>
-                <h3>Weekly Sales</h3>
-                <p>Sales performance for this week</p>
+                <h3 id="salesTitle">Weekly Sales</h3>
+                <p id="salesSubtitle">Sales performance from Monday to Sunday</p>
               </div>
               <div class="pill-toggle">
                 <button class="active" id="btnWeekly" onclick="setChartMode('weekly')">Weekly</button>
@@ -1136,9 +1135,12 @@ function renderBars(){
     return;
   }
   const now = new Date();
+  const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mondayOffset = (now.getDay()+6)%7;
   const data = chartMode === 'weekly'
-    ? Array.from({length:7},(_,index)=>{const date=new Date(now);date.setDate(now.getDate()-6+index);return {key:date.toDateString(),d:date.toLocaleDateString('en-IN',{weekday:'short'}),v:0};})
-    : Array.from({length:12},(_,index)=>{const date=new Date(now.getFullYear(),now.getMonth()-11+index,1);return {key:`${date.getFullYear()}-${date.getMonth()}`,d:date.toLocaleDateString('en-IN',{month:'short'}),v:0};});
+    ? Array.from({length:7},(_,index)=>{const date=new Date(now);date.setHours(0,0,0,0);date.setDate(now.getDate()-mondayOffset+index);return {key:date.toDateString(),d:WEEKDAY_LABELS[index],v:0};})
+    : Array.from({length:12},(_,index)=>{const date=new Date(now.getFullYear(),index,1);return {key:`${date.getFullYear()}-${date.getMonth()}`,d:MONTH_LABELS[index],v:0};});
   paidOrders.forEach(order=>{
     const date = new Date(order.created);
     const key = chartMode === 'weekly' ? date.toDateString() : `${date.getFullYear()}-${date.getMonth()}`;
@@ -1154,7 +1156,7 @@ function renderBars(){
   const barsHtml = data.map(item=>{
     const h = Math.max(3,(item.v/max)*100);
     const high = item.v===highest && item.v>0;
-    return `<div class="bar-col ${high?'hi':''}"><div class="bar-tip"><span>Total sale</span><br><span class="t-amt">${fmtINR(item.v)}</span></div><div class="bar ${high?'hi':''}" style="height:${h}%"></div><div class="bar-day">${item.d}</div></div>`;
+    return `<div class="bar-col ${high?'hi':''}" tabindex="0" aria-label="${item.d}: ${fmtINR(item.v)} in sales"><div class="bar-tip"><span>Total sale</span><br><span class="t-amt">${fmtINR(item.v)}</span></div><div class="bar ${high?'hi':''}" style="height:${h}%"></div><div class="bar-day">${item.d}</div></div>`;
   }).join('');
   wrap.innerHTML = yAxisHtml + barsHtml;
 }
@@ -1162,6 +1164,8 @@ function setChartMode(mode){
   chartMode = mode;
   document.getElementById('btnWeekly').classList.toggle('active', mode==='weekly');
   document.getElementById('btnMonthly').classList.toggle('active', mode==='monthly');
+  document.getElementById('salesTitle').textContent = mode==='weekly' ? 'Weekly Sales' : 'Monthly Sales';
+  document.getElementById('salesSubtitle').textContent = mode==='weekly' ? 'Sales performance from Monday to Sunday' : 'Sales performance from January to December';
   renderBars();
 }
 
@@ -1612,10 +1616,10 @@ function renderCalendar(){
   const y = calView.year, m = calView.month;
   const monthLabel=document.getElementById('calMonthLabel'); const grid=document.getElementById('calGrid'); if(!monthLabel||!grid) return;
   monthLabel.textContent = new Date(y,m,1).toLocaleString('default',{month:'long',year:'numeric'});
-  const first = new Date(y,m,1).getDay();
+  const first = (new Date(y,m,1).getDay()+6)%7;
   const days = new Date(y,m+1,0).getDate();
   let html = '';
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d=> html += `<div class="cal-dow">${d}</div>`);
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=> html += `<div class="cal-dow">${d}</div>`);
   for(let i=0;i<first;i++) html += `<div class="cal-day empty"></div>`;
   const isToday = (d)=> y===today.getFullYear() && m===today.getMonth() && d===today.getDate();
   for(let d=1;d<=days;d++){
