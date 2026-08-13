@@ -148,7 +148,7 @@
 - [x] Inspect the public landing page at phone width for overflow, navigation, hero, CTA, image, and cookie-consent layout faults.
 - [x] Repair the landing page’s phone layout so all key content fits and remains reachable without horizontal overflow.
 - [x] Add regression coverage and validate the corrected landing page at phone and desktop widths.
-- [ ] Synchronize the validated landing-page phone-layout repair to GitHub for Render deployment.
+- [x] Synchronize the validated landing-page phone-layout repair to GitHub for Render deployment.
 - [x] Confirm live hero CTA labels are visible with correct explicit colors, full opacity, and non-zero dimensions; blank labels in the automated phone capture are a screenshot artifact rather than a rendered-page failure.
 - [x] Diagnose and eliminate the remaining phone-width hero CTA overflow observed in the independent Chromium capture.
 - [x] Confirm hero CTA bounds change from an overflowing 2,215 CSS pixels to a contained 453 CSS pixels after constraining the ticker’s parent grid item.
