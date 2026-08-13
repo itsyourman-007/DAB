@@ -121,6 +121,6 @@
 - [x] Provide a safe TiDB Cloud setup path for the MySQL-compatible database, Render `DATABASE_URL`, and ordered 91DAB schema migrations.
 - [x] Make Render deployment apply the existing MySQL schema migrations before starting the 91DAB application, without reapplying them to a complete existing schema.
 - [ ] Restore deployed dashboard data access and UPI QR checkout after production configuration is supplied.
-- [ ] Validate and push the deployment repair to `itsyourman-007/DAB` for Render auto-deploy.
+- [x] Validate and push the deployment repair to `itsyourman-007/DAB` for Render auto-deploy.
 - [x] Compare no-cold-start hosting options for the full-stack 91DAB site, including GoDaddy compatibility and a practical recommendation.
 - [x] Keep the Resend configuration regression test local and deterministic; actual email delivery remains validated by the configured key and verified sender in the deployed environment.
