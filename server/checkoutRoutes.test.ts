@@ -1,6 +1,6 @@
 import type { Server } from "node:http";
 import express from "express";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("./db", () => ({
   createMerchantCheckoutOrder: vi.fn(async (input: Record<string, unknown>) => ({ ...input, paymentStatus: "pending", source: "91dab-shop" })),
@@ -10,6 +10,7 @@ vi.mock("./db", () => ({
 }));
 
 import { registerCheckoutRoutes } from "./checkoutRoutes";
+import * as db from "./db";
 
 describe("trusted checkout QR endpoint", () => {
   let server: Server;
@@ -32,6 +33,14 @@ describe("trusted checkout QR endpoint", () => {
 
   afterAll(async () => {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  });
+
+  beforeEach(() => {
+    vi.mocked(db.createMerchantCheckoutOrder).mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("creates a checkout QR from the configured merchant VPA", async () => {
@@ -57,5 +66,30 @@ describe("trusted checkout QR endpoint", () => {
     expect(body.amount).toBe(500);
     expect(body.qrDataUrl.startsWith("data:image/png;base64,")).toBe(true);
     expect(body.upiLink).toContain(`pa=${encodeURIComponent(process.env.MERCHANT_VPA!.trim())}`);
+  });
+
+  it("refuses an unconfigured merchant VPA before creating a partial dashboard order", async () => {
+    vi.stubEnv("MERCHANT_VPA", "");
+    const response = await fetch(`${baseUrl}/api/orders`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        planKey: "introductory",
+        qty: 1,
+        orderInfo: {
+          name: "Configuration Safety Test",
+          email: "configuration@example.test",
+          phone: "9000000000",
+          address: "1 Test Street",
+          city: "Bengaluru",
+          state: "Karnataka",
+          pincode: "560001",
+        },
+      }),
+    });
+    const body = await response.json() as { error: string };
+    expect(response.status).toBe(503);
+    expect(body.error).toContain("Merchant payment configuration is incomplete");
+    expect(db.createMerchantCheckoutOrder).not.toHaveBeenCalled();
   });
 });

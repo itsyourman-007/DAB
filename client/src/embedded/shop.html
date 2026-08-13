@@ -1220,8 +1220,12 @@ function upsertShopOrder(record){
     }catch(err){
       console.error(err);
       currentOrder = null;
-      content.innerHTML = `<div style="padding:1.2rem;text-align:center;"><strong>Payment setup is temporarily unavailable.</strong><div style="margin-top:.5rem;font-size:.82rem;color:var(--ink-faint);">Please return to checkout and try again. No payment request or order record was created.</div><button class="text-btn" style="margin-top:1rem;" onclick="goTo('checkout')">Return to checkout</button></div>`;
-      showToast('Payment setup could not be created. Please try again.','error');
+      const paymentConfigurationMissing = err instanceof Error && err.message.includes('Merchant payment configuration is incomplete');
+      const detail = paymentConfigurationMissing
+        ? 'The payment QR is not configured yet. Please contact 91DAB for help; no payment request or order record was created.'
+        : 'Please return to checkout and try again. No payment request or order record was created.';
+      content.innerHTML = `<div style="padding:1.2rem;text-align:center;"><strong>${paymentConfigurationMissing ? 'Payment QR is not configured yet.' : 'Payment setup is temporarily unavailable.'}</strong><div style="margin-top:.5rem;font-size:.82rem;color:var(--ink-faint);">${detail}</div><button class="text-btn" style="margin-top:1rem;" onclick="goTo('checkout')">Return to checkout</button></div>`;
+      showToast(paymentConfigurationMissing ? 'Payment QR is not configured yet. Please contact 91DAB.' : 'Payment setup could not be created. Please try again.','error');
     }
   }
 

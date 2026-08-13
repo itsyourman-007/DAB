@@ -10,9 +10,17 @@ describe("Render deployment configuration", () => {
     ["DATABASE_URL", "MERCHANT_VPA", "RESEND_API_KEY", "ADMIN_OTP_RECIPIENT_EMAIL", "ADMIN_OTP_FROM_EMAIL", "ADMIN_DASHBOARD_PASSWORD", "JWT_SECRET"].forEach((key) => {
       expect(blueprint).toContain(`key: ${key}`);
     });
+    expect(blueprint).toContain("buildCommand: corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build");
+    expect(blueprint).toContain("startCommand: node server/_core/migrateOnStart.mjs && pnpm start");
+    const bootstrap = readFileSync(resolve(process.cwd(), "server/_core/migrateOnStart.mjs"), "utf8");
+    expect(bootstrap).toContain("Fresh database detected");
+    expect(bootstrap).toContain("Database schema is incomplete");
+    expect(bootstrap).toContain("process.exit(0)");
     expect(guide).toContain("MySQL-compatible database");
     expect(guide).toContain("Resend");
     expect(guide).toContain("Custom Domains");
     expect(guide).toContain("Auto-Deploy");
+    expect(guide).toContain("GoDaddy Node.js Hosting");
+    expect(guide).toContain("Render paid Web Service");
   });
 });

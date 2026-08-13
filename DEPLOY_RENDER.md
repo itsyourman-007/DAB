@@ -13,13 +13,15 @@ This project is ready to deploy from the GitHub repository at [itsyourman-007/DA
 | Setting | Value |
 |---|---|
 | Service type | Web Service |
-| Build command | `corepack enable && pnpm install --frozen-lockfile && pnpm build` |
-| Start command | `pnpm start` |
+| Build command | `corepack enable && pnpm install --frozen-lockfile --prod=false && pnpm build` |
+| Start command | `node server/_core/migrateOnStart.mjs && pnpm start` |
 | Health-check path | `/` |
 | Runtime | Node |
 | Auto-deploy | **On Commit** on the `main` branch |
 
 Render automatically deploys a linked Git branch when changes are pushed, and a failed build leaves the most recent successful version running. [1]
+
+At application start, 91DAB now checks the database before the web server starts. An **empty database** receives the checked-in Drizzle migrations once; a **complete existing 91DAB database** is left unchanged; and a **partially migrated database** stops with a clear error rather than risking records by applying only some migrations. Do not replace the Blueprint commands with `drizzle-kit migrate && pnpm start`.
 
 ## 2. Add environment variables
 
@@ -41,25 +43,47 @@ Open the Render service, choose **Environment**, add the entries below, and sele
 
 The `MERCHANT_VPA` can be changed later in **Render → service → Environment → `MERCHANT_VPA` → Save, rebuild, and deploy**. The next deployed checkout uses the new QR recipient; no code change is needed.
 
-## 3. Configure Resend before accepting real orders
+## 3. Create and connect TiDB Cloud
+
+91DAB requires a **MySQL-compatible** database. TiDB Cloud Starter or Essential supports standard MySQL/ORM connections, but public connections require TLS. [7] [8]
+
+1. Create or sign in to [TiDB Cloud](https://tidbcloud.com/), open **My TiDB**, and create a **Starter** instance in your preferred region. Do not create a PostgreSQL/Supabase database for this project.
+2. Open the new instance, select **Connect**, keep the connection type set to **Public**, generate a password if prompted, and save it securely. TiDB Cloud shows the database user, host, port, and a driver-specific connection string in this dialog. Copy the full connection string it supplies; do not guess or rewrite the username because TiDB Cloud can use an instance/account prefix. [8] [9]
+3. Open **Settings → Networking**. Ensure **Public Endpoint** is enabled. If you restrict the firewall, add the required deployment network before deploying. For an AWS-hosted TiDB Cloud Starter or Essential instance, TiDB Cloud provides **Add AWS Access**, which permits current AWS ranges; otherwise begin with the default rule only long enough to test and then replace it with the narrowest reliable deployment-network rule. [10]
+4. In **Render → 91dab-store → Environment**, create `DATABASE_URL` and paste the exact TiDB connection string from step 2. Keep TLS enabled exactly as shown by TiDB. Do not put this value in GitHub, the browser, or an HTML file.
+5. Click **Save, rebuild, and deploy**. On the first successful deploy, the safe startup bootstrap creates all 91DAB tables. On later deploys it detects the existing complete schema and starts normally without reapplying migrations.
+
+> If the Render log says **“Could not reach the configured database,”** recheck the TiDB URL, public endpoint, firewall rule, and TLS options. If it says **“Database schema is incomplete,”** use a new empty TiDB database for the first setup or complete the schema deliberately before retrying; do not delete customer records to bypass the message.
+
+## 4. Configure Resend before accepting real orders
 
 Resend powers administrator password-change OTPs, payment confirmations, and the new Shipped/Delivered buyer emails. In [Resend Domains](https://resend.com/domains), add a domain or subdomain you control, then place the exact DNS records Resend shows in your domain provider. Wait until the domain displays **Verified** before using it as `ADMIN_OTP_FROM_EMAIL`.
 
 Use a sender such as `91DAB <orders@yourdomain.com>`. The same verified sender supports all site emails. A buyer receives an email after payment verification and again after a staff member marks an order **Shipped** or **Delivered**. The app stores a per-order, per-status dispatch record so a status email is not duplicated; if Resend has a temporary error, the Delivery Tracking screen exposes a retry action.
 
-## 4. Use your own domain
+## 5. Use your own domain
 
 After the Render service is live on its temporary `onrender.com` address, open **Render → service → Settings → Custom Domains → Add Custom Domain**. Add either your root domain (`yourdomain.com`) or `www.yourdomain.com`; Render automatically creates the paired redirect. Then add the DNS records Render displays at your domain registrar/DNS provider and click **Verify** in Render. Render provides managed TLS and redirects HTTP to HTTPS after verification. [3]
 
 Before verification, remove conflicting `AAAA` records. If you use Cloudflare, start with the DNS record in **DNS-only** mode rather than a proxied record until Render verification and TLS issuance complete. Save the final HTTPS address as `PUBLIC_SITE_URL` in Render and redeploy.
 
-## 5. Is Render slow?
+## 6. Is Render slow?
 
 The application itself is a normal Node web service. On a paid Render instance, visitors should not experience an idle cold start. On Render’s **Free** web-service tier, Render spins the service down after 15 minutes with no inbound traffic; the next request can take about one minute while Render starts it again. Render explicitly advises against using Free instances for production applications. [4]
 
 For real customers and a password-protected merchant dashboard, choose a paid web-service instance before launch. Also keep all orders and settings in the external database; Render’s service filesystem is ephemeral and files written there are lost on restarts or redeploys. [1] [4]
 
-## 6. Updating the site after your domain is live
+## 7. Hosting without free-tier wake-ups
+
+| Option | Suitable for 91DAB? | Wake-up risk | Operational responsibility |
+|---|---|---|---|
+| **Render paid Web Service** | **Recommended** | No Render Free-tier idle spin-down | Low. Keep the existing Blueprint, external MySQL-compatible database, and environment variables. |
+| **GoDaddy Node.js Hosting** | Possible, but not my first production choice | GoDaddy documents Node/Express support but its Node.js product is currently beta and does not publish a no-cold-start commitment. Confirm the production runtime behavior with GoDaddy before relying on it. | Low to medium. Their hosted Node flow supports zipped or Git-based deployment and custom domains. [5] |
+| **GoDaddy VPS / Managed VPS** | Yes | A continuously managed Node process can remain running, so there is no free-tier sleep model. | Medium to high. You or a managed-service provider must configure Node, a process manager such as systemd/PM2, HTTPS/reverse proxy, firewall, operating-system updates, backups, monitoring, and deploys. GoDaddy positions VPS for root-level control and larger workloads. [6] |
+
+**Recommendation:** choose a **paid Render Web Service** if you want the least change to this repository and a straightforward custom-domain setup. Choose a **GoDaddy VPS** only if you already want GoDaddy server administration or purchase its managed VPS support. Do not choose GoDaddy Node.js Hosting solely on the assumption of “zero wake-up time”; its official documentation confirms Node/Express and custom-domain compatibility, but not that specific uptime behavior. [5]
+
+## 8. Updating the site after your domain is live
 
 Your custom domain does **not** change when you update code. Use this routine:
 
@@ -71,7 +95,7 @@ Your custom domain does **not** change when you update code. Use this routine:
 
 For a configuration-only change, use **Environment → Save, rebuild, and deploy**. Never change secrets in GitHub. Render supports one-off manual deployment from the service’s **Events** page if Auto-Deploy is off. [1] [2]
 
-## 7. First post-deploy checks
+## 9. First post-deploy checks
 
 | Check | Expected result |
 |---|---|
@@ -94,3 +118,15 @@ After the final HTTPS domain is available, send it to me to create the fixed And
 [3] [Render: Custom Domains](https://render.com/docs/custom-domains)
 
 [4] [Render: Deploy for Free](https://render.com/docs/free)
+
+[5] [GoDaddy Node.js Hosting FAQ](https://www.godaddy.com/help/godaddy-nodejs-hosting-faq-42915)
+
+[6] [GoDaddy VPS Hosting](https://www.godaddy.com/hosting/vps-hosting)
+
+[7] [TiDB Cloud: Connect to a Starter or Essential instance](https://docs.pingcap.com/tidbcloud/connect-to-tidb-cluster-serverless/)
+
+[8] [TiDB Cloud: TLS connections for Starter or Essential](https://docs.pingcap.com/tidbcloud/secure-connections-to-serverless-clusters/)
+
+[9] [TiDB Cloud: Connect via public endpoint](https://docs.pingcap.com/tidbcloud/connect-via-standard-connection-serverless/)
+
+[10] [TiDB Cloud: Configure public-endpoint firewall rules](https://docs.pingcap.com/tidbcloud/configure-serverless-firewall-rules-for-public-endpoints/)

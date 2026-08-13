@@ -67,6 +67,7 @@ export function registerCheckoutRoutes(app: Express) {
       const input = createOrderInput.parse(req.body);
       const plan = plans[input.planKey];
       const amount = plan.price * input.qty;
+      const vpa = merchantVpa();
       const orderId = `91DAB-${nanoid(12).toUpperCase()}`;
       const order = await db.createMerchantCheckoutOrder({
         orderId,
@@ -86,11 +87,14 @@ export function registerCheckoutRoutes(app: Express) {
         createdAt: new Date(),
       });
       if (!order) throw new Error("Checkout record could not be created");
-      const intent = upiLink({ vpa: merchantVpa(), amount, orderId });
+      const intent = upiLink({ vpa, amount, orderId });
       const qrDataUrl = await QRCode.toDataURL(intent, { margin: 1, width: 320, color: { dark: "#0F2325", light: "#FFFFFF" } });
       return res.json({ orderId, amount, upiLink: intent, qrDataUrl, expiresAt: expiresAt(order) });
     } catch (error) {
       if (error instanceof z.ZodError) return res.status(400).json({ error: "Checkout details are incomplete or invalid" });
+      if (error instanceof Error && error.message === "MERCHANT_VPA is not configured in the deployment environment") {
+        return res.status(503).json({ error: "Merchant payment configuration is incomplete. Please contact 91DAB before trying again." });
+      }
       return res.status(500).json({ error: error instanceof Error ? error.message : "Could not create checkout order" });
     }
   });

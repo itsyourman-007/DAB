@@ -116,4 +116,11 @@
 - [x] Restore QR-code visibility on the buyer payment screen after checkout creation.
 - [x] Ensure each trusted checkout that reaches payment is visible in the protected dashboard as a pending order record.
 - [x] Provide a project-specific Render deployment checklist, including Resend, custom domain, performance expectations, and GitHub-based update workflow.
-- [ ] Sync the validated Render Blueprint and deployment guide update to the exported GitHub repository.
+- [x] Sync the validated Render Blueprint and deployment guide update to the exported GitHub repository.
+- [ ] Restore secure administrator dashboard access when the deployed Render password is rejected.
+- [x] Provide a safe TiDB Cloud setup path for the MySQL-compatible database, Render `DATABASE_URL`, and ordered 91DAB schema migrations.
+- [x] Make Render deployment apply the existing MySQL schema migrations before starting the 91DAB application, without reapplying them to a complete existing schema.
+- [ ] Restore deployed dashboard data access and UPI QR checkout after production configuration is supplied.
+- [ ] Validate and push the deployment repair to `itsyourman-007/DAB` for Render auto-deploy.
+- [x] Compare no-cold-start hosting options for the full-stack 91DAB site, including GoDaddy compatibility and a practical recommendation.
+- [x] Keep the Resend configuration regression test local and deterministic; actual email delivery remains validated by the configured key and verified sender in the deployed environment.
