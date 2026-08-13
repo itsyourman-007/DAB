@@ -160,6 +160,20 @@ export const merchantInventory = mysqlTable("merchantInventory", {
 
 export type MerchantInventory = typeof merchantInventory.$inferSelect;
 
+/** One immutable DAB inventory deduction per actual shipment allocation; the unique key prevents duplicate stock decrements. */
+export const merchantInventoryShipmentAllocations = mysqlTable("merchantInventoryShipmentAllocations", {
+  id: int("id").autoincrement().primaryKey(),
+  allocationKey: varchar("allocationKey", { length: 192 }).notNull().unique(),
+  orderId: varchar("orderId", { length: 128 }).notNull(),
+  productKey: varchar("productKey", { length: 64 }).notNull().default("dab"),
+  periodKey: varchar("periodKey", { length: 7 }),
+  allocationKind: varchar("allocationKind", { length: 32 }).notNull(),
+  units: int("units").notNull(),
+  shippedAt: timestamp("shippedAt").defaultNow().notNull(),
+});
+
+export type MerchantInventoryShipmentAllocation = typeof merchantInventoryShipmentAllocations.$inferSelect;
+
 /** One record per paid subscription order and delivery month; the unique key makes checkbox delivery updates idempotent. */
 export const subscriptionDeliveryRecords = mysqlTable("subscriptionDeliveryRecords", {
   id: int("id").autoincrement().primaryKey(),

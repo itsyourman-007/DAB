@@ -159,3 +159,12 @@
 - [x] Visually verify the new Notification sound control appears in Dashboard Settings and defaults to off with a clear muted-by-default explanation.
 - [x] Validate in an isolated dashboard session that initial order hydration produces zero chimes, a newly received UPI-reference state produces one chime, and no test order is persisted.
 - [x] Validate in an isolated dashboard session that a trusted live-message event invokes one chime without persistence, then clear all transient message, notification, and order data.
+- [x] Inspect the current inventory and fulfillment implementation to identify every existing deduction and shipment-status transition.
+- [x] Define durable per-shipment DAB allocation rules for introductory orders, monthly subscriptions, and yearly subscriptions shipped monthly or all at once.
+- [x] Add an Inventory & Products sidebar screen showing authoritative DAB stock, product fulfillment rules, and password-confirmed stock increases.
+- [x] Deduct stock once when an eligible shipment is recorded, rather than at payment time, while retaining a durable idempotence record for each shipped allocation.
+- [x] Add and apply the required MySQL/TiDB migration, regression coverage, and validation for one-time, monthly, and yearly inventory fulfillment.
+- [x] Synchronize the validated Inventory & Products and shipment-allocation update to GitHub for Render deployment.
+- [x] Confirm the new Inventory & Products sidebar entry renders in the standalone merchant dashboard without seeded inventory data.
+- [x] Resolve the standalone dashboard navigation error and visually confirm Inventory & Products opens with authoritative stock, scheduled-shipment, and allocation-history empty states.
+- [x] Verify in an isolated dashboard session that monthly, yearly-monthly, and yearly-all-at-once rows render 198-, 125-, and 1,500-unit DAB shipment allocations without persisting test orders.

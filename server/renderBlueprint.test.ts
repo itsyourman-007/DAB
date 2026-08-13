@@ -15,6 +15,8 @@ describe("Render deployment configuration", () => {
     expect(blueprint).toContain("startCommand: node server/_core/migrateOnStart.mjs && pnpm start");
     const bootstrap = readFileSync(resolve(process.cwd(), "server/_core/migrateOnStart.mjs"), "utf8");
     expect(bootstrap).toContain("Fresh database detected");
+    expect(bootstrap).toContain("Applying additive schema updates");
+    expect(bootstrap).toContain("merchantInventoryShipmentAllocations");
     expect(bootstrap).toContain("Database schema is incomplete");
     expect(bootstrap).toContain("process.exit(0)");
     expect(guide).toContain("MySQL-compatible database");

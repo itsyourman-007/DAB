@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import mysql from "mysql2/promise";
 
-const REQUIRED_TABLES = [
+const BASE_TABLES = [
   "users",
   "adminSecurity",
   "paymentConfirmationEmails",
@@ -18,6 +18,23 @@ const REQUIRED_TABLES = [
   "demoOrderCleanupSettings",
   "subscriptionReminderDispatches",
 ];
+
+const ADDITIVE_TABLES = {
+  merchantInventoryShipmentAllocations: `CREATE TABLE IF NOT EXISTS \`merchantInventoryShipmentAllocations\` (
+    \`id\` int AUTO_INCREMENT NOT NULL,
+    \`allocationKey\` varchar(192) NOT NULL,
+    \`orderId\` varchar(128) NOT NULL,
+    \`productKey\` varchar(64) NOT NULL DEFAULT 'dab',
+    \`periodKey\` varchar(7),
+    \`allocationKind\` varchar(32) NOT NULL,
+    \`units\` int NOT NULL,
+    \`shippedAt\` timestamp NOT NULL DEFAULT (now()),
+    CONSTRAINT \`merchantInventoryShipmentAllocations_id\` PRIMARY KEY(\`id\`),
+    CONSTRAINT \`merchantInventoryShipmentAllocations_allocationKey_unique\` UNIQUE(\`allocationKey\`)
+  )`,
+};
+
+const REQUIRED_TABLES = [...BASE_TABLES, ...Object.keys(ADDITIVE_TABLES)];
 
 function fail(message) {
   console.error(`[Database bootstrap] ${message}`);
@@ -50,6 +67,23 @@ async function main() {
 
   if (missing.length === 0) {
     console.log("[Database bootstrap] Existing 91DAB schema detected; migrations already applied.");
+    return;
+  }
+
+  const missingBaseTables = missing.filter((table) => BASE_TABLES.includes(table));
+  const missingAdditiveTables = missing.filter((table) => table in ADDITIVE_TABLES);
+  if (missingBaseTables.length === 0 && missingAdditiveTables.length === missing.length) {
+    console.log(`[Database bootstrap] Applying additive schema updates: ${missingAdditiveTables.join(", ")}.`);
+    const url = process.env.DATABASE_URL.trim();
+    const connection = await mysql.createConnection(url);
+    try {
+      for (const table of missingAdditiveTables) await connection.query(ADDITIVE_TABLES[table]);
+    } finally {
+      await connection.end();
+    }
+    const remaining = await getMissingTables();
+    if (remaining.length) fail(`Additive schema update completed but tables are still missing: ${remaining.join(", ")}.`);
+    console.log("[Database bootstrap] Additive 91DAB schema updates are ready.");
     return;
   }
 

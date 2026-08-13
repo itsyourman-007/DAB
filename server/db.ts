@@ -16,6 +16,7 @@ import {
   merchantDashboardLoginAudits,
   merchantEmployeeAccounts,
   merchantInventory,
+  merchantInventoryShipmentAllocations,
   merchantOrders,
   merchantTeamMembers,
   merchantTeams,
@@ -461,18 +462,24 @@ export async function markMerchantOrderPaid(orderId: string): Promise<MerchantOr
 export async function updateMerchantOrderFulfillment(input: { orderId: string; status: "shipped" | "delivered" }): Promise<MerchantOrder | undefined> {
   const db = await getDb();
   if (!db) throw new Error("Database is required for merchant order records");
-  const existing = await getMerchantOrder(input.orderId);
-  if (!existing) return undefined;
-  if (existing.paymentStatus !== "paid") throw new Error("Only paid orders can be marked shipped or delivered");
-  if (input.status === "delivered" && existing.fulfillmentStatus === "not_shipped") throw new Error("Mark the order shipped before marking it delivered");
-  if (existing.fulfillmentStatus === "delivered") throw new Error("This order is already marked delivered");
-  const now = new Date();
-  await db.update(merchantOrders).set({
-    fulfillmentStatus: input.status,
-    shippedAt: input.status === "shipped" ? now : existing.shippedAt ?? now,
-    deliveredAt: input.status === "delivered" ? now : existing.deliveredAt,
-  }).where(eq(merchantOrders.orderId, input.orderId));
-  return getMerchantOrder(input.orderId);
+  return db.transaction(async (tx) => {
+    const existing = (await tx.select().from(merchantOrders).where(eq(merchantOrders.orderId, input.orderId)).limit(1))[0];
+    if (!existing) return undefined;
+    if (existing.paymentStatus !== "paid") throw new Error("Only paid orders can be marked shipped or delivered");
+    if (input.status === "delivered" && existing.fulfillmentStatus === "not_shipped") throw new Error("Mark the order shipped before marking it delivered");
+    if (existing.fulfillmentStatus === "delivered") throw new Error("This order is already marked delivered");
+    if (input.status === "shipped" && (existing.planKey === "monthly" || (existing.planKey === "yearly" && existing.deliverySpan !== "once"))) {
+      throw new Error("Use Inventory & Products to record each scheduled subscription shipment");
+    }
+    if (input.status === "shipped") await applyShipmentAllocation(tx, existing, { allocationKind: existing.planKey === "yearly" ? "yearly-all-at-once" : "one-time" });
+    const now = new Date();
+    await tx.update(merchantOrders).set({
+      fulfillmentStatus: input.status,
+      shippedAt: input.status === "shipped" ? now : existing.shippedAt ?? now,
+      deliveredAt: input.status === "delivered" ? now : existing.deliveredAt,
+    }).where(eq(merchantOrders.id, existing.id));
+    return (await tx.select().from(merchantOrders).where(eq(merchantOrders.id, existing.id)).limit(1))[0];
+  });
 }
 
 export async function getMerchantInventory(): Promise<MerchantInventory> {
@@ -490,29 +497,68 @@ export async function setMerchantInventoryUnits(availableUnits: number) {
   return getMerchantInventory();
 }
 
-export async function decrementInventoryForPaidOrder(orderId: string) {
+export async function increaseMerchantInventoryUnits(units: number) {
   const db = await getDb();
   if (!db) throw new Error("Database is required for inventory");
   return db.transaction(async (tx) => {
-    const rows = await tx.select().from(merchantOrders).where(and(eq(merchantOrders.orderId, orderId), eq(merchantOrders.source, "91dab-shop"))).limit(1);
-    const order = rows[0];
-    if (!order || order.paymentStatus !== "paid") return { applied: false, reason: "not-paid" as const, inventory: await getMerchantInventory() };
     const inventoryRows = await tx.select().from(merchantInventory).where(eq(merchantInventory.id, 1)).limit(1);
     const inventory = inventoryRows[0] ?? { id: 1, productKey: "dab", productName: "DAB", availableUnits: 0, configured: false, updatedAt: new Date() };
-    if (!inventory.configured) return { applied: false, reason: "not-configured" as const, inventory };
-    if (order.inventoryDeductedAt) return { applied: false, reason: "already-deducted" as const, inventory };
-    await tx.update(merchantOrders).set({ inventoryDeductedAt: new Date() }).where(and(
-      eq(merchantOrders.id, order.id),
-      isNull(merchantOrders.inventoryDeductedAt),
-    ));
-    const claimedOrder = (await tx.select().from(merchantOrders).where(eq(merchantOrders.id, order.id)).limit(1))[0];
-    if (!claimedOrder?.inventoryDeductedAt) throw new Error("Inventory deduction marker could not be recorded");
+    if (!inventory.configured) throw new Error("Initialize DAB inventory before increasing stock");
     await tx.update(merchantInventory).set({
-      availableUnits: sql`GREATEST(0, ${merchantInventory.availableUnits} - ${order.quantity})`,
+      availableUnits: sql`${merchantInventory.availableUnits} + ${units}`,
     }).where(eq(merchantInventory.id, 1));
     const updated = await tx.select().from(merchantInventory).where(eq(merchantInventory.id, 1)).limit(1);
-    return { applied: true, reason: "deducted" as const, inventory: updated[0] ?? inventory };
+    return updated[0] ?? inventory;
   });
+}
+
+function allocationForOrder(order: MerchantOrder, periodKey?: string) {
+  const quantity = Math.max(1, Number(order.quantity || 1));
+  if (order.planKey === "introductory") return { allocationKey: `${order.orderId}:one-time`, allocationKind: "one-time", periodKey: null, units: quantity * 12 };
+  if (order.planKey === "yearly" && order.deliverySpan === "once") return { allocationKey: `${order.orderId}:yearly-all-at-once`, allocationKind: "yearly-all-at-once", periodKey: null, units: quantity * 1500 };
+  if (!periodKey) throw new Error("A shipment month is required for recurring subscription inventory");
+  if (order.planKey === "monthly") return { allocationKey: `${order.orderId}:monthly:${periodKey}`, allocationKind: "monthly", periodKey, units: quantity * 99 };
+  if (order.planKey === "yearly") return { allocationKey: `${order.orderId}:yearly-monthly:${periodKey}`, allocationKind: "yearly-monthly", periodKey, units: quantity * 125 };
+  throw new Error("This order does not have a DAB inventory fulfillment rule");
+}
+
+async function applyShipmentAllocation(tx: any, order: MerchantOrder, input: { allocationKind?: string; periodKey?: string }) {
+  const allocation = allocationForOrder(order, input.periodKey);
+  const existingAllocation = (await tx.select().from(merchantInventoryShipmentAllocations).where(eq(merchantInventoryShipmentAllocations.allocationKey, allocation.allocationKey)).limit(1))[0];
+  const inventory = (await tx.select().from(merchantInventory).where(eq(merchantInventory.id, 1)).limit(1))[0] ?? { id: 1, productKey: "dab", productName: "DAB", availableUnits: 0, configured: false, updatedAt: new Date() };
+  if (existingAllocation) return { applied: false, reason: "already-shipped" as const, inventory, allocation: existingAllocation };
+  if (!inventory.configured) {
+    await tx.insert(merchantInventoryShipmentAllocations).values({ ...allocation, orderId: order.orderId, productKey: "dab" });
+    const savedAllocation = (await tx.select().from(merchantInventoryShipmentAllocations).where(eq(merchantInventoryShipmentAllocations.allocationKey, allocation.allocationKey)).limit(1))[0];
+    return { applied: true, reason: "recorded-before-inventory" as const, inventory, allocation: savedAllocation };
+  }
+  if (inventory.availableUnits < allocation.units) throw new Error(`Insufficient DAB stock for this shipment. ${allocation.units} units are required and ${inventory.availableUnits} are available.`);
+  await tx.insert(merchantInventoryShipmentAllocations).values({ ...allocation, orderId: order.orderId, productKey: "dab" });
+  await tx.update(merchantInventory).set({ availableUnits: sql`${merchantInventory.availableUnits} - ${allocation.units}` }).where(eq(merchantInventory.id, 1));
+  const updatedInventory = (await tx.select().from(merchantInventory).where(eq(merchantInventory.id, 1)).limit(1))[0] ?? inventory;
+  const savedAllocation = (await tx.select().from(merchantInventoryShipmentAllocations).where(eq(merchantInventoryShipmentAllocations.allocationKey, allocation.allocationKey)).limit(1))[0];
+  return { applied: true, reason: "deducted" as const, inventory: updatedInventory, allocation: savedAllocation };
+}
+
+export async function recordSubscriptionShipment(input: { orderId: string; periodKey: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for inventory");
+  return db.transaction(async (tx) => {
+    const order = (await tx.select().from(merchantOrders).where(and(eq(merchantOrders.orderId, input.orderId), eq(merchantOrders.source, "91dab-shop"))).limit(1))[0];
+    if (!order || order.paymentStatus !== "paid" || (order.planKey !== "monthly" && order.planKey !== "yearly")) throw new Error("Only paid monthly or yearly subscriptions can be shipped on a schedule");
+    if (order.planKey === "yearly" && order.deliverySpan === "once") throw new Error("This yearly subscription is fulfilled all at once and should use its shipment action");
+    const shipment = await applyShipmentAllocation(tx, order, { periodKey: input.periodKey });
+    const deliveryKey = `${input.orderId}:${input.periodKey}`;
+    try { await tx.insert(subscriptionDeliveryRecords).values({ deliveryKey, orderId: input.orderId, periodKey: input.periodKey }); }
+    catch (error: any) { if (error?.code !== "ER_DUP_ENTRY" && error?.cause?.code !== "ER_DUP_ENTRY") throw error; }
+    return shipment;
+  });
+}
+
+export async function listMerchantInventoryShipmentAllocations() {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for inventory allocation history");
+  return db.select().from(merchantInventoryShipmentAllocations).orderBy(desc(merchantInventoryShipmentAllocations.shippedAt));
 }
 
 export async function listSubscriptionDeliveryRecords() {

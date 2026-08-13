@@ -473,6 +473,10 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <svg class="n-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>
           <span class="n-text">Delivery Tracking</span><span class="n-badge" id="deliveryTrackingBadge">0</span>
         </button></li>
+        <li><button class="nav-item" data-screen="inventory-products">
+          <svg class="n-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"/><path d="M7 7V4h10v3M8 12h8M8 16h5"/></svg>
+          <span class="n-text">Inventory &amp; Products</span>
+        </button></li>
         <li>
           <button class="nav-item expanded" id="analyticsToggle">
             <svg class="n-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -727,6 +731,14 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="card table-card"><div class="table-wrap">
           <table class="data-table"><thead><tr><th>Order</th><th>Buyer</th><th>Plan</th><th>Paid</th><th>Shipment</th><th>Shipped on</th><th>Delivered on</th><th>Action</th></tr></thead><tbody id="deliveryTrackingBody"></tbody></table>
         </div></div>
+      </section>
+
+      <!-- ============ INVENTORY & PRODUCTS ============ -->
+      <section class="screen" id="screen-inventory-products">
+        <div class="panel-head" style="padding:0 0 1rem;"><div><h3>Inventory &amp; Products</h3><p>Authoritative DAB units are deducted only when a real shipment is recorded. Payment confirmation never reduces stock.</p></div><div style="display:flex;flex-wrap:wrap;gap:.55rem;"><button class="form-btn" data-admin-only style="background:var(--card-tint);color:var(--text);" onclick="openInventoryDialog()">Set current stock</button><button class="form-btn" data-admin-only onclick="openInventoryIncreaseDialog()">Add DAB units</button></div></div>
+        <div class="payment-summary" id="inventoryProductSummary"></div>
+        <div class="card table-card" style="margin-bottom:1rem;"><div class="panel-head"><div><h3>Scheduled DAB shipments</h3><p>Record a shipment to deduct the exact DAB allocation once. Monthly subscriptions deduct 99 pieces per subscription unit; yearly monthly plans deduct 125 pieces per subscription unit each month; yearly all-at-once plans deduct 1,500 pieces per subscription unit.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Order</th><th>Buyer</th><th>Fulfillment</th><th>DAB units</th><th>Shipment</th><th>Action</th></tr></thead><tbody id="inventoryShipmentBody"></tbody></table></div></div>
+        <div class="card table-card"><div class="panel-head"><div><h3>Stock movement history</h3><p>Every shipment deduction is immutable and keyed to its order and delivery allocation.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Shipped</th><th>Order</th><th>Allocation</th><th>Period</th><th>DAB units</th></tr></thead><tbody id="inventoryAllocationBody"></tbody></table></div></div>
       </section>
 
       <!-- ============ CUSTOMER DETAIL MODAL ============ -->
@@ -1017,6 +1029,7 @@ let shopOrderRecords = [];
 let shopQuoteRecords = [];
 let serverOrderRecords = [];
 let inventoryState = null;
+let inventoryAllocations = [];
 let subscriptionDeliveries = [];
 
 const PRODUCTS = [];
@@ -1138,10 +1151,12 @@ function applyInventory(inventory){
   const configured=Boolean(inventory?.configured);
   const units=Number(inventory?.availableUnits||0);
   const inventoryUnits=document.getElementById('inventoryUnits'); if(inventoryUnits) inventoryUnits.textContent=configured?`${units.toLocaleString('en-IN')} units`:'Not set';
-  const inventoryStatus=document.getElementById('inventoryStatus'); if(inventoryStatus) inventoryStatus.textContent=configured?`Live DAB inventory is ${units.toLocaleString('en-IN')} units. Every trusted paid purchase deducts its ordered quantity once.`:'Inventory has not been initialized. Enter the actual available units to enable live paid-order deductions.';
+  const inventoryStatus=document.getElementById('inventoryStatus'); if(inventoryStatus) inventoryStatus.textContent=configured?`Live DAB inventory is ${units.toLocaleString('en-IN')} units. Stock is deducted only after a real shipment is recorded.`:'Inventory has not been initialized. Enter the actual available units before recording DAB shipments.';
   const alert=document.getElementById('lowStockAlert');
   if(alert){ if(configured&&units<1000){alert.style.display='block';alert.innerHTML=`<div class="card" style="padding:1rem 1.2rem;border:1px solid #dc2626;background:#fef2f2;color:#991b1b;"><strong>Low stock alert:</strong> DAB inventory is ${units.toLocaleString('en-IN')} units, below the 1,000-unit threshold. Update inventory after replenishment.</div>`;}else{alert.style.display='none';alert.innerHTML='';} }
+  renderInventoryProducts();
 }
+function applyInventoryAllocations(allocations){ inventoryAllocations=Array.isArray(allocations)?allocations:[]; renderInventoryProducts(); }
 function openInventoryDialog(){
   if(dashboardRole!=='admin') return;
   const current=inventoryState?.configured?String(inventoryState.availableUnits):'';
@@ -1150,14 +1165,35 @@ function openInventoryDialog(){
   document.getElementById('teamModal').classList.add('open');
 }
 function submitInventory(event){ event.preventDefault();const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Saving…';window.parent?.postMessage({type:'91dab-inventory-save',inventory:{availableUnits:Number(document.getElementById('inventoryAvailableUnits').value),password:document.getElementById('inventoryAdminPassword').value}},'*'); }
+function openInventoryIncreaseDialog(){
+  if(dashboardRole!=='admin') return;
+  document.getElementById('teamModalTitle').textContent='Add DAB inventory';
+  document.getElementById('teamModalBody').innerHTML=`<p class="modal-note">Add received DAB units to the live stock count. This never overwrites the existing quantity and requires the administrator password.</p><form onsubmit="submitInventoryIncrease(event)"><div class="field"><label for="inventoryIncreaseUnits">DAB units received</label><input id="inventoryIncreaseUnits" type="number" min="1" max="10000000" step="1" inputmode="numeric" required></div><div class="field"><label for="inventoryIncreasePassword">Administrator password</label><input id="inventoryIncreasePassword" type="password" required autocomplete="current-password"></div><div class="modal-action-row"><button type="button" class="form-btn" style="background:var(--card-tint);color:var(--text);" onclick="closeTeamModal()">Cancel</button><button class="form-btn" type="submit">Add units</button></div></form>`;
+  document.getElementById('teamModal').classList.add('open');
+}
+function submitInventoryIncrease(event){ event.preventDefault();const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Adding…';window.parent?.postMessage({type:'91dab-inventory-increase',inventory:{units:Number(document.getElementById('inventoryIncreaseUnits').value),password:document.getElementById('inventoryIncreasePassword').value}},'*'); }
 function periodKeyForDate(value){ const date=new Date(value); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
 function deliveryPeriods(order){ const start=new Date(order.start||order.created||Date.now()); if(order.planKey==='monthly'){ const now=new Date(); const elapsed=Math.max(0,(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth())); return Array.from({length:elapsed+1},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); } return Array.from({length:12},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); }
 function isDeliveryRecorded(orderId,periodKey){ return subscriptionDeliveries.some(record=>record.orderId===orderId&&record.periodKey===periodKey); }
-function deliveryCheckboxes(order){ const readOnly=dashboardRole!=='admin'; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const checked=isDeliveryRecorded(order.id,period)?'checked':'';return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${checked} ${readOnly?'disabled':''} onchange="setSubscriptionDelivery('${String(order.id).replace(/'/g,'\\\'')}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
-function setSubscriptionDelivery(orderId,periodKey,delivered){ if(dashboardRole!=='admin') return; window.parent?.postMessage({type:'91dab-subscription-delivery-save',delivery:{orderId,periodKey,delivered}},'*'); }
+function deliveryCheckboxes(order){ if(order.planKey==='yearly'&&order.deliverySpan==='once') return '<button class="action-link" onclick="navigate(\'inventory-products\')">Record all-at-once shipment</button>'; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${String(order.id).replace(/'/g,'\\\'')}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
+function setSubscriptionDelivery(orderId,periodKey,delivered){ if(!delivered){ showToast('Recorded shipments stay in history. Use a password-confirmed stock adjustment to correct inventory.','info'); return; } window.parent?.postMessage({type:'91dab-subscription-delivery-save',delivery:{orderId,periodKey,delivered:true}},'*'); }
+function allocationKeyForRow(order,periodKey){ if(order.planKey==='introductory') return `${order.id}:one-time`; if(order.planKey==='yearly'&&order.deliverySpan==='once') return `${order.id}:yearly-all-at-once`; return `${order.id}:${order.planKey==='monthly'?'monthly':'yearly-monthly'}:${periodKey}`; }
+function allocationUnitsForRow(order){ const quantity=Math.max(1,Number(order.qty)||1); if(order.planKey==='introductory') return quantity*12; if(order.planKey==='yearly'&&order.deliverySpan==='once') return quantity*1500; if(order.planKey==='monthly') return quantity*99; return quantity*125; }
+function renderInventoryProducts(){
+  const summary=document.getElementById('inventoryProductSummary'); const shipmentBody=document.getElementById('inventoryShipmentBody'); const allocationBody=document.getElementById('inventoryAllocationBody'); if(!summary||!shipmentBody||!allocationBody) return;
+  const configured=Boolean(inventoryState?.configured); const units=Number(inventoryState?.availableUnits||0); const allocationCount=inventoryAllocations.length;
+  summary.innerHTML=`<div class="summary-card"><span>Available DAB stock</span><b>${configured?units.toLocaleString('en-IN'):'Not initialized'}</b><small>${configured?'Units ready for future shipments':'Administrator must set the current physical stock'}</small></div><div class="summary-card"><span>Recorded shipments</span><b>${allocationCount.toLocaleString('en-IN')}</b><small>Immutable stock deductions</small></div><div class="summary-card"><span>Stock rule</span><b>On shipment</b><small>Never at payment verification</small></div>`;
+  const scheduled=[];
+  orders.filter(order=>order.paymentStatus==='paid').forEach(order=>{
+    if(order.planKey==='introductory'||(order.planKey==='yearly'&&order.deliverySpan==='once')) scheduled.push({order,periodKey:null});
+    else if(order.planKey==='monthly'||order.planKey==='yearly') deliveryPeriods(order).forEach(periodKey=>scheduled.push({order,periodKey}));
+  });
+  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-link" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-link" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td>${order.plan}<div style="font-size:.7rem;color:var(--text-faint);">${recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment')}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'Awaiting shipment'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
+  allocationBody.innerHTML=inventoryAllocations.map(allocation=>`<tr><td>${formatDate(new Date(allocation.shippedAt).getTime())}</td><td class="mono">${allocation.orderId}</td><td>${allocation.allocationKind}</td><td>${allocation.periodKey||'—'}</td><td class="mono">${Number(allocation.units||0).toLocaleString('en-IN')}</td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">No DAB stock has been deducted yet. Record a shipment to create the first allocation.</td></tr>`;
+}
 function syncDashboardViews(){
   renderBars(); renderTopProducts(); renderOrders(document.getElementById('orderSearch')?.value || '');
-  renderActivity(); renderTracking(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); updateShopBadges(); refreshHomeStats();
+  renderActivity(); renderTracking(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); updateShopBadges(); refreshHomeStats();
 }
 syncNotificationSoundControl();
 window.addEventListener('storage', (event)=>{
@@ -1429,6 +1465,7 @@ function paymentEmailAction(o){
 function fulfillmentBadge(status){ const label=status==='delivered'?'Delivered':status==='shipped'?'Shipped':'Not shipped'; const color=status==='delivered'?'#1f7a57':status==='shipped'?'#b7791f':'var(--text-faint)'; return `<span style="font-size:.72rem;font-weight:700;color:${color};">${label}</span>`; }
 function fulfillmentAction(o){
   if(o.paymentStatus!=='paid') return '<span class="secondary-cell">Awaiting payment</span>';
+  if(o.planKey==='monthly'||(o.planKey==='yearly'&&o.deliverySpan!=='once')) return '<button class="action-link" onclick="event.stopPropagation();navigate(\'inventory-products\')">Record scheduled shipment</button>';
   if(o.fulfillmentStatus==='delivered') return '<span class="secondary-cell">Complete</span>';
   const next=o.fulfillmentStatus==='shipped'?'delivered':'shipped';
   const label=next==='shipped'?'Mark shipped':'Mark delivered';
@@ -1921,13 +1958,18 @@ window.addEventListener('message',(event)=>{
   if(data.type==='91dab-server-orders'){ applyServerOrders(data.orders); }
   if(data.type==='91dab-live-message'){ applyTrustedLiveMessage(data.message); }
   if(data.type==='91dab-inventory'){ applyInventory(data.inventory); }
+  if(data.type==='91dab-inventory-allocations'){ applyInventoryAllocations(data.allocations); }
   if(data.type==='91dab-inventory-result'){
     if(data.success){ applyInventory(data.inventory); closeTeamModal(); showToast('DAB inventory saved','success'); }
     else showToast(data.message||'Inventory could not be saved.','error');
   }
+  if(data.type==='91dab-inventory-increase-result'){
+    if(data.success){ applyInventory(data.inventory); closeTeamModal(); showToast('DAB inventory increased','success'); }
+    else showToast(data.message||'DAB inventory could not be increased.','error');
+  }
   if(data.type==='91dab-subscription-deliveries'){ subscriptionDeliveries=Array.isArray(data.deliveries)?data.deliveries:[]; renderSubscriptions(); }
   if(data.type==='91dab-subscription-delivery-result'){
-    if(data.success){ subscriptionDeliveries=Array.isArray(data.deliveries)?data.deliveries:subscriptionDeliveries; renderSubscriptions(); showToast('Delivery status updated','success'); }
+    if(data.success){ subscriptionDeliveries=Array.isArray(data.deliveries)?data.deliveries:subscriptionDeliveries; if(data.inventory) applyInventory(data.inventory); renderSubscriptions(); renderInventoryProducts(); showToast('Subscription shipment recorded and DAB stock deducted','success'); }
     else showToast(data.message||'Delivery status could not be updated.','error');
   }
   if(data.type==='91dab-reminder-status'){ applyReminderStatus(data.reminder); }
@@ -1945,7 +1987,7 @@ window.addEventListener('message',(event)=>{
     else showToast(data.message||'Payment could not be marked paid.','error');
   }
   if(data.type==='91dab-fulfillment-result'){
-    if(data.success){ const serverOrder=data.order; fulfillmentEmailStates[`${serverOrder.orderId}:${serverOrder.fulfillmentStatus}`]=data.email; const index=serverOrderRecords.findIndex(item=>item.orderId===serverOrder.orderId); if(index>=0) serverOrderRecords[index]=serverOrder; else serverOrderRecords.unshift(serverOrder); hydrateShopData(); syncDashboardViews(); const status=serverOrder.fulfillmentStatus==='delivered'?'delivered':'shipped'; const emailNote=data.email==='sent'?' Buyer email sent.':data.email==='already-sent'?' Buyer email was already sent.':data.email==='not-requested'?' No buyer email was recorded.':data.email==='failed'?' The status was saved, but the buyer email could not be sent.':''; showToast(`Order marked ${status}.${emailNote}`,data.email==='failed'?'info':'success'); }
+    if(data.success){ const serverOrder=data.order; fulfillmentEmailStates[`${serverOrder.orderId}:${serverOrder.fulfillmentStatus}`]=data.email; const index=serverOrderRecords.findIndex(item=>item.orderId===serverOrder.orderId); if(index>=0) serverOrderRecords[index]=serverOrder; else serverOrderRecords.unshift(serverOrder); if(data.inventory) applyInventory(data.inventory); hydrateShopData(); syncDashboardViews(); const status=serverOrder.fulfillmentStatus==='delivered'?'delivered':'shipped'; const emailNote=data.email==='sent'?' Buyer email sent.':data.email==='already-sent'?' Buyer email was already sent.':data.email==='not-requested'?' No buyer email was recorded.':data.email==='failed'?' The status was saved, but the buyer email could not be sent.':''; showToast(`Order marked ${status}.${emailNote}`,data.email==='failed'?'info':'success'); }
     else showToast(data.message||'Shipment status could not be updated.','error');
   }
   if(data.type==='91dab-fulfillment-email-result'){
@@ -1967,7 +2009,7 @@ const SCREEN_TITLES = {
   home:'Overview', inbox:'Inbox', customers:'Customers', subscriptions:'Subscriptions', payments:'Payments', transactions:'Transaction history', tracking:'E-commerce', marketing:'Marketing Overview',
   mobile:'Mobile App', events:'Events', calendar:'Calendar', activity:'Activity',
   teams:'All teams', 'team-eng':'Engineering', 'team-mkt':'Marketing', 'team-sales':'Sales',
-  support:'Support', settings:'Settings', access:'Access status'
+  support:'Support', settings:'Settings', access:'Access status', 'inventory-products':'Inventory & Products'
 };
 function navigate(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -1987,6 +2029,7 @@ function navigate(screen){
   if(screen==='subscriptions'){ renderPlanCards(); renderSubscriptions(); }
   if(screen==='payments') renderPayments();
   if(screen==='transactions') renderTransactions();
+  if(screen==='inventory-products') renderInventoryProducts();
   if(screen==='calendar') requestAnimationFrame(renderCalendar);
   document.getElementById('app').classList.remove('mobile-open');
 }

@@ -29,6 +29,7 @@ export default function Admin() {
     refetchIntervalInBackground: false,
   });
   const inventory = trpc.admin.inventory.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
+  const inventoryAllocations = trpc.admin.inventoryAllocations.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const subscriptionDeliveries = trpc.admin.subscriptionDeliveries.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const reminderStatus = trpc.admin.subscriptionReminderStatus.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const demoCleanupStatus = trpc.admin.demoOrderCleanupStatus.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
@@ -85,6 +86,7 @@ export default function Admin() {
   const updateFulfillment = trpc.admin.updateFulfillment.useMutation();
   const resendFulfillmentEmail = trpc.admin.resendFulfillmentEmail.useMutation();
   const setInventory = trpc.admin.setInventory.useMutation();
+  const increaseInventory = trpc.admin.increaseInventory.useMutation();
   const setSubscriptionDelivery = trpc.admin.setSubscriptionDelivery.useMutation();
   const activateSubscriptionReminders = trpc.admin.activateSubscriptionReminders.useMutation();
   const activateDemoOrderCleanup = trpc.admin.activateDemoOrderCleanup.useMutation();
@@ -143,6 +145,11 @@ export default function Admin() {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
     iframe?.contentWindow?.postMessage({ type: "91dab-inventory", inventory: inventory.data ?? null }, window.location.origin);
   }, [inventory.data]);
+
+  useEffect(() => {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
+    iframe?.contentWindow?.postMessage({ type: "91dab-inventory-allocations", allocations: inventoryAllocations.data ?? [] }, window.location.origin);
+  }, [inventoryAllocations.data]);
 
   useEffect(() => {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
@@ -251,9 +258,11 @@ export default function Admin() {
       }
       if (event.data.type === "91dab-fulfillment-update") {
         updateFulfillment.mutate(event.data.fulfillment, {
-          onSuccess: async ({ order, email }) => {
+          onSuccess: async ({ order, email, inventory: nextInventory }) => {
             await utils.admin.listOrders.invalidate();
-            respond({ type: "91dab-fulfillment-result", success: true, order, email });
+            await utils.admin.inventory.invalidate();
+            await utils.admin.inventoryAllocations.invalidate();
+            respond({ type: "91dab-fulfillment-result", success: true, order, email, inventory: nextInventory });
           },
           onError: (error) => respond({ type: "91dab-fulfillment-result", success: false, message: error.message }),
         });
@@ -270,11 +279,22 @@ export default function Admin() {
           onError: (error) => respond({ type: "91dab-inventory-result", success: false, message: error.message }),
         });
       }
+      if (event.data.type === "91dab-inventory-increase") {
+        increaseInventory.mutate(event.data.inventory, {
+          onSuccess: async (nextInventory) => {
+            await utils.admin.inventory.invalidate();
+            respond({ type: "91dab-inventory-increase-result", success: true, inventory: nextInventory });
+          },
+          onError: (error) => respond({ type: "91dab-inventory-increase-result", success: false, message: error.message }),
+        });
+      }
       if (event.data.type === "91dab-subscription-delivery-save") {
         setSubscriptionDelivery.mutate(event.data.delivery, {
-          onSuccess: async (deliveries) => {
+          onSuccess: async (result) => {
             await utils.admin.subscriptionDeliveries.invalidate();
-            respond({ type: "91dab-subscription-delivery-result", success: true, deliveries });
+            await utils.admin.inventory.invalidate();
+            await utils.admin.inventoryAllocations.invalidate();
+            respond({ type: "91dab-subscription-delivery-result", success: true, deliveries: result.deliveries, inventory: result.inventory, shipment: result.shipment });
           },
           onError: (error) => respond({ type: "91dab-subscription-delivery-result", success: false, message: error.message }),
         });
@@ -306,7 +326,7 @@ export default function Admin() {
     };
     window.addEventListener("message", handleEmbeddedDashboardAction);
     return () => window.removeEventListener("message", handleEmbeddedDashboardAction);
-  }, [createTeamMember, updateTeamMember, removeTeamMember, createTeam, updateTeam, removeTeam, createEmployeeAccount, resetEmployeePassword, removeEmployeeAccount, updateProfile, markOrderPaid, updateFulfillment, resendFulfillmentEmail, setInventory, setSubscriptionDelivery, activateSubscriptionReminders, activateDemoOrderCleanup, submitSupportRequest, utils]);
+  }, [createTeamMember, updateTeamMember, removeTeamMember, createTeam, updateTeam, removeTeam, createEmployeeAccount, resetEmployeePassword, removeEmployeeAccount, updateProfile, markOrderPaid, updateFulfillment, resendFulfillmentEmail, setInventory, increaseInventory, setSubscriptionDelivery, activateSubscriptionReminders, activateDemoOrderCleanup, submitSupportRequest, utils]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

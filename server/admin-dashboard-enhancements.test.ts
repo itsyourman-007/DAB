@@ -115,18 +115,22 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("Active restricted employee session");
   });
 
-  it("tracks inventory from administrator-entered quantities and supports paid subscription delivery checkboxes", () => {
+  it("tracks inventory from administrator-entered quantities and shipment-driven subscription allocations", () => {
     expect(schemaSource).toContain('mysqlTable("merchantInventory"');
+    expect(schemaSource).toContain('mysqlTable("merchantInventoryShipmentAllocations"');
     expect(schemaSource).toContain('mysqlTable("subscriptionDeliveryRecords"');
-    expect(schemaSource).toContain('inventoryDeductedAt: timestamp("inventoryDeductedAt")');
     expect(routerSource).toContain("setInventory: publicProcedure");
+    expect(routerSource).toContain("increaseInventory: publicProcedure");
+    expect(routerSource).toContain("inventoryAllocations: publicProcedure");
     expect(routerSource).toContain("setSubscriptionDelivery: publicProcedure");
-    expect(routerSource).toContain("decrementInventoryForPaidOrder");
+    expect(routerSource).toContain("recordSubscriptionShipment");
     expect(routerSource).toContain("dantaresearch@gmail.com");
     expect(dashboardHtml).toContain("id=\"lowStockAlert\"");
     expect(dashboardHtml).toContain("below the 1,000-unit threshold");
     expect(dashboardHtml).toContain("id=\"inventoryUnits\"");
-    expect(dashboardHtml).toContain("deliveryCheckboxes(o)");
+    expect(dashboardHtml).toContain("Inventory &amp; Products");
+    expect(dashboardHtml).toContain("id=\"screen-inventory-products\"");
+    expect(dashboardHtml).toContain("function renderInventoryProducts()");
     expect(dashboardHtml).toContain("91dab-subscription-delivery-save");
   });
 

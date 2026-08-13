@@ -250,6 +250,17 @@ export const appRouter = router({
         if (!(await passwordMatchesAdminPassword(input.password))) throw new TRPCError({ code: "UNAUTHORIZED", message: "Administrator password was not accepted" });
         return db.setMerchantInventoryUnits(input.availableUnits);
       }),
+    increaseInventory: publicProcedure
+      .input(z.object({ units: z.number().int().min(1).max(10_000_000), password: z.string().min(1).max(256) }))
+      .mutation(async ({ ctx, input }) => {
+        if (!(await isAdminSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        if (!(await passwordMatchesAdminPassword(input.password))) throw new TRPCError({ code: "UNAUTHORIZED", message: "Administrator password was not accepted" });
+        return db.increaseMerchantInventoryUnits(input.units);
+      }),
+    inventoryAllocations: publicProcedure.query(async ({ ctx }) => {
+      if (!(await isDashboardSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Dashboard access is required" });
+      return db.listMerchantInventoryShipmentAllocations();
+    }),
     subscriptionDeliveries: publicProcedure.query(async ({ ctx }) => {
       if (!(await isDashboardSession(ctx.req.headers.cookie))) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Dashboard access is required" });
@@ -259,12 +270,14 @@ export const appRouter = router({
     setSubscriptionDelivery: publicProcedure
       .input(z.object({ orderId: z.string().trim().min(4).max(128), periodKey: z.string().regex(/^\d{4}-\d{2}$/), delivered: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        if (!(await isAdminSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        if (!(await isDashboardSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Dashboard access is required" });
         const order = await db.getMerchantOrder(input.orderId);
         if (!order || order.paymentStatus !== "paid" || (order.planKey !== "monthly" && order.planKey !== "yearly")) {
           throw new TRPCError({ code: "BAD_REQUEST", message: "Only paid monthly or yearly subscriptions can be marked delivered" });
         }
-        return db.setSubscriptionDelivery(input);
+        if (!input.delivered) throw new TRPCError({ code: "BAD_REQUEST", message: "A recorded shipment cannot be unchecked. Use a password-confirmed stock adjustment to correct inventory." });
+        const shipment = await db.recordSubscriptionShipment(input);
+        return { deliveries: await db.listSubscriptionDeliveryRecords(), inventory: shipment.inventory, shipment };
       }),
     markOrderPaid: publicProcedure
       .input(z.object({ orderId: z.string().trim().min(4).max(128) }))
@@ -281,8 +294,8 @@ export const appRouter = router({
         }
         const order = existing.paymentStatus === "paid" ? existing : await db.markMerchantOrderPaid(input.orderId);
         if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "The order was not found after verification" });
-        const inventoryResult = await db.decrementInventoryForPaidOrder(order.orderId);
-        if (!order.buyerEmail) return { order, email: "not-requested" as const, inventory: inventoryResult.inventory, inventoryResult: inventoryResult.reason };
+        const inventory = await db.getMerchantInventory();
+        if (!order.buyerEmail) return { order, email: "not-requested" as const, inventory, inventoryResult: "awaiting-shipment" as const };
         const reserved = await db.reservePaymentConfirmationEmail({ orderId: order.orderId, recipient: order.buyerEmail.toLowerCase() });
         if (!reserved) return { order, email: "already-sent" as const };
         try {
@@ -305,7 +318,7 @@ export const appRouter = router({
             phone: order.phone,
           });
           await db.markPaymentConfirmationEmailSent(order.orderId);
-          return { order, email: "sent" as const, inventory: inventoryResult.inventory, inventoryResult: inventoryResult.reason };
+          return { order, email: "sent" as const, inventory, inventoryResult: "awaiting-shipment" as const };
         } catch {
           await db.releasePaymentConfirmationEmail(order.orderId);
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Payment was marked paid, but the buyer confirmation email could not be sent" });
@@ -428,7 +441,7 @@ export const appRouter = router({
         try {
           const order = await db.updateMerchantOrderFulfillment(input);
           if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Order was not found" });
-          return { order, email: await deliverBuyerFulfillmentEmail(order, input.status) };
+          return { order, email: await deliverBuyerFulfillmentEmail(order, input.status), inventory: await db.getMerchantInventory() };
         } catch (error) {
           if (error instanceof TRPCError) throw error;
           throw new TRPCError({ code: "BAD_REQUEST", message: error instanceof Error ? error.message : "Shipment status could not be updated" });

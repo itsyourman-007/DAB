@@ -1,22 +1,52 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
-import { merchantInventory, merchantOrders } from "../drizzle/schema";
+import { merchantInventory, merchantInventoryShipmentAllocations, merchantOrders, subscriptionDeliveryRecords } from "../drizzle/schema";
 import {
   createMerchantCheckoutOrder,
-  decrementInventoryForPaidOrder,
   getDb,
   getMerchantInventory,
+  listMerchantInventoryShipmentAllocations,
   markMerchantOrderPaid,
+  recordSubscriptionShipment,
   setMerchantInventoryUnits,
   submitMerchantOrderUtr,
+  updateMerchantOrderFulfillment,
 } from "./db";
 
 const describeWithDatabase = process.env.DATABASE_URL ? describe : describe.skip;
 
-describeWithDatabase("trusted inventory deduction", () => {
-  const orderId = `91DAB-INVENTORY-TEST-${Date.now()}`;
+describeWithDatabase("shipment-driven DAB inventory", () => {
+  const suffix = Date.now();
+  const orderIds = {
+    introductory: `91DAB-INVENTORY-INTRO-${suffix}`,
+    monthly: `91DAB-INVENTORY-MONTHLY-${suffix}`,
+    yearlyMonthly: `91DAB-INVENTORY-YEARLY-MONTHLY-${suffix}`,
+    yearlyOnce: `91DAB-INVENTORY-YEARLY-ONCE-${suffix}`,
+  };
   let database: Awaited<ReturnType<typeof getDb>>;
   let originalInventory: typeof merchantInventory.$inferSelect | undefined;
+
+  async function createPaidOrder(input: { orderId: string; planKey: "introductory" | "monthly" | "yearly"; quantity: number; deliverySpan: string | null }) {
+    await createMerchantCheckoutOrder({
+      orderId: input.orderId,
+      buyerName: "Inventory Test Buyer",
+      buyerEmail: null,
+      phone: null,
+      address: null,
+      city: null,
+      state: null,
+      pincode: null,
+      planKey: input.planKey,
+      planName: `DAB ${input.planKey}`,
+      quantity: input.quantity,
+      amount: 100,
+      paymentMethod: "UPI",
+      deliverySpan: input.deliverySpan,
+      createdAt: new Date(),
+    });
+    await submitMerchantOrderUtr(input.orderId, `UTR-${input.orderId.slice(-12)}`);
+    await markMerchantOrderPaid(input.orderId);
+  }
 
   beforeAll(async () => {
     database = await getDb();
@@ -26,7 +56,11 @@ describeWithDatabase("trusted inventory deduction", () => {
 
   afterAll(async () => {
     if (!database) return;
-    await database.delete(merchantOrders).where(eq(merchantOrders.orderId, orderId));
+    for (const orderId of Object.values(orderIds)) {
+      await database.delete(subscriptionDeliveryRecords).where(eq(subscriptionDeliveryRecords.orderId, orderId));
+      await database.delete(merchantInventoryShipmentAllocations).where(eq(merchantInventoryShipmentAllocations.orderId, orderId));
+      await database.delete(merchantOrders).where(eq(merchantOrders.orderId, orderId));
+    }
     if (originalInventory) {
       await database.insert(merchantInventory).values(originalInventory).onDuplicateKeyUpdate({
         set: {
@@ -41,35 +75,31 @@ describeWithDatabase("trusted inventory deduction", () => {
     }
   });
 
-  it("deducts a paid order only once and reports stock below the 1,000-unit threshold", async () => {
-    await setMerchantInventoryUnits(1001);
-    await createMerchantCheckoutOrder({
-      orderId,
-      buyerName: "Inventory Test Buyer",
-      buyerEmail: null,
-      phone: null,
-      address: null,
-      city: null,
-      state: null,
-      pincode: null,
-      planKey: "introductory",
-      planName: "Introductory DAB",
-      quantity: 3,
-      amount: 1500,
-      paymentMethod: "UPI",
-      deliverySpan: null,
-      createdAt: new Date(),
-    });
-    await submitMerchantOrderUtr(orderId, "UTR-INVENTORY-TEST");
-    await markMerchantOrderPaid(orderId);
+  it("keeps paid orders in stock until shipment and deducts each one-time, monthly, and yearly allocation exactly once", async () => {
+    await setMerchantInventoryUnits(5_000);
+    await createPaidOrder({ orderId: orderIds.introductory, planKey: "introductory", quantity: 3, deliverySpan: null });
+    await createPaidOrder({ orderId: orderIds.monthly, planKey: "monthly", quantity: 2, deliverySpan: null });
+    await createPaidOrder({ orderId: orderIds.yearlyMonthly, planKey: "yearly", quantity: 1, deliverySpan: "monthly" });
+    await createPaidOrder({ orderId: orderIds.yearlyOnce, planKey: "yearly", quantity: 1, deliverySpan: "once" });
 
-    const first = await decrementInventoryForPaidOrder(orderId);
-    const second = await decrementInventoryForPaidOrder(orderId);
-    const inventory = await getMerchantInventory();
+    expect((await getMerchantInventory()).availableUnits).toBe(5_000);
 
-    expect(first).toMatchObject({ applied: true, reason: "deducted" });
-    expect(second).toMatchObject({ applied: false, reason: "already-deducted" });
-    expect(inventory).toMatchObject({ configured: true, availableUnits: 998 });
-    expect(inventory.availableUnits).toBeLessThan(1000);
-  });
+    await updateMerchantOrderFulfillment({ orderId: orderIds.introductory, status: "shipped" });
+    expect((await getMerchantInventory()).availableUnits).toBe(4_964);
+
+    const monthlyFirst = await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-08" });
+    const monthlyDuplicate = await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-08" });
+    expect(monthlyFirst).toMatchObject({ applied: true, reason: "deducted" });
+    expect(monthlyDuplicate).toMatchObject({ applied: false, reason: "already-shipped" });
+    expect((await getMerchantInventory()).availableUnits).toBe(4_766);
+
+    await recordSubscriptionShipment({ orderId: orderIds.yearlyMonthly, periodKey: "2026-08" });
+    expect((await getMerchantInventory()).availableUnits).toBe(4_641);
+
+    await updateMerchantOrderFulfillment({ orderId: orderIds.yearlyOnce, status: "shipped" });
+    expect((await getMerchantInventory()).availableUnits).toBe(3_141);
+
+    const allocations = await listMerchantInventoryShipmentAllocations();
+    expect(allocations.filter((allocation) => Object.values(orderIds).includes(allocation.orderId))).toHaveLength(4);
+  }, 20_000);
 });
