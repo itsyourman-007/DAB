@@ -140,7 +140,7 @@
 - [x] Diagnose why shop-page images are not visible in the deployed storefront and identify the correct deployment-safe image URLs.
 - [x] Repair shop product and supporting image delivery with safe visible fallbacks where needed.
 - [x] Add regression coverage and visually validate repaired shop images at desktop and mobile widths.
-- [ ] Synchronize the validated shop-image repair to GitHub for Render deployment.
+- [x] Synchronize the validated shop-image repair to GitHub for Render deployment.
 - [x] Confirm the missing shop images are caused by `/manus-storage/` URLs unavailable on Render; identify `dab_img.png` as the product source and the supplied clinic visual as the supporting source.
 - [x] Visually verify the repaired public product image in the shop hero at desktop and mobile widths.
 - [x] Confirm the live shop route renders the repaired product hero image from the external CDN rather than a missing Manus-only storage path.
