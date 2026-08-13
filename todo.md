@@ -1,0 +1,117 @@
+# Project TODO
+
+- [x] Port the supplied integrated shop and dashboard website into the browser-ready project.
+- [x] Remove every seeded order, demo customer, fake activity item, notification, tracking record, quote request, and hardcoded dashboard metric from the target dashboard.
+- [x] Restrict dashboard ingestion to shop records with a submitted UPI reference or confirmed payment, plus genuine clinic quote submissions.
+- [x] Add clean real-data empty states for Overview, Recent Orders, Customers, Subscriptions, Payments, activity, tracking, and notification views.
+- [x] Preserve search, filters, CSV exports, payment verification, navigation, and shared `91dab_shop_orders` / `91dab_clinic_quotes` browser-storage flow.
+- [x] Add and run focused tests for clean first load and qualifying record ingestion.
+- [x] Visually verify first-load empty states and real shop-record flow in the browser.
+- [x] Save a completed website checkpoint and provide the live website link.
+- [x] Remove the dashboard switch from the public storefront and retain the shop at the root URL.
+- [x] Add a dedicated `/admin` merchant-dashboard route.
+- [x] Add server-validated password protection and a secure admin session for `/admin`.
+- [x] Test public storefront access, rejected password attempts, successful protected dashboard access, and logout.
+- [x] Save a protected-admin website checkpoint and deliver the updated project version.
+- [x] Add Render-compatible deployment guidance and required environment-variable documentation.
+- [x] Add instructions for rotating `ADMIN_DASHBOARD_PASSWORD` without exposing it in code.
+- [x] Build and validate a clean deployment ZIP that excludes local dependencies, logs, and secrets.
+- [x] Deliver the Render deployment ZIP and password-change guidance.
+- [x] Upload and integrate the supplied DAB product image into the storefront product areas that currently show black placeholders.
+- [x] Upload and integrate the supplied clinic image into the clinic/group section of the storefront.
+- [x] Add server-side email OTP confirmation for administrator password changes, restricted to one configured recipient email.
+- [x] Add a protected dashboard Settings interface for requesting an OTP and confirming a password change.
+- [x] Add required email-delivery configuration, tests, and security documentation without exposing passwords or OTPs.
+- [x] Visually validate image placement and functionally validate the email-OTP password change flow.
+- [x] Functionally test administrator OTP request, trusted-recipient email payload, OTP confirmation, new-password login, old-password rejection, and test-data cleanup.
+- [x] Record the end-to-end password-change validation result in the project notes.
+- [x] Save and deliver the updated website version.
+- [x] Reposition the clinic/group-practice image lower so the section heading remains fully visible.
+- [x] Visually verify the clinic/group-practice section after the crop change and confirm the in-image heading is fully visible.
+- [x] Verify the revised clinic-section composition and deliver the adjusted website version.
+- [x] Document the current site’s data-storage dependencies and the effect of deleting platform/project data after external deployment.
+- [x] Document JWT secret handling for external hosting.
+- [x] Document the workflow for integrating a future HTML file into the deployment-ready project and maintaining source order.
+- [x] Deliver the requested deployment and maintenance guidance.
+- [x] Add server-side buyer payment-confirmation emails after an administrator verifies an eligible UPI payment.
+- [x] Ensure duplicate verification does not send duplicate buyer confirmation emails.
+- [x] Add test coverage for buyer payment-confirmation email eligibility and delivery payload.
+- [x] Document Resend email-service setup, domain verification, and required deployment environment variables.
+- [x] Deliver the updated website and OTP/payment email setup guidance.
+- [x] Inspect the supplied landing page, server, UPI, Supabase, email, and supporting files for compatible production logic.
+- [x] Use the supplied landing page as the public first page and preserve every Buy DAB route to the shop page.
+- [x] Upgrade the buyer payment-confirmation email with 91DAB branding and complete verified order details.
+- [x] Add a visible sending state and email-success or email-failure notification to the dashboard Verify payment action.
+- [x] Validate landing-to-shop navigation, buyer-email contents, duplicate protection, and admin verification feedback.
+- [x] Refresh the Render deployment ZIP and deliver the integrated website version.
+- [x] Restore a reliable way to expand the merchant-dashboard sidebar after it is collapsed.
+- [x] Diagnose and improve the configured-recipient administrator OTP delivery flow and its error feedback.
+- [x] Correct public storefront links: Buy DAB must open `/shop`, while 91DAB and Read story must return to the public landing page.
+- [x] Add a functional Reject option alongside Accept in the landing-page cookie consent banner.
+- [x] Verify and refine landing, shop, and dashboard layouts at phone, tablet, and desktop widths.
+- [x] Prepare a practical Android APK delivery path for the 91DAB experience without changing unrelated store or dashboard functionality.
+- [x] Inspect the configured Resend sender domain and provide actionable DNS verification guidance for reliable OTP delivery.
+- [x] Add a real-data-only transaction history screen to the protected dashboard using qualifying recorded purchases.
+- [x] Repair the landing-page phone layout and align every shop, cart, checkout, payment, and confirmation screen for phone use.
+- [x] Validate Resend configuration, transaction-history rendering, and the complete phone storefront flow before delivery.
+- [x] Keep the Resend custom-domain verification guide ready for the user’s future DNS setup without attempting to send from an unverified sender.
+- [x] Add password-confirmed team-member creation and removal controls to the protected dashboard without displaying seeded team members.
+- [x] Route the dashboard Support contact action to the configured administrator support email address.
+- [x] Create a downloadable Android dashboard wrapper project and release-APK build configuration that loads only the final published HTTPS site.
+- [x] Validate secure team actions, support email routing, real-data transaction history, and the Android package configuration before delivery.
+- [x] Manually validate the phone storefront through cart, checkout, UPI payment, and confirmation screens without creating a real purchase record.
+- [x] Add a production release-APK signing configuration path while retaining the verified installable debug APK for immediate testing.
+- [x] Visually inspect the temporary phone cart screen to confirm its product controls, totals, and checkout action remain usable and contained.
+- [x] Create and validate a PC-friendly website-only Render ZIP that excludes Android wrapper and build-script files while keeping the APK separate.
+- [ ] Replace the configurable Android wrapper with a fixed deployed dashboard shortcut that opens `/admin` directly and relies only on the existing administrator password login.
+- [ ] Replace the Android URL entry with a native password-first login screen that validates against a fixed stable server and opens the live dashboard only after successful authentication.
+- [x] Collect and implement the user’s next requested website changes.
+- [ ] Save the completed website checkpoint and export the project to the confirmed GitHub repository.
+- [x] Correct the landing-page MeitY TIDE 2.0 EIR Grant and Women’s Hackathon 3.0 recognition titles.
+- [x] Replace the remaining landing-page paragraph reference with “MeitY TIDE 2.0 EIR Grant”.
+- [x] Replace the two landing-page recognition photographs with the supplied Women Startup Program and 91DAB exhibition images.
+- [x] Refine the two replacement recognition-image frames for clean desktop, tablet, and phone alignment.
+- [x] Validate the updated recognition section and refresh deployment-ready sources.
+- [x] Validate the updated recognition photographs at tablet width and record the alignment result.
+- [x] Bundle the supplied recognition photographs into the Render deployment assets and rebuild the website-only deployment ZIP.
+- [x] Re-run focused regression and production build validation after packaging the recognition assets for deployment.
+- [x] Correct only the landing-page DAB introductory price from ₹150 to ₹500, without changing the shop, checkout, dashboard, or any other content.
+- [x] Expand protected dashboard CSV exports to include customer name, phone, address, plan, amount, UPI reference, and order identifier.
+- [x] Allow password-confirmed creation, editing, and removal of teams and team members, including editable email and salary details.
+- [x] Add a protected login/status view and repair the dashboard calendar so it renders immediately and reliably.
+- [x] Allow an administrator to mark a qualifying verified transaction as paid from the dashboard.
+- [x] Add both visible dashboard reminders and automatic first-of-month subscription-summary emails using secure managed delivery.
+- [x] Replace public client-submitted payment recording with a trusted server-side checkout and UTR lifecycle before using orders for CSV, Mark paid, or reminders.
+- [x] Preserve the existing Render environment-based merchant UPI configuration while moving the checkout lifecycle to trusted server-side persistence.
+- [x] Add true password-confirmed team-level creation, rename, and deletion with persistent teams beyond free-text member departments.
+- [x] Add a dedicated protected login-status view and browser-verify that the dashboard calendar opens and renders immediately.
+- [ ] After publishing, activate and smoke-test the first-of-month reminder against trusted durable subscription records.
+- [x] Add administrator-managed restricted employee access: username and password login for authorized email accounts, with password-confirmed add and remove controls in Settings and administrator email dantaresearcg@gmail.com.
+- [x] Remove browser-local order ingestion from all dashboard-eligible payment, CSV, subscription, and reminder views.
+- [x] Quarantine failed checkout and failed UTR fallback records so they cannot become dashboard-eligible local submitted payments.
+- [x] Correct the administrator login and profile email to dantaresearch@gmail.com.
+- [x] Add durable month-by-month delivery tracking for paid monthly and yearly subscriptions, with administrator-controlled delivery checkboxes.
+- [x] Add password-confirmed inventory controls using only administrator-entered stock quantities, with trusted paid-purchase stock decrement and a red low-stock alert below 1,000 units.
+- [x] Generate recurring monthly-subscription delivery checkbox periods and verify inventory decrements once, returns authoritative post-deduction stock, and renders the red low-stock alert below 1,000 units.
+- [x] Verify long-running monthly subscriptions retain every elapsed delivery month without an arbitrary period cap.
+- [x] Add durable Shipped and Delivered order status tracking with role-appropriate updates by administrators and authorized employees.
+- [x] Record protected dashboard logins and show the administrator a login audit list in Settings.
+- [x] Perform a final security-hardening, shop-flow, dashboard-flow, mobile-wrapper, and production launch-readiness review.
+- [ ] Build the fixed Android dashboard shortcut after receiving the final published HTTPS dashboard URL.
+- [x] Validate the post-change trusted lifecycle from checkout and UTR submission through payment verification, Shipped, Delivered, and successful-login audit persistence using self-cleaning database integration coverage.
+- [x] Inspect the existing Android debug APK: its packaged destination remains the intentional placeholder `https://yourdomain.com/admin`, so it must be rebuilt after the final public HTTPS URL is known.
+- [x] Delete only test orders whose buyer name is explicitly marked with “demo” after they have been retained for 24 hours, without deleting genuine customer orders.
+- [x] Prepare and validate the published-site recurring cleanup schedule for expired demo orders.
+- [ ] After publishing, activate and smoke-test the hourly demo-order cleanup schedule from administrator Settings.
+- [x] Share and verify the current working 91DAB preview before GitHub export.
+- [ ] Export the verified project to the GitHub repository identifier provided by the user.
+- [ ] Restore a preview URL that is reachable from the user’s device and verify the landing, shop, and dashboard entry routes.
+- [ ] Diagnose and resolve the renewed user-reported preview loading failure before sharing another access link.
+- [x] Confirm the target `owner/repository` identifier required for the requested GitHub export.
+- [ ] Verify access to the confirmed GitHub repository `itsyourman-007/DAB` and export the latest validated project state.
+- [x] Provide an accessible preview alternative because the temporary preview address is not loading on the user’s device.
+- [x] Add a dedicated Delivery Tracking sidebar screen for paid orders, accessible to administrators and authorized employees.
+- [x] Send a server-side buyer email confirmation when an authorized staff member marks an eligible order as Shipped or Delivered.
+- [x] Persist and test deduplicated shipment and delivery email dispatches without exposing buyer data or generating duplicate notifications.
+- [x] Restore QR-code visibility on the buyer payment screen after checkout creation.
+- [x] Ensure each trusted checkout that reaches payment is visible in the protected dashboard as a pending order record.

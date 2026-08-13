@@ -1,0 +1,22 @@
+services:
+  - type: web
+    runtime: node
+    name: 91dab-store
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_DASHBOARD_PASSWORD
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: ADMIN_OTP_RECIPIENT_EMAIL
+        sync: false
+      - key: ADMIN_OTP_FROM_EMAIL
+        sync: false

@@ -1,0 +1,90 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786553544076,
+      "tag": "0000_tiresome_rage",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786560516174,
+      "tag": "0001_wandering_cobalt_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786562585971,
+      "tag": "0002_long_molly_hayes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786566863568,
+      "tag": "0003_dashing_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786608625617,
+      "tag": "0004_flawless_skaar",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1786610270320,
+      "tag": "0005_slim_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786610984958,
+      "tag": "0006_melodic_lethal_legion",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786612520282,
+      "tag": "0007_motionless_the_executioner",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1786612602306,
+      "tag": "0008_cheerful_victor_mancha",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1786613706927,
+      "tag": "0009_icy_tana_nile",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1786615211867,
+      "tag": "0010_stale_yellow_claw",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1786625014415,
+      "tag": "0011_lively_human_robot",
+      "breakpoints": true
+    }
+  ]
+}

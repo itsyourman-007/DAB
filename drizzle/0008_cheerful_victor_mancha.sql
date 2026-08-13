@@ -1,0 +1,1 @@
+ALTER TABLE `merchantOrders` ADD `inventoryDeductedAt` timestamp;
