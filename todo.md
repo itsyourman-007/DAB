@@ -127,7 +127,7 @@
 - [x] Make the merchant dashboard Overview calendar begin on Monday, continue through Sunday, and use January-to-December month ordering.
 - [x] Show sales-chart values only in a black hover tooltip over the relevant chart block, with no persistent in-chart value box.
 - [x] Add regression coverage and visually validate the revised dashboard overview at desktop and mobile widths.
-- [ ] Provide secure Resend automatic-email setup steps and synchronize the validated dashboard overview update to GitHub for Render deployment.
+- [x] Provide secure Resend automatic-email setup steps and synchronize the validated dashboard overview update to GitHub for Render deployment.
 - [x] Remove the Render-incompatible `corepack enable` build step from the Blueprint and deployment guide, then validate the new direct-pnpm command.
 - [x] Visually inspect the standalone dashboard at desktop width: Overview states Monday-to-Sunday sales grouping and Calendar renders Mon through Sun in order.
 - [x] Visually confirm the black sales tooltip appears only on an interactive chart bar at desktop and mobile widths, using isolated non-production test data.
