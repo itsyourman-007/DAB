@@ -155,7 +155,7 @@
 - [x] Inspect current merchant dashboard notification and live-update behavior to identify reliable real-item arrival signals.
 - [x] Add a user-enabled, muted-by-default notification chime and accessible sound toggle for genuinely new dashboard alerts or live updates.
 - [x] Add regression coverage and validate that the chime sounds only after a new received item and never on the initial dashboard load.
-- [ ] Synchronize the validated dashboard notification-sound update to GitHub for Render deployment.
+- [x] Synchronize the validated dashboard notification-sound update to GitHub for Render deployment.
 - [x] Visually verify the new Notification sound control appears in Dashboard Settings and defaults to off with a clear muted-by-default explanation.
 - [x] Validate in an isolated dashboard session that initial order hydration produces zero chimes, a newly received UPI-reference state produces one chime, and no test order is persisted.
 - [x] Validate in an isolated dashboard session that a trusted live-message event invokes one chime without persistence, then clear all transient message, notification, and order data.
