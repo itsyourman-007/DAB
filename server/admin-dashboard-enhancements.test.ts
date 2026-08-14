@@ -132,6 +132,17 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).not.toContain('>Buyer</button>');
   });
 
+  it("keeps Customer and shipment actions spaced in their existing table cell and marks a quote Replied after its response is submitted", () => {
+    expect(dashboardHtml).toContain('.table-action-group{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;min-width:132px;}');
+    expect(dashboardHtml).toContain('<div class="table-action-group">${fulfillmentAction(o)} ${paymentEmailAction(o)}</div>');
+    expect(dashboardHtml).toContain('<div class="table-action-group">${fulfillmentAction(o)} <button class="action-btn action-btn-customer"');
+    expect(dashboardHtml).toContain("replyStatus:raw.replyStatus==='replied'||replies.length?'replied':'awaiting_reply'");
+    expect(dashboardHtml).toContain("q.replyStatus==='replied'?'<span class=\"badge completed\">Replied</span>'");
+    expect(dashboardHtml).toContain("activeQuote.replyStatus='replied'");
+    expect(dashboardHtml).toContain("raw.replyStatus='replied'");
+    expect(dashboardHtml).toContain("writeShopStorage(SHOP_QUOTE_KEY,shopQuoteRecords)");
+  });
+
   it("requires an explicit confirmation and shows in-button loading plus server-confirmed success feedback for status updates", () => {
     expect(dashboardHtml).toContain('id="statusConfirmModal"');
     expect(dashboardHtml).toContain("function openStatusConfirmation(update)");

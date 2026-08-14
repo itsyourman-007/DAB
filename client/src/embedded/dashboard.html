@@ -307,6 +307,7 @@ tbody tr:last-child td{border-bottom:none;}
 .data-toolbar .toolbar-spacer{flex:1;}
 .table-card{overflow:hidden;}
 .table-card .table-wrap{padding-bottom:.8rem;}
+.table-action-group{display:flex;align-items:center;flex-wrap:wrap;gap:.45rem;min-width:132px;}
 .data-table td{vertical-align:middle;}
 .customer-cell{display:flex;align-items:center;gap:.65rem;min-width:190px;}
 .customer-cell .avatar{width:32px;height:32px;font-size:.65rem;}
@@ -1160,7 +1161,7 @@ function rebuildOrderViews(orderRows){
 function hydrateShopData(){
   rebuildOrderViews(serverOrderRecords.map(orderFromServerRecord));
   shopQuoteRecords = readShopStorage(SHOP_QUOTE_KEY);
-  quoteRequests = shopQuoteRecords.filter(raw=>raw.source==='91dab-shop' && raw.email).map((raw,index)=>({id:index+1,email:raw.email,phone:raw.phone||'',note:raw.note||'Clinic / bulk order quote requested.',time:raw.createdAt?formatDate(raw.createdAt):'Recently',created:raw.createdAt?new Date(raw.createdAt).getTime():0,replies:Array.isArray(raw.replies)?raw.replies:[]}));
+  quoteRequests = shopQuoteRecords.filter(raw=>raw.source==='91dab-shop' && raw.email).map((raw,index)=>{const replies=Array.isArray(raw.replies)?raw.replies:[];return {id:index+1,email:raw.email,phone:raw.phone||'',note:raw.note||'Clinic / bulk order quote requested.',time:raw.createdAt?formatDate(raw.createdAt):'Recently',created:raw.createdAt?new Date(raw.createdAt).getTime():0,replies,replyStatus:raw.replyStatus==='replied'||replies.length?'replied':'awaiting_reply'};});
   quoteSeq = quoteRequests.length + 1;
 }
 function formatLiveStoreSyncTime(value){
@@ -1579,7 +1580,7 @@ function renderDeliveryTracking(){
     const hay=[o.id,o.customer,o.plan,o.orderInfo?.email].join(' ').toLowerCase();
     return (!search||hay.includes(search))&&(filter==='all'||(o.fulfillmentStatus||'not_shipped')===filter);
   });
-  body.innerHTML=rows.map(o=>`<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'No buyer email'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="mono">${fmtINR(o.amount)}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td class="secondary-cell">${o.shippedAt?formatDate(new Date(o.shippedAt).getTime()):'—'}</td><td class="secondary-cell">${o.deliveredAt?formatDate(new Date(o.deliveredAt).getTime()):'—'}</td><td>${fulfillmentAction(o)} ${fulfillmentEmailAction(o)}</td></tr>`).join('')||`<tr><td colspan="8" class="empty-state">No paid orders are ready for delivery tracking.</td></tr>`;
+  body.innerHTML=rows.map(o=>`<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'No buyer email'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="mono">${fmtINR(o.amount)}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td class="secondary-cell">${o.shippedAt?formatDate(new Date(o.shippedAt).getTime()):'—'}</td><td class="secondary-cell">${o.deliveredAt?formatDate(new Date(o.deliveredAt).getTime()):'—'}</td><td><div class="table-action-group">${fulfillmentAction(o)} ${fulfillmentEmailAction(o)}</div></td></tr>`).join('')||`<tr><td colspan="8" class="empty-state">No paid orders are ready for delivery tracking.</td></tr>`;
   const summary=document.getElementById('deliveryTrackingSummary'); if(summary){
     const paid=orders.filter(o=>o.paymentStatus==='paid'); const awaiting=paid.filter(o=>(o.fulfillmentStatus||'not_shipped')==='not_shipped'); const shipped=paid.filter(o=>o.fulfillmentStatus==='shipped'); const delivered=paid.filter(o=>o.fulfillmentStatus==='delivered');
     summary.innerHTML=`<div class="card stat-card"><div class="stat-top"><span class="lbl">Awaiting shipment</span>${ICONS.cart}</div><div class="stat-num">${awaiting.length}</div><div class="stat-delta">Paid orders ready to dispatch</div></div><div class="card stat-card"><div class="stat-top"><span class="lbl">Shipped</span>${ICONS.clock}</div><div class="stat-num">${shipped.length}</div><div class="stat-delta">Buyer notification sent where email is available</div></div><div class="card stat-card"><div class="stat-top"><span class="lbl">Delivered</span>${ICONS.card}</div><div class="stat-num">${delivered.length}</div><div class="stat-delta">Completed delivery updates</div></div><div class="card stat-card"><div class="stat-top"><span class="lbl">Paid orders</span>${ICONS.cart}</div><div class="stat-num">${paid.length}</div><div class="stat-delta">Tracked through this delivery workflow</div></div>`;
@@ -1589,7 +1590,7 @@ function renderPayments(){
   const body=document.getElementById('paymentsBody'); if(!body) return;
   const search=(document.getElementById('paymentSearch')?.value||'').toLowerCase().trim(); const filter=document.getElementById('paymentStatusFilter')?.value||'all';
   const rows=[...orders].sort((a,b)=>(b.created||0)-(a.created||0)).filter(o=>{const s=o.paymentStatus||'pending'; const hay=[o.id,o.customer,o.plan,o.utr].join(' ').toLowerCase(); return (!search||hay.includes(search))&&(filter==='all'||s===filter);});
-  body.innerHTML=rows.map(o=>{const fullUtr=String(o.utr??'').trim()||'Not submitted';return `<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}</td><td class="mono">${fmtINR(o.amount)}</td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="utr-code" title="${escapeText(fullUtr)}">${escapeText(fullUtr)}</td><td class="secondary-cell">${formatDate(o.created)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td>${fulfillmentAction(o)} ${paymentEmailAction(o)}</td></tr>`;}).join('')||`<tr><td colspan="10" class="empty-state">No payments match these filters.</td></tr>`;
+  body.innerHTML=rows.map(o=>{const fullUtr=String(o.utr??'').trim()||'Not submitted';return `<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}</td><td class="mono">${fmtINR(o.amount)}</td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="utr-code" title="${escapeText(fullUtr)}">${escapeText(fullUtr)}</td><td class="secondary-cell">${formatDate(o.created)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${fulfillmentAction(o)} ${paymentEmailAction(o)}</div></td></tr>`;}).join('')||`<tr><td colspan="10" class="empty-state">No payments match these filters.</td></tr>`;
   renderPaymentSummary(); updateShopBadges();
 }
 function renderTransactions(){
@@ -1600,7 +1601,7 @@ function renderTransactions(){
     const hay=[o.id,o.customer,o.plan,o.utr,o.orderInfo?.email].join(' ').toLowerCase();
     return (!search||hay.includes(search)) && (filter==='all'||o.paymentStatus===filter);
   });
-  body.innerHTML=rows.map(o=>`<tr><td class="secondary-cell">${formatDate(o.created)}</td><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td>${fulfillmentAction(o)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button></td></tr>`).join('')||`<tr><td colspan="9" class="empty-state">No recorded transactions match these filters.</td></tr>`;
+  body.innerHTML=rows.map(o=>`<tr><td class="secondary-cell">${formatDate(o.created)}</td><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${fulfillmentAction(o)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button></div></td></tr>`).join('')||`<tr><td colspan="9" class="empty-state">No recorded transactions match these filters.</td></tr>`;
   const summary=document.getElementById('transactionSummary'); if(summary){
     const paid=orders.filter(o=>o.paymentStatus==='paid'); const submitted=orders.filter(o=>o.paymentStatus==='utr_submitted');
     const verifiedValue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0); const recordedValue=orders.reduce((sum,o)=>sum+(Number(o.amount)||0),0);
@@ -1725,7 +1726,7 @@ function renderQuotes(){
     <div class="quote-row">
       <div class="avatar" style="width:38px;height:38px;font-size:.68rem;">${initials(q.email.split('@')[0].replace(/[._]/g,' '))}</div>
       <div class="q-body">
-        <div class="q-top"><span class="q-email">${q.email}</span>${q.phone?`<span class="q-phone">· ${q.phone}</span>`:''}${q.replies.length?'<span class="badge completed">Replied</span>':'<span class="badge pending">Awaiting reply</span>'}</div>
+        <div class="q-top"><span class="q-email">${q.email}</span>${q.phone?`<span class="q-phone">· ${q.phone}</span>`:''}${q.replyStatus==='replied'?'<span class="badge completed">Replied</span>':'<span class="badge pending">Awaiting reply</span>'}</div>
         <div class="q-msg">${q.note}</div>
         <div class="q-time">${q.time}</div>
       </div>
@@ -1734,7 +1735,7 @@ function renderQuotes(){
       </div>
     </div>`).join('') || `<div style="color:var(--text-faint);font-size:.85rem;padding:1rem 0;">No clinic quote requests yet.</div>`;
   const badge = document.getElementById('quotesBadge');
-  const pending = quoteRequests.filter(q=>!q.replies.length).length;
+  const pending = quoteRequests.filter(q=>q.replyStatus!=='replied').length;
   badge.textContent = pending;
   badge.style.display = pending ? '' : 'none';
 }
@@ -1761,7 +1762,9 @@ function renderQuoteReplies(){
 function sendQuoteReply(){
   const val = document.getElementById('quoteReplyText').value.trim();
   if(!val || !activeQuote) return;
-  activeQuote.replies.push({text:val, time:'just now'});
+  const reply={text:val, time:'just now'}; activeQuote.replies.push(reply); activeQuote.replyStatus='replied';
+  const raw=shopQuoteRecords.find(item=>item.source==='91dab-shop'&&item.email===activeQuote.email&&item.note===activeQuote.note);
+  if(raw){ raw.replies=activeQuote.replies; raw.replyStatus='replied'; raw.repliedAt=new Date().toISOString(); writeShopStorage(SHOP_QUOTE_KEY,shopQuoteRecords); }
   document.getElementById('quoteReplyText').value = '';
   renderQuoteReplies();
   renderQuotes();

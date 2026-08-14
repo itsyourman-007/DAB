@@ -176,3 +176,4 @@
 - [x] Make protected Mark paid, Shipped, and Delivered dashboard actions visually clear buttons, retain server-side authorization, add regression coverage, validate, and synchronize the update to GitHub.
 - [x] Add confirmation dialogs, in-button loading spinners, and success feedback for protected Mark paid, Shipped, and Delivered updates; add regression coverage, validate, and synchronize the update to GitHub.
 - [x] Apply purple styling to dashboard status actions and render Customer actions as matching buttons without changing layout or protected behavior; add regression coverage, validate, and synchronize the update to GitHub.
+- [x] Repair action-cell spacing so Customer and shipment/status buttons do not overlap, and change quote status from Awaiting reply to Replied after a response; add regression coverage, validate, and synchronize the update to GitHub.
