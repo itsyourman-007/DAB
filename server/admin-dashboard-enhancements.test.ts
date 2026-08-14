@@ -57,6 +57,17 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain('id="screen-access"');
   });
 
+  it("keeps Security Settings behind a password re-confirmation gate and leaves the administrator email blank at /admin", () => {
+    expect(routerSource).toContain("verifySecuritySettingsPassword: publicProcedure");
+    expect(routerSource).toContain("Administrator password was not accepted");
+    expect(adminSource).toContain('const [username, setUsername] = useState("")');
+    expect(adminSource).toContain('autoComplete="off"');
+    expect(adminSource).toContain("onClick={openSecurityGate}");
+    expect(adminSource).toContain('id="security-gate-password"');
+    expect(adminSource).toContain("verifySecuritySettingsPassword.mutate({ password: securityGatePassword })");
+    expect(adminSource).toContain("setSettingsOpen(true)");
+  });
+
   it("renders the calendar immediately and shows real verified monthly subscriptions on each first of the month", () => {
     expect(dashboardHtml).toContain("if(screen==='calendar') requestAnimationFrame(renderCalendar)");
     expect(dashboardHtml).toContain("function subscriptionReminderEvents(key)");

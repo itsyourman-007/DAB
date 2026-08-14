@@ -48,6 +48,7 @@ async function startServer() {
   app.post("/api/scheduled/demo-order-cleanup", cleanupScheduledDemoOrders);
   app.post("/api/scheduled/monthly-subscription-summary", sendScheduledMonthlySubscriptionSummary);
   app.use("/api/trpc/admin.login", rateLimit({ name: "dashboard-login", windowMs: 15 * 60 * 1000, max: 5 }));
+  app.use("/api/trpc/admin.verifySecuritySettingsPassword", rateLimit({ name: "dashboard-security-confirm", windowMs: 15 * 60 * 1000, max: 5 }));
   app.use("/api/trpc/admin.requestPasswordChange", rateLimit({ name: "dashboard-otp", windowMs: 10 * 60 * 1000, max: 3 }));
   app.use("/api/trpc", requireTrustedMutationOrigin);
   // tRPC API

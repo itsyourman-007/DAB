@@ -8,9 +8,12 @@ import { toast } from "sonner";
 import dashboardHtml from "../embedded/dashboard.html?raw";
 
 export default function Admin() {
-  const [username, setUsername] = useState("dantaresearch@gmail.com");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [securityGateOpen, setSecurityGateOpen] = useState(false);
+  const [securityGatePassword, setSecurityGatePassword] = useState("");
+  const [securityGateError, setSecurityGateError] = useState<string | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -43,8 +46,22 @@ export default function Admin() {
   });
   const logout = trpc.admin.logout.useMutation({
     onSuccess: async () => {
+      setUsername("");
+      setPassword("");
+      setSettingsOpen(false);
+      setSecurityGateOpen(false);
+      setSecurityGatePassword("");
       await utils.admin.status.invalidate();
     },
+  });
+  const verifySecuritySettingsPassword = trpc.admin.verifySecuritySettingsPassword.useMutation({
+    onSuccess: () => {
+      setSecurityGatePassword("");
+      setSecurityGateError(null);
+      setSecurityGateOpen(false);
+      setSettingsOpen(true);
+    },
+    onError: (error) => setSecurityGateError(error.message || "The administrator password was not accepted."),
   });
   const requestPasswordChange = trpc.admin.requestPasswordChange.useMutation({
     onSuccess: ({ recipient }) => {
@@ -332,6 +349,16 @@ export default function Admin() {
     event.preventDefault();
     login.mutate({ username, password });
   };
+  const openSecurityGate = () => {
+    setSecurityGatePassword("");
+    setSecurityGateError(null);
+    setSecurityGateOpen(true);
+  };
+  const confirmSecuritySettingsAccess = (event: FormEvent) => {
+    event.preventDefault();
+    setSecurityGateError(null);
+    verifySecuritySettingsPassword.mutate({ password: securityGatePassword });
+  };
   const requestOtp = () => requestPasswordChange.mutate();
   const changePassword = (event: FormEvent) => {
     event.preventDefault();
@@ -360,7 +387,7 @@ export default function Admin() {
           <form className="mt-7 space-y-5" onSubmit={submit}>
             <div className="space-y-2">
               <Label htmlFor="admin-username" className="text-slate-200">Username / email</Label>
-              <Input id="admin-username" type="email" autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required className="border-white/15 bg-white/5 text-white placeholder:text-slate-500" placeholder="you@example.com" />
+              <Input id="admin-username" type="email" autoComplete="off" value={username} onChange={(event) => setUsername(event.target.value)} required className="border-white/15 bg-white/5 text-white placeholder:text-slate-500" placeholder="you@example.com" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="admin-password" className="text-slate-100">Password</Label>
@@ -398,7 +425,7 @@ export default function Admin() {
         </div>
         <div className="flex items-center gap-2">
           {status.data?.role === "admin" ? (
-            <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
+            <Button variant="outline" size="sm" onClick={openSecurityGate}>
               <ShieldCheck className="mr-2 h-4 w-4" />
               Security settings
             </Button>
@@ -435,6 +462,30 @@ export default function Admin() {
           className="h-full w-full border-0 bg-white"
         />
       </main>
+      {securityGateOpen ? (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="security-confirm-title">
+          <section className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-7">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">Protected action</p>
+                <h2 id="security-confirm-title" className="mt-1 text-xl font-semibold tracking-tight text-slate-950">Confirm administrator password</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">Re-enter the administrator password before opening Security Settings.</p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setSecurityGateOpen(false)} disabled={verifySecuritySettingsPassword.isPending}>Close</Button>
+            </div>
+            <form className="mt-6 space-y-4" onSubmit={confirmSecuritySettingsAccess}>
+              <div className="space-y-2">
+                <Label htmlFor="security-gate-password">Administrator password</Label>
+                <Input id="security-gate-password" type="password" autoComplete="current-password" value={securityGatePassword} onChange={(event) => setSecurityGatePassword(event.target.value)} placeholder="Enter password" required />
+              </div>
+              {securityGateError ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{securityGateError}</p> : null}
+              <Button className="w-full bg-violet-600 text-white hover:bg-violet-700" type="submit" disabled={verifySecuritySettingsPassword.isPending}>
+                {verifySecuritySettingsPassword.isPending ? "Confirming…" : "Open Security Settings"}
+              </Button>
+            </form>
+          </section>
+        </div>
+      ) : null}
       {settingsOpen ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="security-settings-title">
           <section className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl sm:p-7">

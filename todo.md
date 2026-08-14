@@ -171,3 +171,4 @@
 - [x] Connect the dashboard E-commerce sidebar view to trusted live orders and transaction records, add regression coverage, validate the rendering, and synchronize the update to GitHub.
 - [x] Repair landing-page top navigation and journal article links, audit interactive controls for dead actions, add regression coverage, validate responsive behavior, and synchronize the update to GitHub.
 - [x] Preserve and display complete UTR/reference values in the Payments dashboard and all payment CSV exports, add regression coverage, validate the correction, and synchronize the update to GitHub.
+- [x] Require password re-confirmation before Security Settings opens and remove any automatic email prefill from the /admin login screen, add regression coverage, validate the access flow, and synchronize the update to GitHub.

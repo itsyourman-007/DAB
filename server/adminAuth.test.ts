@@ -43,6 +43,20 @@ describe("admin password endpoint", () => {
     });
   });
 
+  it("requires the current administrator password again before Security Settings can open", async () => {
+    const password = process.env.ADMIN_DASHBOARD_PASSWORD;
+    expect(password).toBeTruthy();
+    const login = createContext();
+    await appRouter.createCaller(login.ctx).admin.login({ username: "dantaresearch@gmail.com", password: password! });
+    const session = login.setCookies.find((cookie) => cookie.name === ADMIN_SESSION_COOKIE);
+    const gate = createContext(`${ADMIN_SESSION_COOKIE}=${session?.value}`);
+
+    await expect(appRouter.createCaller(gate.ctx).admin.verifySecuritySettingsPassword({ password: "incorrect-password" })).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    await expect(appRouter.createCaller(gate.ctx).admin.verifySecuritySettingsPassword({ password: password! })).resolves.toEqual({ verified: true });
+  });
+
   it("clears the protected administrator session on logout", async () => {
     const session = createContext();
     await expect(appRouter.createCaller(session.ctx).admin.logout()).resolves.toEqual({ success: true });

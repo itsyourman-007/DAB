@@ -481,6 +481,17 @@ export const appRouter = router({
         await db.recordMerchantDashboardLogin({ email, role });
         return { authenticated: true, role, email } as const;
       }),
+    verifySecuritySettingsPassword: publicProcedure
+      .input(z.object({ password: z.string().min(1).max(256) }))
+      .mutation(async ({ ctx, input }) => {
+        if (!(await isAdminSession(ctx.req.headers.cookie))) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        }
+        if (!(await passwordMatchesAdminPassword(input.password))) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Administrator password was not accepted" });
+        }
+        return { verified: true } as const;
+      }),
     requestPasswordChange: publicProcedure.mutation(async ({ ctx }) => {
       if (!(await isAdminSession(ctx.req.headers.cookie))) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
