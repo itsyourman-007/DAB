@@ -24,4 +24,35 @@ describe("landing page phone layout", () => {
     expect(landingHtml).toContain(".article figure.inline-fig{float:none;max-width:100%");
     expect(landingHtml).toContain("max-height:calc(100svh - 1.5rem);overflow-y:auto");
   });
+
+  it("keeps top navigation and journal article controls as reliable in-page links", () => {
+    ["verticals", "dream", "recognition", "journal", "contact", "article-importance", "article-dental-aerosol"].forEach((id) => {
+      expect(landingHtml).toContain(`id="${id}"`);
+    });
+    expect(landingHtml).toContain('id="sectionNav"');
+    expect(landingHtml).toContain('id="navToggle"');
+    expect(landingHtml).toContain('href="#article-importance">Dentist</a>');
+    expect(landingHtml).toContain('class="post-card" href="#article-importance"');
+    expect(landingHtml).toContain('class="post-card" href="#article-dental-aerosol"');
+    expect(landingHtml).toContain("document.querySelectorAll('a[href^=\"#\"]')");
+    expect(landingHtml).toContain("target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })");
+    expect(landingHtml).toContain("history.replaceState(null, '', link.getAttribute('href'))");
+  });
+
+  it("provides an accessible phone menu instead of hiding the section links without a replacement", () => {
+    expect(landingHtml).toContain('.nav-toggle{display:none;');
+    expect(landingHtml).toContain('.nav-links.is-open{display:grid;gap:0;}');
+    expect(landingHtml).toContain("navToggle.setAttribute('aria-expanded', String(open))");
+    expect(landingHtml).toContain('aria-controls="sectionNav"');
+  });
+
+  it("does not leave unresolved in-page links or native landing-page buttons without behavior", () => {
+    const fragmentTargets = [...landingHtml.matchAll(/href="#([^"]+)"/g)].map((match) => match[1]);
+    expect(fragmentTargets.length).toBeGreaterThan(0);
+    fragmentTargets.forEach((target) => expect(landingHtml).toContain(`id="${target}"`));
+    expect(landingHtml).not.toContain('href="#"');
+    expect(landingHtml).toContain("navToggle.addEventListener('click'");
+    expect(landingHtml).toContain("cookieAccept.addEventListener('click'");
+    expect(landingHtml).toContain("cookieReject.addEventListener('click'");
+  });
 });
