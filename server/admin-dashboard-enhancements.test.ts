@@ -116,14 +116,20 @@ describe("protected merchant dashboard enhancements", () => {
   });
 
   it("renders Mark paid, Shipped, and Delivered as clear action buttons while retaining their protected message handlers", () => {
-    expect(dashboardHtml).toContain(".action-btn-paid{background:var(--accent);color:#fff;}");
-    expect(dashboardHtml).toContain(".action-btn-shipped{background:#a96312;color:#fff;}");
-    expect(dashboardHtml).toContain(".action-btn-delivered{background:#187a4b;color:#fff;}");
+    expect(dashboardHtml).toContain(".action-btn-paid{background:#7c3aed;color:#fff;}");
+    expect(dashboardHtml).toContain(".action-btn-shipped{background:#7c3aed;color:#fff;}");
+    expect(dashboardHtml).toContain(".action-btn-delivered{background:#7c3aed;color:#fff;}");
     expect(dashboardHtml).toContain('<button class="action-btn action-btn-paid" onclick="event.stopPropagation();requestMarkPaid');
     expect(dashboardHtml).toContain("action-btn-shipped':'action-btn-delivered");
     expect(dashboardHtml).toContain("requestFulfillment(");
     expect(dashboardHtml).toContain("91dab-mark-paid");
     expect(dashboardHtml).toContain("91dab-fulfillment-update");
+  });
+
+  it("uses matching compact purple buttons for Customer shortcuts without changing their existing detail action", () => {
+    expect(dashboardHtml).toContain(".action-btn-customer{min-height:28px;padding:.34rem .5rem;background:#7c3aed;color:#fff;}");
+    expect(dashboardHtml).toContain('<button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer');
+    expect(dashboardHtml).not.toContain('>Buyer</button>');
   });
 
   it("requires an explicit confirmation and shows in-button loading plus server-confirmed success feedback for status updates", () => {

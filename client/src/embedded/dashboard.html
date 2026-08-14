@@ -333,10 +333,11 @@ tbody tr:last-child td{border-bottom:none;}
 .action-btn:active{transform:scale(.97);}
 .action-btn:focus-visible{outline:3px solid rgba(79,70,229,.32);outline-offset:2px;}
 .action-btn:disabled{cursor:wait;opacity:.68;box-shadow:none;}
-.action-btn-paid{background:var(--accent);color:#fff;}
-.action-btn-shipped{background:#a96312;color:#fff;}
-.action-btn-delivered{background:#187a4b;color:#fff;}
+.action-btn-paid{background:#7c3aed;color:#fff;}
+.action-btn-shipped{background:#7c3aed;color:#fff;}
+.action-btn-delivered{background:#7c3aed;color:#fff;}
 .action-btn-secondary{background:var(--card);color:var(--accent);border-color:var(--accent);box-shadow:none;}
+.action-btn-customer{min-height:28px;padding:.34rem .5rem;background:#7c3aed;color:#fff;}
 .action-spinner{display:inline-block;width:12px;height:12px;margin-right:6px;border:2px solid rgba(255,255,255,.42);border-top-color:currentColor;border-radius:50%;vertical-align:-2px;animation:actionSpin .65s linear infinite;}
 @keyframes actionSpin{to{transform:rotate(360deg);}}
 .email-spinner{display:inline-block;width:10px;height:10px;margin-right:5px;border:1.75px solid rgba(79,70,229,.22);border-top-color:var(--accent);border-radius:50%;vertical-align:-1px;animation:emailSpin .65s linear infinite;}
@@ -1515,7 +1516,7 @@ function renderSubscriptions(){
   body.innerHTML=rows.map(o=>`<tr onclick="openCustomer('${encodeURIComponent((o.info.email||o.customer).toLowerCase())}')"><td><div class="customer-name">${o.info.name||o.customer}</div><div class="customer-email">${o.info.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${o.unit}</div></td><td class="secondary-cell">${o.planKey==='yearly'?(o.deliverySpan==='once'?'All at once':'1st of every month'):'1st of every month'}</td><td class="secondary-cell">${formatDate(o.start)}</td><td class="secondary-cell">${formatDate(o.next)}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus)}</td><td onclick="event.stopPropagation()">${o.paymentStatus==='paid'?deliveryCheckboxes(o):'<span class="secondary-cell">Awaiting payment</span>'}</td></tr>`).join('')||`<tr><td colspan="8" class="empty-state">No subscriptions match this status.</td></tr>`;
 }
 function paymentEmailAction(o){
-  if(dashboardRole!=='admin') return `<button class="action-link" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
+  if(dashboardRole!=='admin') return `<button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
   const state=paymentEmailStates[o.id];
   if(isStatusActionPending('payment',o.id)) return `<button class="action-btn action-btn-paid" disabled aria-live="polite"><span class="action-spinner" aria-hidden="true"></span>Marking paid…</button>`;
   if(state==='sending') return `<button class="action-btn action-btn-paid" disabled aria-live="polite"><span class="email-spinner" aria-hidden="true"></span>Sending…</button>`;
@@ -1524,7 +1525,7 @@ function paymentEmailAction(o){
   if(state==='failed') return `<button class="action-btn action-btn-secondary" onclick="event.stopPropagation();sendBuyerConfirmation('${o.id}')">Retry email</button>`;
   if(o.paymentStatus==='utr_submitted') return `<button class="action-btn action-btn-paid" onclick="event.stopPropagation();requestMarkPaid('${o.id}')">Mark paid</button>`;
   if(o.paymentStatus==='pending') return `<span class="email-result">Awaiting UPI reference</span>`;
-  return `<button class="action-link" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
+  return `<button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
 }
 function fulfillmentBadge(status){ const label=status==='delivered'?'Delivered':status==='shipped'?'Shipped':'Not shipped'; const color=status==='delivered'?'#1f7a57':status==='shipped'?'#b7791f':'var(--text-faint)'; return `<span style="font-size:.72rem;font-weight:700;color:${color};">${label}</span>`; }
 function fulfillmentAction(o){
@@ -1599,7 +1600,7 @@ function renderTransactions(){
     const hay=[o.id,o.customer,o.plan,o.utr,o.orderInfo?.email].join(' ').toLowerCase();
     return (!search||hay.includes(search)) && (filter==='all'||o.paymentStatus===filter);
   });
-  body.innerHTML=rows.map(o=>`<tr><td class="secondary-cell">${formatDate(o.created)}</td><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td>${fulfillmentAction(o)} <button class="action-link" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Buyer</button></td></tr>`).join('')||`<tr><td colspan="9" class="empty-state">No recorded transactions match these filters.</td></tr>`;
+  body.innerHTML=rows.map(o=>`<tr><td class="secondary-cell">${formatDate(o.created)}</td><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td>${fulfillmentAction(o)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button></td></tr>`).join('')||`<tr><td colspan="9" class="empty-state">No recorded transactions match these filters.</td></tr>`;
   const summary=document.getElementById('transactionSummary'); if(summary){
     const paid=orders.filter(o=>o.paymentStatus==='paid'); const submitted=orders.filter(o=>o.paymentStatus==='utr_submitted');
     const verifiedValue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0); const recordedValue=orders.reduce((sum,o)=>sum+(Number(o.amount)||0),0);
