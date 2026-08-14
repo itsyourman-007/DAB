@@ -218,8 +218,22 @@ describe("real-data-only dashboard integration", () => {
     expect(dashboardHtml).toContain('id="screen-transactions"');
     expect(dashboardHtml).toContain('id="transactionsBody"');
     expect(dashboardHtml).toContain('function renderTransactions()');
+    expect(dashboardHtml).toContain("renderActivity(); renderEcommerce(); renderEmails();");
     expect(dashboardHtml).toContain("renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); updateShopBadges(); refreshHomeStats();");
     expect(dashboardHtml).toContain('Only purchases recorded by the live 91DAB shop appear here.');
+  });
+
+  it("connects the E-commerce sidebar to protected checkout, payment, and fulfillment records", () => {
+    expect(dashboardHtml).toContain('data-screen="tracking"');
+    expect(dashboardHtml).toContain('id="ecommerceSummary"');
+    expect(dashboardHtml).toContain('id="ecommerceOrdersBody"');
+    expect(dashboardHtml).toContain('id="ecommerceFilter"');
+    expect(dashboardHtml).toContain('function renderEcommerce()');
+    expect(dashboardHtml).toContain('Trusted server-side store orders');
+    expect(dashboardHtml).toContain("filter==='fulfillment'?order.paymentStatus==='paid'&&order.fulfillmentStatus!=='delivered'");
+    expect(dashboardHtml).toContain("navigate('transactions')");
+    expect(dashboardHtml).toContain("navigate('delivery-tracking')");
+    expect(adminSource).toContain('type: "91dab-server-orders"');
   });
 
   it("keeps the public landing and every purchase screen within the compact phone layout", () => {

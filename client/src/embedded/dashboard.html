@@ -815,8 +815,10 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 
       <!-- ============ E-COMMERCE / LIVE ORDER TRACKING ============ -->
       <section class="screen" id="screen-tracking">
-        <div class="hint">Live status of every order currently in fulfilment. Updates automatically as orders progress.</div>
-        <div id="trackingList"></div>
+        <div class="panel-head" style="padding:0 0 1rem;"><div><h3>E-commerce orders &amp; transactions</h3><p>Protected 91DAB checkout records update automatically. Payment and fulfillment information stays in sync with Orders, Payments, Transaction history, and Delivery Tracking.</p></div><button class="form-btn" onclick="navigate('transactions')">Transaction history</button></div>
+        <div class="payment-summary" id="ecommerceSummary"></div>
+        <div class="data-toolbar"><input id="ecommerceSearch" placeholder="Search order, buyer, email or UTR…" oninput="renderEcommerce()"><select id="ecommerceFilter" onchange="renderEcommerce()"><option value="all">All checkout records</option><option value="utr_submitted">UPI reference submitted</option><option value="paid">Paid transactions</option><option value="fulfillment">Paid fulfillment queue</option></select><span class="toolbar-spacer"></span><span class="hint" style="margin:0;">Live protected store records</span></div>
+        <div class="card table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Order</th><th>Buyer</th><th>Plan / quantity</th><th>Amount</th><th>Payment</th><th>UPI reference</th><th>Fulfillment</th><th>Action</th></tr></thead><tbody id="ecommerceOrdersBody"></tbody></table></div></div>
       </section>
 
       <!-- ============ MARKETING OVERVIEW ============ -->
@@ -1193,7 +1195,7 @@ function renderInventoryProducts(){
 }
 function syncDashboardViews(){
   renderBars(); renderTopProducts(); renderOrders(document.getElementById('orderSearch')?.value || '');
-  renderActivity(); renderTracking(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); updateShopBadges(); refreshHomeStats();
+  renderActivity(); renderEcommerce(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); updateShopBadges(); refreshHomeStats();
 }
 syncNotificationSoundControl();
 window.addEventListener('storage', (event)=>{
@@ -1341,31 +1343,30 @@ function renderFullActivity(filter){
     </div>`).join('') || `<div style="color:var(--text-faint);font-size:.85rem;padding:1rem 0;">No activity in this category yet</div>`;
 }
 
-function renderTracking(){
-  const el = document.getElementById('trackingList');
-  if(!trackingOrders.length){
-    el.innerHTML = '<div class="card" style="padding:2rem;"><div class="empty-state">No qualifying orders are ready for tracking yet.</div></div>';
-    return;
-  }
-  el.innerHTML = trackingOrders.map(o=>{
-    let steps = '';
-    TRACK_STEPS.forEach((s,i)=>{
-      let cls = '';
-      if(i < o.step) cls = 'done';
-      else if(i === o.step) cls = 'now';
-      steps += `<div class="step ${cls}">
-        <div class="dot">${i<o.step?ICONS.check:i+1}</div>
-        <div class="lbl">${s}</div>
-      </div>`;
-    });
-    return `<div class="card track-card">
-      <div class="track-top">
-        <div><div class="track-id">${o.id}</div><div class="track-cust">${o.customer} · <span style="color:var(--accent-soft-text);font-weight:600;">${o.plan}</span></div></div>
-        <button class="form-btn" style="padding:.5rem .9rem;font-size:.78rem;" onclick="resendEmail('${o.id}','${o.customer}')">Resend confirmation email</button>
-      </div>
-      <div class="stepper">${steps}</div>
-    </div>`;
-  }).join('');
+function ecommercePaymentBadge(order){
+  if(order.paymentStatus==='paid') return '<span class="badge paid">Paid</span>';
+  if(order.paymentStatus==='utr_submitted') return '<span class="badge processing">UPI submitted</span>';
+  return '<span class="badge pending">Awaiting payment</span>';
+}
+function ecommerceFulfillmentBadge(order){
+  if(order.fulfillmentStatus==='delivered') return '<span class="badge paid">Delivered</span>';
+  if(order.fulfillmentStatus==='shipped') return '<span class="badge processing">Shipped</span>';
+  return order.paymentStatus==='paid'?'<span class="badge pending">Awaiting shipment</span>':'<span class="hint">—</span>';
+}
+function renderEcommerce(){
+  const summary=document.getElementById('ecommerceSummary'); const body=document.getElementById('ecommerceOrdersBody'); if(!summary||!body) return;
+  const paidOrders=orders.filter(order=>order.paymentStatus==='paid');
+  const utrSubmitted=orders.filter(order=>order.paymentStatus==='utr_submitted');
+  const fulfillmentQueue=paidOrders.filter(order=>order.fulfillmentStatus!=='delivered');
+  const paidRevenue=paidOrders.reduce((total,order)=>total+(Number(order.amount)||0),0);
+  summary.innerHTML=`<div class="summary-card"><span>Checkout records</span><b>${orders.length.toLocaleString('en-IN')}</b><small>Trusted server-side store orders</small></div><div class="summary-card"><span>Paid transactions</span><b>${paidOrders.length.toLocaleString('en-IN')}</b><small>${fmtINR(paidRevenue)} confirmed revenue</small></div><div class="summary-card"><span>Awaiting review</span><b>${utrSubmitted.length.toLocaleString('en-IN')}</b><small>UPI references submitted</small></div><div class="summary-card"><span>Fulfillment queue</span><b>${fulfillmentQueue.length.toLocaleString('en-IN')}</b><small>Paid orders not yet delivered</small></div>`;
+  const search=(document.getElementById('ecommerceSearch')?.value||'').trim().toLowerCase(); const filter=document.getElementById('ecommerceFilter')?.value||'all';
+  const visible=orders.filter(order=>{
+    const matchesFilter=filter==='all'||(filter==='fulfillment'?order.paymentStatus==='paid'&&order.fulfillmentStatus!=='delivered':order.paymentStatus===filter);
+    const matchesSearch=!search||[order.id,order.customer,order.plan,order.orderInfo?.email,order.utr].some(value=>String(value||'').toLowerCase().includes(search));
+    return matchesFilter&&matchesSearch;
+  });
+  body.innerHTML=visible.map(order=>{const safeOrderId=escapeText(order.id);const quantity=Math.max(1,Number(order.qty)||1);const action=order.paymentStatus==='utr_submitted'?`<button class="action-link" onclick="navigate('payments')">Review payment</button>`:order.paymentStatus==='paid'&&order.fulfillmentStatus!=='delivered'?`<button class="action-link" onclick="navigate('delivery-tracking')">Manage delivery</button>`:`<button class="action-link" onclick="navigate('transactions')">View transaction</button>`;return `<tr><td>${formatDate(order.created)}</td><td class="mono">${safeOrderId}</td><td><div class="customer-name">${escapeText(order.customer)}</div><div class="customer-email">${escapeText(order.orderInfo?.email||'No buyer email')}</div></td><td>${escapeText(order.plan)}<div style="font-size:.7rem;color:var(--text-faint);">${quantity.toLocaleString('en-IN')} unit${quantity===1?'':'s'}</div></td><td class="mono">${fmtINR(order.amount)}</td><td>${ecommercePaymentBadge(order)}</td><td class="mono">${escapeText(order.utr||'—')}</td><td>${ecommerceFulfillmentBadge(order)}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="9" class="empty-state">${orders.length?'No protected checkout records match this filter.':'No qualifying checkout records yet. Orders will appear here after the 91DAB shop creates a trusted checkout.'}</td></tr>`;
 }
 
 function resendEmail(orderId, customer){

@@ -168,3 +168,4 @@
 - [x] Confirm the new Inventory & Products sidebar entry renders in the standalone merchant dashboard without seeded inventory data.
 - [x] Resolve the standalone dashboard navigation error and visually confirm Inventory & Products opens with authoritative stock, scheduled-shipment, and allocation-history empty states.
 - [x] Verify in an isolated dashboard session that monthly, yearly-monthly, and yearly-all-at-once rows render 198-, 125-, and 1,500-unit DAB shipment allocations without persisting test orders.
+- [x] Connect the dashboard E-commerce sidebar view to trusted live orders and transaction records, add regression coverage, validate the rendering, and synchronize the update to GitHub.
