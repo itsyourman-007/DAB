@@ -313,7 +313,7 @@ tbody tr:last-child td{border-bottom:none;}
 .payment-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.1rem;}
 .payment-summary .stat-card{padding:1.1rem 1.2rem;}
 .payment-method{font-size:.75rem;color:var(--text-soft);font-family:'IBM Plex Mono',monospace;}
-.utr-code{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--text-soft);}
+.utr-code{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--text-soft);white-space:normal;overflow-wrap:anywhere;min-width:13ch;}
 .action-link{color:var(--accent);font-size:.76rem;font-weight:700;white-space:nowrap;border:0;background:transparent;padding:0;cursor:pointer;}
 .action-link:hover{text-decoration:underline;}
 .action-link:disabled{cursor:wait;opacity:.68;text-decoration:none;}
@@ -707,7 +707,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
       <section class="screen" id="screen-payments">
         <div class="panel-head" style="padding:0 0 1rem;"><div><h3>Payments &amp; UPI reconciliation</h3><p>Every checkout order records its amount, payment method, UTR, and verification state.</p></div><button class="form-btn" onclick="exportPaymentsCSV()">Export payments</button></div>
         <div class="payment-summary" id="paymentSummary"></div>
-        <div class="data-toolbar"><input id="paymentSearch" placeholder="Search order, customer, UTR…" oninput="renderPayments()"><select id="paymentStatusFilter" onchange="renderPayments()"><option value="all">All payment statuses</option><option value="paid">Paid</option><option value="utr_submitted">UTR submitted</option><option value="pending">Awaiting payment</option><option value="expired">Expired</option></select><span class="toolbar-spacer"></span><span class="hint" style="margin:0;">UPI references are masked in the list for safer review.</span></div>
+        <div class="data-toolbar"><input id="paymentSearch" placeholder="Search order, customer, UTR…" oninput="renderPayments()"><select id="paymentStatusFilter" onchange="renderPayments()"><option value="all">All payment statuses</option><option value="paid">Paid</option><option value="utr_submitted">UTR submitted</option><option value="pending">Awaiting payment</option><option value="expired">Expired</option></select><span class="toolbar-spacer"></span><span class="hint" style="margin:0;">Complete UTR/reference numbers are visible to authorized dashboard users and exported in full.</span></div>
         <div class="card table-card"><div class="table-wrap">
           <table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Plan</th><th>Amount</th><th>Method</th><th>UTR / reference</th><th>Created</th><th>Payment</th><th>Shipment</th><th></th></tr></thead><tbody id="paymentsBody"></tbody></table>
         </div></div>
@@ -1394,7 +1394,6 @@ function formatDate(value){
 }
 function paymentStatusText(status){ return ({paid:'Paid',utr_submitted:'UTR submitted',pending:'Awaiting payment',expired:'Expired'})[status] || 'Awaiting payment'; }
 function paymentBadge(status){ const cls = status==='paid'?'completed':status==='utr_submitted'?'processing':status==='expired'?'cancelled':'pending'; return `<span class="badge ${cls}">${paymentStatusText(status)}</span>`; }
-function maskedUtr(utr){ return utr ? (utr.length>6 ? `${utr.slice(0,3)}•••${utr.slice(-3)}` : utr) : 'Not submitted'; }
 function customerRecords(){
   const map = new Map();
   const ensure = (key, seed)=>{
@@ -1502,7 +1501,7 @@ function renderPayments(){
   const body=document.getElementById('paymentsBody'); if(!body) return;
   const search=(document.getElementById('paymentSearch')?.value||'').toLowerCase().trim(); const filter=document.getElementById('paymentStatusFilter')?.value||'all';
   const rows=[...orders].sort((a,b)=>(b.created||0)-(a.created||0)).filter(o=>{const s=o.paymentStatus||'pending'; const hay=[o.id,o.customer,o.plan,o.utr].join(' ').toLowerCase(); return (!search||hay.includes(search))&&(filter==='all'||s===filter);});
-  body.innerHTML=rows.map(o=>`<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}</td><td class="mono">${fmtINR(o.amount)}</td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="utr-code">${maskedUtr(o.utr)}</td><td class="secondary-cell">${formatDate(o.created)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td>${fulfillmentAction(o)} ${paymentEmailAction(o)}</td></tr>`).join('')||`<tr><td colspan="10" class="empty-state">No payments match these filters.</td></tr>`;
+  body.innerHTML=rows.map(o=>{const fullUtr=String(o.utr??'').trim()||'Not submitted';return `<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}</td><td class="mono">${fmtINR(o.amount)}</td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="utr-code" title="${escapeText(fullUtr)}">${escapeText(fullUtr)}</td><td class="secondary-cell">${formatDate(o.created)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td>${fulfillmentAction(o)} ${paymentEmailAction(o)}</td></tr>`;}).join('')||`<tr><td colspan="10" class="empty-state">No payments match these filters.</td></tr>`;
   renderPaymentSummary(); updateShopBadges();
 }
 function renderTransactions(){
@@ -1560,8 +1559,8 @@ function updateShopBadges(){
 }
 function csvCell(value){ return `"${String(value??'').replace(/"/g,'""')}"`; }
 function downloadCsv(filename,headers,rows){ const csv=[headers, ...rows].map(row=>row.map(csvCell).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
-const ORDER_CSV_HEADERS=['Order ID','Customer name','Customer email','Phone number','Delivery address','City','State','PIN code','Plan','Quantity','Amount INR','Payment method','UPI reference','Payment status','Order date'];
-function orderCsvRows(){ return orders.map(o=>{ const info=o.orderInfo||{}; return [o.id,o.customer,info.email||'',info.phone||'',info.address||'',info.city||'',info.state||'',info.pincode||'',o.plan,Number(o.qty)||1,o.amount,o.paymentMethod||'UPI',o.utr||'',o.paymentStatus||'pending',formatDate(o.created)]; }); }
+const ORDER_CSV_HEADERS=['Order ID','Customer name','Customer email','Phone number','Delivery address','City','State','PIN code','Plan','Quantity','Amount INR','Payment method','UPI UTR / reference (full)','Payment status','Order date'];
+function orderCsvRows(){ return orders.map(o=>{ const info=o.orderInfo||{}; return [o.id,o.customer,info.email||'',info.phone||'',info.address||'',info.city||'',info.state||'',info.pincode||'',o.plan,Number(o.qty)||1,o.amount,o.paymentMethod||'UPI',String(o.utr??''),o.paymentStatus||'pending',formatDate(o.created)]; }); }
 function exportCustomersCSV(){ downloadCsv('91dab-customers.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete customer and order details exported to CSV','success'); }
 function exportPaymentsCSV(){ downloadCsv('91dab-payments.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete payment details exported to CSV','success'); }
 document.getElementById('customerModal')?.addEventListener('click',(e)=>{if(e.target.id==='customerModal') closeCustomerModal();});

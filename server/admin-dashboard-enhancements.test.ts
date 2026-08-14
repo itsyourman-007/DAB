@@ -13,11 +13,20 @@ const adminAuthSource = readFileSync(resolve(process.cwd(), "server/adminAuth.ts
 
 describe("protected merchant dashboard enhancements", () => {
   it("exports complete real customer and payment fields in every order CSV", () => {
-    ["Order ID", "Customer name", "Phone number", "Delivery address", "Plan", "Amount INR", "UPI reference"].forEach((column) => {
+    ["Order ID", "Customer name", "Phone number", "Delivery address", "Plan", "Amount INR", "UPI UTR / reference (full)"].forEach((column) => {
       expect(dashboardHtml).toContain(column);
     });
     expect(dashboardHtml).toContain("function orderCsvRows()");
+    expect(dashboardHtml).toContain("String(o.utr??'')");
     expect(dashboardHtml).toContain("downloadCsv('91dab-orders.csv',ORDER_CSV_HEADERS,orderCsvRows())");
+  });
+
+  it("shows full safely escaped UTR values in Payments instead of masking the merchant reference", () => {
+    expect(dashboardHtml).toContain("Complete UTR/reference numbers are visible to authorized dashboard users and exported in full.");
+    expect(dashboardHtml).toContain("const fullUtr=String(o.utr??'').trim()||'Not submitted'");
+    expect(dashboardHtml).toContain('class="utr-code" title="${escapeText(fullUtr)}">${escapeText(fullUtr)}</td>');
+    expect(dashboardHtml).toContain('overflow-wrap:anywhere;min-width:13ch;');
+    expect(dashboardHtml).not.toContain("maskedUtr(o.utr)");
   });
 
   it("keeps persistent team and member creation, editing, and removal password-confirmed with selectable teams and salary fields", () => {
