@@ -160,6 +160,15 @@ export default function Admin() {
 
   useEffect(() => {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
+    const status = orders.isError ? "offline" : orders.data !== undefined ? "online" : "connecting";
+    iframe?.contentWindow?.postMessage({
+      type: "91dab-live-store-monitor",
+      monitor: { status, lastSyncedAt: orders.dataUpdatedAt || null },
+    }, window.location.origin);
+  }, [orders.data, orders.dataUpdatedAt, orders.isError]);
+
+  useEffect(() => {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
     iframe?.contentWindow?.postMessage({ type: "91dab-inventory", inventory: inventory.data ?? null }, window.location.origin);
   }, [inventory.data]);
 
@@ -450,6 +459,7 @@ export default function Admin() {
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-employee-accounts", accounts: employeeAccounts.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-login-audits", audits: loginAudits.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-dashboard-role", role: status.data?.role ?? null }, window.location.origin);
+              event.currentTarget.contentWindow?.postMessage({ type: "91dab-live-store-monitor", monitor: { status: orders.isError ? "offline" : orders.data !== undefined ? "online" : "connecting", lastSyncedAt: orders.dataUpdatedAt || null } }, window.location.origin);
               if (orders.data !== undefined) event.currentTarget.contentWindow?.postMessage({ type: "91dab-server-orders", orders: orders.data }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-inventory", inventory: inventory.data ?? null }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-subscription-deliveries", deliveries: subscriptionDeliveries.data ?? [] }, window.location.origin);

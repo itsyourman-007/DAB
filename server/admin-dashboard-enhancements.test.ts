@@ -29,6 +29,19 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).not.toContain("maskedUtr(o.utr)");
   });
 
+  it("shows a clickable Live Store Data monitor that distinguishes connected protected polling from an offline feed", () => {
+    expect(dashboardHtml).toContain('id="liveStoreMonitor"');
+    expect(dashboardHtml).toContain('onclick="showLiveStoreStatus()"');
+    expect(dashboardHtml).toContain('.live-store-monitor.online .live-dot');
+    expect(dashboardHtml).toContain('@keyframes liveStoreShine');
+    expect(dashboardHtml).toContain('.live-store-monitor.offline');
+    expect(dashboardHtml).toContain("function showLiveStoreStatus()");
+    expect(dashboardHtml).toContain("Live Store Data is live and continuously monitored");
+    expect(dashboardHtml).toContain("if(data.type==='91dab-live-store-monitor'){ setLiveStoreMonitor(data.monitor); }");
+    expect(adminSource).toContain('type: "91dab-live-store-monitor"');
+    expect(adminSource).toContain('orders.isError ? "offline" : orders.data !== undefined ? "online" : "connecting"');
+  });
+
   it("keeps persistent team and member creation, editing, and removal password-confirmed with selectable teams and salary fields", () => {
     expect(routerSource).toContain("updateTeamMember: publicProcedure");
     expect(routerSource).toContain("createTeam: publicProcedure");
