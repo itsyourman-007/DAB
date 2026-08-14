@@ -328,6 +328,15 @@ tbody tr:last-child td{border-bottom:none;}
 .action-link{color:var(--accent);font-size:.76rem;font-weight:700;white-space:nowrap;border:0;background:transparent;padding:0;cursor:pointer;}
 .action-link:hover{text-decoration:underline;}
 .action-link:disabled{cursor:wait;opacity:.68;text-decoration:none;}
+.action-btn{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:.42rem .68rem;border:1px solid transparent;border-radius:8px;font-size:.74rem;font-weight:800;line-height:1;letter-spacing:.01em;white-space:nowrap;cursor:pointer;transition:transform .14s ease,box-shadow .14s ease,filter .14s ease;box-shadow:0 2px 5px rgba(15,23,42,.14);}
+.action-btn:hover{filter:brightness(1.04);box-shadow:0 4px 10px rgba(15,23,42,.2);}
+.action-btn:active{transform:scale(.97);}
+.action-btn:focus-visible{outline:3px solid rgba(79,70,229,.32);outline-offset:2px;}
+.action-btn:disabled{cursor:wait;opacity:.68;box-shadow:none;}
+.action-btn-paid{background:var(--accent);color:#fff;}
+.action-btn-shipped{background:#a96312;color:#fff;}
+.action-btn-delivered{background:#187a4b;color:#fff;}
+.action-btn-secondary{background:var(--card);color:var(--accent);border-color:var(--accent);box-shadow:none;}
 .email-spinner{display:inline-block;width:10px;height:10px;margin-right:5px;border:1.75px solid rgba(79,70,229,.22);border-top-color:var(--accent);border-radius:50%;vertical-align:-1px;animation:emailSpin .65s linear infinite;}
 .email-result{font-size:.72rem;font-weight:700;white-space:nowrap;}.email-result.sent{color:var(--success);}.email-result.failed{color:var(--danger);}
 @keyframes emailSpin{to{transform:rotate(360deg);}}
@@ -1219,7 +1228,7 @@ function submitInventoryIncrease(event){ event.preventDefault();const button=eve
 function periodKeyForDate(value){ const date=new Date(value); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
 function deliveryPeriods(order){ const start=new Date(order.start||order.created||Date.now()); if(order.planKey==='monthly'){ const now=new Date(); const elapsed=Math.max(0,(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth())); return Array.from({length:elapsed+1},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); } return Array.from({length:12},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); }
 function isDeliveryRecorded(orderId,periodKey){ return subscriptionDeliveries.some(record=>record.orderId===orderId&&record.periodKey===periodKey); }
-function deliveryCheckboxes(order){ if(order.planKey==='yearly'&&order.deliverySpan==='once') return '<button class="action-link" onclick="navigate(\'inventory-products\')">Record all-at-once shipment</button>'; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${String(order.id).replace(/'/g,'\\\'')}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
+function deliveryCheckboxes(order){ if(order.planKey==='yearly'&&order.deliverySpan==='once') return '<button class="action-btn action-btn-shipped" onclick="navigate(\'inventory-products\')">Record all-at-once shipment</button>'; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${String(order.id).replace(/'/g,'\\\'')}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
 function setSubscriptionDelivery(orderId,periodKey,delivered){ if(!delivered){ showToast('Recorded shipments stay in history. Use a password-confirmed stock adjustment to correct inventory.','info'); return; } window.parent?.postMessage({type:'91dab-subscription-delivery-save',delivery:{orderId,periodKey,delivered:true}},'*'); }
 function allocationKeyForRow(order,periodKey){ if(order.planKey==='introductory') return `${order.id}:one-time`; if(order.planKey==='yearly'&&order.deliverySpan==='once') return `${order.id}:yearly-all-at-once`; return `${order.id}:${order.planKey==='monthly'?'monthly':'yearly-monthly'}:${periodKey}`; }
 function allocationUnitsForRow(order){ const quantity=Math.max(1,Number(order.qty)||1); if(order.planKey==='introductory') return quantity*12; if(order.planKey==='yearly'&&order.deliverySpan==='once') return quantity*1500; if(order.planKey==='monthly') return quantity*99; return quantity*125; }
@@ -1232,7 +1241,7 @@ function renderInventoryProducts(){
     if(order.planKey==='introductory'||(order.planKey==='yearly'&&order.deliverySpan==='once')) scheduled.push({order,periodKey:null});
     else if(order.planKey==='monthly'||order.planKey==='yearly') deliveryPeriods(order).forEach(periodKey=>scheduled.push({order,periodKey}));
   });
-  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-link" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-link" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td>${order.plan}<div style="font-size:.7rem;color:var(--text-faint);">${recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment')}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'Awaiting shipment'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
+  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-btn action-btn-shipped" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-btn action-btn-shipped" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td>${order.plan}<div style="font-size:.7rem;color:var(--text-faint);">${recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment')}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'Awaiting shipment'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
   allocationBody.innerHTML=inventoryAllocations.map(allocation=>`<tr><td>${formatDate(new Date(allocation.shippedAt).getTime())}</td><td class="mono">${allocation.orderId}</td><td>${allocation.allocationKind}</td><td>${allocation.periodKey||'—'}</td><td class="mono">${Number(allocation.units||0).toLocaleString('en-IN')}</td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">No DAB stock has been deducted yet. Record a shipment to create the first allocation.</td></tr>`;
 }
 function syncDashboardViews(){
@@ -1498,22 +1507,22 @@ function renderSubscriptions(){
 function paymentEmailAction(o){
   if(dashboardRole!=='admin') return `<button class="action-link" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
   const state=paymentEmailStates[o.id];
-  if(state==='sending') return `<button class="action-link" disabled aria-live="polite"><span class="email-spinner" aria-hidden="true"></span>Sending…</button>`;
+  if(state==='sending') return `<button class="action-btn action-btn-paid" disabled aria-live="polite"><span class="email-spinner" aria-hidden="true"></span>Sending…</button>`;
   if(state==='sent') return `<span class="email-result sent">Email sent ✓</span>`;
   if(state==='duplicate') return `<span class="email-result sent">Email already sent</span>`;
-  if(state==='failed') return `<button class="action-link" onclick="event.stopPropagation();sendBuyerConfirmation('${o.id}')">Retry email</button>`;
-  if(o.paymentStatus==='utr_submitted') return `<button class="action-link" onclick="event.stopPropagation();requestMarkPaid('${o.id}')">Mark paid</button>`;
+  if(state==='failed') return `<button class="action-btn action-btn-secondary" onclick="event.stopPropagation();sendBuyerConfirmation('${o.id}')">Retry email</button>`;
+  if(o.paymentStatus==='utr_submitted') return `<button class="action-btn action-btn-paid" onclick="event.stopPropagation();requestMarkPaid('${o.id}')">Mark paid</button>`;
   if(o.paymentStatus==='pending') return `<span class="email-result">Awaiting UPI reference</span>`;
   return `<button class="action-link" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
 }
 function fulfillmentBadge(status){ const label=status==='delivered'?'Delivered':status==='shipped'?'Shipped':'Not shipped'; const color=status==='delivered'?'#1f7a57':status==='shipped'?'#b7791f':'var(--text-faint)'; return `<span style="font-size:.72rem;font-weight:700;color:${color};">${label}</span>`; }
 function fulfillmentAction(o){
   if(o.paymentStatus!=='paid') return '<span class="secondary-cell">Awaiting payment</span>';
-  if(o.planKey==='monthly'||(o.planKey==='yearly'&&o.deliverySpan!=='once')) return '<button class="action-link" onclick="event.stopPropagation();navigate(\'inventory-products\')">Record scheduled shipment</button>';
+  if(o.planKey==='monthly'||(o.planKey==='yearly'&&o.deliverySpan!=='once')) return '<button class="action-btn action-btn-shipped" onclick="event.stopPropagation();navigate(\'inventory-products\')">Record scheduled shipment</button>';
   if(o.fulfillmentStatus==='delivered') return '<span class="secondary-cell">Complete</span>';
   const next=o.fulfillmentStatus==='shipped'?'delivered':'shipped';
   const label=next==='shipped'?'Mark shipped':'Mark delivered';
-  return `<button class="action-link" onclick="event.stopPropagation();requestFulfillment('${String(o.id).replace(/'/g,'\\\'')}','${next}')">${label}</button>`;
+  return `<button class="action-btn ${next==='shipped'?'action-btn-shipped':'action-btn-delivered'}" onclick="event.stopPropagation();requestFulfillment('${String(o.id).replace(/'/g,'\\\'')}','${next}')">${label}</button>`;
 }
 function requestFulfillment(orderId,status){ window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId,status}},'*'); }
 function fulfillmentEmailAction(o){

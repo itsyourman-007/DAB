@@ -173,3 +173,4 @@
 - [x] Preserve and display complete UTR/reference values in the Payments dashboard and all payment CSV exports, add regression coverage, validate the correction, and synchronize the update to GitHub.
 - [x] Require password re-confirmation before Security Settings opens and remove any automatic email prefill from the /admin login screen, add regression coverage, validate the access flow, and synchronize the update to GitHub.
 - [x] Add a clickable Live Store Data monitoring indicator that shines green while the protected order feed is connected and monitored, reports red/offline when unavailable, includes regression coverage, and is synchronized to GitHub.
+- [x] Make protected Mark paid, Shipped, and Delivered dashboard actions visually clear buttons, retain server-side authorization, add regression coverage, validate, and synchronize the update to GitHub.

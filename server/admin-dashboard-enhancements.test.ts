@@ -115,6 +115,17 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain(">Mark paid</button>");
   });
 
+  it("renders Mark paid, Shipped, and Delivered as clear action buttons while retaining their protected message handlers", () => {
+    expect(dashboardHtml).toContain(".action-btn-paid{background:var(--accent);color:#fff;}");
+    expect(dashboardHtml).toContain(".action-btn-shipped{background:#a96312;color:#fff;}");
+    expect(dashboardHtml).toContain(".action-btn-delivered{background:#187a4b;color:#fff;}");
+    expect(dashboardHtml).toContain('<button class="action-btn action-btn-paid" onclick="event.stopPropagation();requestMarkPaid');
+    expect(dashboardHtml).toContain("action-btn-shipped':'action-btn-delivered");
+    expect(dashboardHtml).toContain("requestFulfillment(");
+    expect(dashboardHtml).toContain("91dab-mark-paid");
+    expect(dashboardHtml).toContain("91dab-fulfillment-update");
+  });
+
   it("builds all dashboard-eligible order views from trusted server records and never from browser-local payment fallbacks", () => {
     expect(dashboardHtml).toContain("rebuildOrderViews(serverOrderRecords.map(orderFromServerRecord))");
     expect(dashboardHtml).not.toContain("qualifiesForDashboard");
