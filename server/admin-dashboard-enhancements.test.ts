@@ -126,6 +126,20 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("91dab-fulfillment-update");
   });
 
+  it("requires an explicit confirmation and shows in-button loading plus server-confirmed success feedback for status updates", () => {
+    expect(dashboardHtml).toContain('id="statusConfirmModal"');
+    expect(dashboardHtml).toContain("function openStatusConfirmation(update)");
+    expect(dashboardHtml).toContain("function confirmStatusUpdate()");
+    expect(dashboardHtml).toContain("openStatusConfirmation({kind:'payment',orderId:id})");
+    expect(dashboardHtml).toContain("openStatusConfirmation({kind:'fulfillment',orderId,status})");
+    expect(dashboardHtml).toContain("class=\"action-spinner\"");
+    expect(dashboardHtml).toContain("Marking paid…");
+    expect(dashboardHtml).toContain("Marking ${next}…");
+    expect(dashboardHtml).toContain("statusActionPending=null;");
+    expect(dashboardHtml).toContain("Payment marked paid successfully");
+    expect(dashboardHtml).toContain("Order marked ${status} successfully.");
+  });
+
   it("builds all dashboard-eligible order views from trusted server records and never from browser-local payment fallbacks", () => {
     expect(dashboardHtml).toContain("rebuildOrderViews(serverOrderRecords.map(orderFromServerRecord))");
     expect(dashboardHtml).not.toContain("qualifiesForDashboard");

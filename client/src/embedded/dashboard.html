@@ -337,6 +337,8 @@ tbody tr:last-child td{border-bottom:none;}
 .action-btn-shipped{background:#a96312;color:#fff;}
 .action-btn-delivered{background:#187a4b;color:#fff;}
 .action-btn-secondary{background:var(--card);color:var(--accent);border-color:var(--accent);box-shadow:none;}
+.action-spinner{display:inline-block;width:12px;height:12px;margin-right:6px;border:2px solid rgba(255,255,255,.42);border-top-color:currentColor;border-radius:50%;vertical-align:-2px;animation:actionSpin .65s linear infinite;}
+@keyframes actionSpin{to{transform:rotate(360deg);}}
 .email-spinner{display:inline-block;width:10px;height:10px;margin-right:5px;border:1.75px solid rgba(79,70,229,.22);border-top-color:var(--accent);border-radius:50%;vertical-align:-1px;animation:emailSpin .65s linear infinite;}
 .email-result{font-size:.72rem;font-weight:700;white-space:nowrap;}.email-result.sent{color:var(--success);}.email-result.failed{color:var(--danger);}
 @keyframes emailSpin{to{transform:rotate(360deg);}}
@@ -765,6 +767,14 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="modal-panel">
           <div class="modal-head"><h4 id="customerModalTitle">Customer details</h4><button class="icon-btn" style="width:32px;height:32px;" onclick="closeCustomerModal()"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
           <div class="modal-body"><div id="customerModalBody"></div><button class="form-btn" style="width:100%;margin-top:1rem;" onclick="closeCustomerModal();navigate('payments');">View payment history</button></div>
+        </div>
+      </div>
+
+      <!-- ============ STATUS UPDATE CONFIRMATION ============ -->
+      <div class="modal-overlay" id="statusConfirmModal" role="dialog" aria-modal="true" aria-labelledby="statusConfirmTitle" aria-describedby="statusConfirmDescription">
+        <div class="modal-panel">
+          <div class="modal-head"><h4 id="statusConfirmTitle">Confirm status update</h4><button class="icon-btn" style="width:32px;height:32px;" onclick="closeStatusConfirmation()" aria-label="Cancel status update"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+          <div class="modal-body"><p id="statusConfirmDescription" style="margin:0;color:var(--text-soft);line-height:1.55;"></p><div style="display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.35rem;"><button class="action-btn action-btn-secondary" type="button" onclick="closeStatusConfirmation()">Cancel</button><button class="action-btn action-btn-paid" id="statusConfirmButton" type="button" onclick="confirmStatusUpdate()">Confirm update</button></div></div>
         </div>
       </div>
 
@@ -1507,6 +1517,7 @@ function renderSubscriptions(){
 function paymentEmailAction(o){
   if(dashboardRole!=='admin') return `<button class="action-link" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
   const state=paymentEmailStates[o.id];
+  if(isStatusActionPending('payment',o.id)) return `<button class="action-btn action-btn-paid" disabled aria-live="polite"><span class="action-spinner" aria-hidden="true"></span>Marking paid…</button>`;
   if(state==='sending') return `<button class="action-btn action-btn-paid" disabled aria-live="polite"><span class="email-spinner" aria-hidden="true"></span>Sending…</button>`;
   if(state==='sent') return `<span class="email-result sent">Email sent ✓</span>`;
   if(state==='duplicate') return `<span class="email-result sent">Email already sent</span>`;
@@ -1522,9 +1533,32 @@ function fulfillmentAction(o){
   if(o.fulfillmentStatus==='delivered') return '<span class="secondary-cell">Complete</span>';
   const next=o.fulfillmentStatus==='shipped'?'delivered':'shipped';
   const label=next==='shipped'?'Mark shipped':'Mark delivered';
+  if(isStatusActionPending('fulfillment',o.id,next)) return `<button class="action-btn ${next==='shipped'?'action-btn-shipped':'action-btn-delivered'}" disabled aria-live="polite"><span class="action-spinner" aria-hidden="true"></span>Marking ${next}…</button>`;
   return `<button class="action-btn ${next==='shipped'?'action-btn-shipped':'action-btn-delivered'}" onclick="event.stopPropagation();requestFulfillment('${String(o.id).replace(/'/g,'\\\'')}','${next}')">${label}</button>`;
 }
-function requestFulfillment(orderId,status){ window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId,status}},'*'); }
+let pendingStatusUpdate=null;
+let statusActionPending=null;
+function statusUpdateKey(kind,orderId,status=''){ return `${kind}:${orderId}:${status}`; }
+function isStatusActionPending(kind,orderId,status=''){ return statusActionPending===statusUpdateKey(kind,orderId,status); }
+function closeStatusConfirmation(){ pendingStatusUpdate=null; document.getElementById('statusConfirmModal')?.classList.remove('open'); }
+function openStatusConfirmation(update){
+  const order=orders.find(item=>item.id===update.orderId); if(!order) return;
+  pendingStatusUpdate=update;
+  const isPayment=update.kind==='payment'; const actionLabel=isPayment?'mark this payment as paid':update.status==='shipped'?'mark this order as shipped':'mark this order as delivered';
+  const title=document.getElementById('statusConfirmTitle'); const description=document.getElementById('statusConfirmDescription'); const button=document.getElementById('statusConfirmButton');
+  if(title) title.textContent=`Confirm ${isPayment?'payment':'delivery'} update`;
+  if(description) description.textContent=`Are you sure you want to ${actionLabel} for ${order.id}? This protected update will be recorded immediately and may notify the buyer.`;
+  if(button){ button.textContent=isPayment?'Confirm Mark paid':update.status==='shipped'?'Confirm Shipped':'Confirm Delivered'; button.className=`action-btn ${isPayment?'action-btn-paid':update.status==='shipped'?'action-btn-shipped':'action-btn-delivered'}`; }
+  document.getElementById('statusConfirmModal')?.classList.add('open');
+}
+function confirmStatusUpdate(){
+  const update=pendingStatusUpdate; if(!update) return;
+  statusActionPending=statusUpdateKey(update.kind,update.orderId,update.status||'');
+  closeStatusConfirmation(); syncDashboardViews();
+  if(update.kind==='payment') window.parent?.postMessage({type:'91dab-mark-paid',orderId:update.orderId},'*');
+  else window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:update.orderId,status:update.status}},'*');
+}
+function requestFulfillment(orderId,status){ openStatusConfirmation({kind:'fulfillment',orderId,status}); }
 function fulfillmentEmailAction(o){
   const status=o.fulfillmentStatus;
   if(status!=='shipped'&&status!=='delivered') return '';
@@ -1595,7 +1629,7 @@ function updatePaymentStatus(id,newStatus){
 function requestMarkPaid(id){
   const order=orders.find(item=>item.id===id); if(!order) return;
   if(order.paymentStatus!=='utr_submitted'){ showToast('Only orders with a submitted UPI reference can be marked paid','info'); return; }
-  window.parent?.postMessage({type:'91dab-mark-paid',orderId:id},'*');
+  openStatusConfirmation({kind:'payment',orderId:id});
 }
 window.addEventListener('message',(event)=>{
   const result=event.data;
@@ -1617,6 +1651,7 @@ function orderCsvRows(){ return orders.map(o=>{ const info=o.orderInfo||{}; retu
 function exportCustomersCSV(){ downloadCsv('91dab-customers.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete customer and order details exported to CSV','success'); }
 function exportPaymentsCSV(){ downloadCsv('91dab-payments.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete payment details exported to CSV','success'); }
 document.getElementById('customerModal')?.addEventListener('click',(e)=>{if(e.target.id==='customerModal') closeCustomerModal();});
+document.getElementById('statusConfirmModal')?.addEventListener('click',(e)=>{if(e.target.id==='statusConfirmModal') closeStatusConfirmation();});
 
 function renderTraffic(){
   document.getElementById('trafficList').innerHTML = '<div class="empty-state">Traffic analytics are unavailable until a real analytics source is connected.</div>';
@@ -2037,12 +2072,14 @@ window.addEventListener('message',(event)=>{
     else { applyDemoCleanupStatus({enabled:false}); showToast(data.message||'Publish the website before activating automatic demo cleanup.','info'); }
   }
   if(data.type==='91dab-mark-paid-result'){
-    if(data.success){ const serverOrder=data.order; const index=serverOrderRecords.findIndex(item=>item.orderId===serverOrder.orderId); if(index>=0) serverOrderRecords[index]=serverOrder; else serverOrderRecords.unshift(serverOrder); if(data.inventory) applyInventory(data.inventory); hydrateShopData(); syncDashboardViews(); showToast(data.email==='sent'?'Payment marked paid and buyer email sent':data.email==='already-sent'?'Payment marked paid; buyer email was already sent':'Payment marked paid','success'); }
-    else showToast(data.message||'Payment could not be marked paid.','error');
+    statusActionPending=null;
+    if(data.success){ const serverOrder=data.order; const index=serverOrderRecords.findIndex(item=>item.orderId===serverOrder.orderId); if(index>=0) serverOrderRecords[index]=serverOrder; else serverOrderRecords.unshift(serverOrder); if(data.inventory) applyInventory(data.inventory); hydrateShopData(); syncDashboardViews(); showToast(data.email==='sent'?'Payment marked paid successfully and buyer email sent':data.email==='already-sent'?'Payment marked paid successfully; buyer email was already sent':'Payment marked paid successfully','success'); }
+    else { syncDashboardViews(); showToast(data.message||'Payment could not be marked paid.','error'); }
   }
   if(data.type==='91dab-fulfillment-result'){
-    if(data.success){ const serverOrder=data.order; fulfillmentEmailStates[`${serverOrder.orderId}:${serverOrder.fulfillmentStatus}`]=data.email; const index=serverOrderRecords.findIndex(item=>item.orderId===serverOrder.orderId); if(index>=0) serverOrderRecords[index]=serverOrder; else serverOrderRecords.unshift(serverOrder); if(data.inventory) applyInventory(data.inventory); hydrateShopData(); syncDashboardViews(); const status=serverOrder.fulfillmentStatus==='delivered'?'delivered':'shipped'; const emailNote=data.email==='sent'?' Buyer email sent.':data.email==='already-sent'?' Buyer email was already sent.':data.email==='not-requested'?' No buyer email was recorded.':data.email==='failed'?' The status was saved, but the buyer email could not be sent.':''; showToast(`Order marked ${status}.${emailNote}`,data.email==='failed'?'info':'success'); }
-    else showToast(data.message||'Shipment status could not be updated.','error');
+    statusActionPending=null;
+    if(data.success){ const serverOrder=data.order; fulfillmentEmailStates[`${serverOrder.orderId}:${serverOrder.fulfillmentStatus}`]=data.email; const index=serverOrderRecords.findIndex(item=>item.orderId===serverOrder.orderId); if(index>=0) serverOrderRecords[index]=serverOrder; else serverOrderRecords.unshift(serverOrder); if(data.inventory) applyInventory(data.inventory); hydrateShopData(); syncDashboardViews(); const status=serverOrder.fulfillmentStatus==='delivered'?'delivered':'shipped'; const emailNote=data.email==='sent'?' Buyer email sent.':data.email==='already-sent'?' Buyer email was already sent.':data.email==='not-requested'?' No buyer email was recorded.':data.email==='failed'?' The status was saved, but the buyer email could not be sent.':''; showToast(`Order marked ${status} successfully.${emailNote}`,data.email==='failed'?'info':'success'); }
+    else { syncDashboardViews(); showToast(data.message||'Shipment status could not be updated.','error'); }
   }
   if(data.type==='91dab-fulfillment-email-result'){
     if(data.success){ fulfillmentEmailStates[`${data.order.orderId}:${data.order.fulfillmentStatus}`]=data.email; renderDeliveryTracking(); showToast(data.email==='sent'?'Buyer delivery email sent':data.email==='already-sent'?'Buyer delivery email was already sent':data.email==='not-requested'?'No buyer email was recorded':'Buyer delivery email could not be sent',data.email==='failed'?'error':'success'); }
