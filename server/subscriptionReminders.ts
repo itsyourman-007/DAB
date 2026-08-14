@@ -22,7 +22,11 @@ export async function sendScheduledMonthlySubscriptionSummary(req: Request, res:
 
     try {
       const subscriptions = (await db.listMerchantOrders())
-        .filter((order) => order.planKey === "monthly" && order.paymentStatus === "paid")
+        .filter((order) => {
+          if (order.planKey !== "monthly" || order.paymentStatus !== "paid") return false;
+          const schedule = db.subscriptionScheduleMonths(order);
+          return schedule === null || schedule.includes(periodKey);
+        })
         .map((order) => ({
           orderId: order.orderId,
           buyerName: order.buyerName,

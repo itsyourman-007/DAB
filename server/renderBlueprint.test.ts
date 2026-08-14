@@ -17,6 +17,9 @@ describe("Render deployment configuration", () => {
     expect(bootstrap).toContain("Fresh database detected");
     expect(bootstrap).toContain("Applying additive schema updates");
     expect(bootstrap).toContain("merchantInventoryShipmentAllocations");
+    expect(bootstrap).toContain("merchantQuoteClientCustomizations");
+    expect(bootstrap).toContain("merchantClinicQuoteLeads");
+    expect(bootstrap).toContain("merchantOrders.deliveryStartMonth");
     expect(bootstrap).toContain("Database schema is incomplete");
     expect(bootstrap).toContain("process.exit(0)");
     expect(guide).toContain("MySQL-compatible database");

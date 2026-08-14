@@ -34,6 +34,8 @@ export default function Admin() {
   const inventory = trpc.admin.inventory.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const inventoryAllocations = trpc.admin.inventoryAllocations.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const subscriptionDeliveries = trpc.admin.subscriptionDeliveries.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
+  const quoteClientCustomizations = trpc.admin.quoteClientCustomizations.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
+  const quoteClientLeads = trpc.admin.quoteClientLeads.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false, refetchInterval: 10_000, refetchIntervalInBackground: false });
   const reminderStatus = trpc.admin.subscriptionReminderStatus.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const demoCleanupStatus = trpc.admin.demoOrderCleanupStatus.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
   const employeeAccounts = trpc.admin.listEmployeeAccounts.useQuery(undefined, { enabled: status.data?.role === "admin", retry: false });
@@ -105,6 +107,7 @@ export default function Admin() {
   const setInventory = trpc.admin.setInventory.useMutation();
   const increaseInventory = trpc.admin.increaseInventory.useMutation();
   const setSubscriptionDelivery = trpc.admin.setSubscriptionDelivery.useMutation();
+  const createQuoteClientCustomization = trpc.admin.createQuoteClientCustomization.useMutation();
   const activateSubscriptionReminders = trpc.admin.activateSubscriptionReminders.useMutation();
   const activateDemoOrderCleanup = trpc.admin.activateDemoOrderCleanup.useMutation();
   const submitSupportRequest = trpc.admin.submitSupportRequest.useMutation();
@@ -181,6 +184,16 @@ export default function Admin() {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
     iframe?.contentWindow?.postMessage({ type: "91dab-subscription-deliveries", deliveries: subscriptionDeliveries.data ?? [] }, window.location.origin);
   }, [subscriptionDeliveries.data]);
+
+  useEffect(() => {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
+    iframe?.contentWindow?.postMessage({ type: "91dab-quote-client-customizations", customizations: quoteClientCustomizations.data ?? [] }, window.location.origin);
+  }, [quoteClientCustomizations.data]);
+
+  useEffect(() => {
+    const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
+    iframe?.contentWindow?.postMessage({ type: "91dab-quote-client-leads", leads: quoteClientLeads.data ?? [] }, window.location.origin);
+  }, [quoteClientLeads.data]);
 
   useEffect(() => {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
@@ -325,6 +338,15 @@ export default function Admin() {
           onError: (error) => respond({ type: "91dab-subscription-delivery-result", success: false, message: error.message }),
         });
       }
+      if (event.data.type === "91dab-quote-client-customization-create") {
+        createQuoteClientCustomization.mutate(event.data.customization, {
+          onSuccess: async (customizations) => {
+            await utils.admin.quoteClientCustomizations.invalidate();
+            respond({ type: "91dab-quote-client-customization-result", success: true, customizations });
+          },
+          onError: (error) => respond({ type: "91dab-quote-client-customization-result", success: false, message: error.message }),
+        });
+      }
       if (event.data.type === "91dab-reminder-activate") {
         activateSubscriptionReminders.mutate(undefined, {
           onSuccess: async (reminder) => {
@@ -352,7 +374,7 @@ export default function Admin() {
     };
     window.addEventListener("message", handleEmbeddedDashboardAction);
     return () => window.removeEventListener("message", handleEmbeddedDashboardAction);
-  }, [createTeamMember, updateTeamMember, removeTeamMember, createTeam, updateTeam, removeTeam, createEmployeeAccount, resetEmployeePassword, removeEmployeeAccount, updateProfile, markOrderPaid, updateFulfillment, resendFulfillmentEmail, setInventory, increaseInventory, setSubscriptionDelivery, activateSubscriptionReminders, activateDemoOrderCleanup, submitSupportRequest, utils]);
+  }, [createTeamMember, updateTeamMember, removeTeamMember, createTeam, updateTeam, removeTeam, createEmployeeAccount, resetEmployeePassword, removeEmployeeAccount, updateProfile, markOrderPaid, updateFulfillment, resendFulfillmentEmail, setInventory, increaseInventory, setSubscriptionDelivery, createQuoteClientCustomization, activateSubscriptionReminders, activateDemoOrderCleanup, submitSupportRequest, utils]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -463,6 +485,8 @@ export default function Admin() {
               if (orders.data !== undefined) event.currentTarget.contentWindow?.postMessage({ type: "91dab-server-orders", orders: orders.data }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-inventory", inventory: inventory.data ?? null }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-subscription-deliveries", deliveries: subscriptionDeliveries.data ?? [] }, window.location.origin);
+              event.currentTarget.contentWindow?.postMessage({ type: "91dab-quote-client-customizations", customizations: quoteClientCustomizations.data ?? [] }, window.location.origin);
+              event.currentTarget.contentWindow?.postMessage({ type: "91dab-quote-client-leads", leads: quoteClientLeads.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-reminder-status", reminder: reminderStatus.data ?? null }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-demo-cleanup-status", cleanup: demoCleanupStatus.data ?? null }, window.location.origin);
             } catch {

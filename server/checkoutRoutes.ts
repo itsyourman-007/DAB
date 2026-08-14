@@ -15,7 +15,8 @@ const plans = {
 const createOrderInput = z.object({
   planKey: z.enum(["introductory", "monthly", "yearly"]),
   qty: z.number().int().min(1).max(1000),
-  deliverySpan: z.string().trim().max(64).nullable().optional(),
+  deliverySpan: z.enum(["monthly", "once"]).nullable().optional(),
+  deliveryStartMonth: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).nullable().optional(),
   orderInfo: z.object({
     name: z.string().trim().min(1).max(160),
     email: z.string().trim().email().max(320),
@@ -28,6 +29,21 @@ const createOrderInput = z.object({
 });
 
 const utrInput = z.object({ utr: z.string().trim().regex(/^[A-Za-z0-9-]{6,128}$/) });
+const clinicQuoteInput = z.object({
+  email: z.string().trim().email().max(320),
+  phone: z.string().trim().min(6).max(64).nullable().optional(),
+});
+
+function subscriptionScheduleForCheckout(input: z.infer<typeof createOrderInput>) {
+  if (input.planKey === "introductory") return { deliverySpan: null, deliveryStartMonth: null };
+  if (!input.deliveryStartMonth) throw new Error("Select the first delivery month for this subscription");
+  if (input.planKey === "monthly") {
+    if (input.deliverySpan && input.deliverySpan !== "monthly") throw new Error("Monthly subscriptions are delivered across monthly schedules");
+    return { deliverySpan: "monthly", deliveryStartMonth: input.deliveryStartMonth };
+  }
+  if (input.deliverySpan !== "monthly" && input.deliverySpan !== "once") throw new Error("Select whether the yearly order is delivered across 12 months or all at once");
+  return { deliverySpan: input.deliverySpan, deliveryStartMonth: input.deliveryStartMonth };
+}
 
 function merchantVpa() {
   const value = process.env.MERCHANT_VPA?.trim();
@@ -62,6 +78,21 @@ async function resolveOrderStatus(orderId: string) {
 }
 
 export function registerCheckoutRoutes(app: Express) {
+  app.post("/api/clinic-quote", async (req: Request, res: Response) => {
+    try {
+      const input = clinicQuoteInput.parse(req.body);
+      await db.saveMerchantClinicQuoteLead({
+        clientEmail: input.email.toLowerCase(),
+        clientPhone: input.phone?.trim() || null,
+        note: "Clinic / bulk order quote requested for 5,000+ pieces.",
+      });
+      return res.status(201).json({ ok: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) return res.status(400).json({ error: "Clinic quote details are incomplete or invalid" });
+      return res.status(500).json({ error: "Could not record the clinic quote" });
+    }
+  });
+
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
       const input = createOrderInput.parse(req.body);
@@ -69,6 +100,7 @@ export function registerCheckoutRoutes(app: Express) {
       const amount = plan.price * input.qty;
       const vpa = merchantVpa();
       const orderId = `91DAB-${nanoid(12).toUpperCase()}`;
+      const schedule = subscriptionScheduleForCheckout(input);
       const order = await db.createMerchantCheckoutOrder({
         orderId,
         buyerName: input.orderInfo.name,
@@ -83,7 +115,8 @@ export function registerCheckoutRoutes(app: Express) {
         quantity: input.qty,
         amount,
         paymentMethod: "UPI",
-        deliverySpan: input.deliverySpan ?? null,
+        deliverySpan: schedule.deliverySpan,
+        deliveryStartMonth: schedule.deliveryStartMonth,
         createdAt: new Date(),
       });
       if (!order) throw new Error("Checkout record could not be created");
@@ -92,6 +125,7 @@ export function registerCheckoutRoutes(app: Express) {
       return res.json({ orderId, amount, upiLink: intent, qrDataUrl, expiresAt: expiresAt(order) });
     } catch (error) {
       if (error instanceof z.ZodError) return res.status(400).json({ error: "Checkout details are incomplete or invalid" });
+      if (error instanceof Error && error.message.includes("delivery")) return res.status(400).json({ error: error.message });
       if (error instanceof Error && error.message === "MERCHANT_VPA is not configured in the deployment environment") {
         return res.status(503).json({ error: "Merchant payment configuration is incomplete. Please contact 91DAB before trying again." });
       }

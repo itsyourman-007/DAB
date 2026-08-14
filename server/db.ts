@@ -7,7 +7,9 @@ import {
   MerchantDashboardLoginAudit,
   MerchantEmployeeAccount,
   MerchantInventory,
+  MerchantClinicQuoteLead,
   MerchantOrder,
+  MerchantQuoteClientCustomization,
   MerchantTeam,
   MerchantTeamMember,
   adminSecurity,
@@ -16,8 +18,10 @@ import {
   merchantDashboardLoginAudits,
   merchantEmployeeAccounts,
   merchantInventory,
+  merchantClinicQuoteLeads,
   merchantInventoryShipmentAllocations,
   merchantOrders,
+  merchantQuoteClientCustomizations,
   merchantTeamMembers,
   merchantTeams,
   paymentConfirmationEmails,
@@ -372,10 +376,11 @@ export type ShopPaymentSubmission = {
   paymentMethod: string;
   utr: string;
   deliverySpan: string | null;
+  deliveryStartMonth: string | null;
   createdAt: Date;
 };
 
-export type MerchantCheckoutOrderInput = Omit<ShopPaymentSubmission, "utr"> & { utr?: string | null };
+export type MerchantCheckoutOrderInput = Omit<ShopPaymentSubmission, "utr" | "deliveryStartMonth"> & { utr?: string | null; deliveryStartMonth?: string | null };
 
 export async function createMerchantCheckoutOrder(input: MerchantCheckoutOrderInput): Promise<MerchantOrder | undefined> {
   const db = await getDb();
@@ -383,6 +388,7 @@ export async function createMerchantCheckoutOrder(input: MerchantCheckoutOrderIn
   await db.insert(merchantOrders).values({
     ...input,
     utr: input.utr ?? null,
+    deliveryStartMonth: input.deliveryStartMonth ?? null,
     paymentStatus: "pending",
     source: "91dab-shop",
   });
@@ -426,6 +432,27 @@ export async function listMerchantOrders(): Promise<MerchantOrder[]> {
   const db = await getDb();
   if (!db) throw new Error("Database is required for merchant order records");
   return db.select().from(merchantOrders).where(eq(merchantOrders.source, "91dab-shop")).orderBy(desc(merchantOrders.createdAt));
+}
+
+const PERIOD_KEY_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+function monthOffset(periodKey: string, offset: number) {
+  const [year, month] = periodKey.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + offset, 1));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Returns the buyer-selected 12-month fulfillment horizon for new recurring orders; legacy orders remain unrestricted. */
+export function subscriptionScheduleMonths(order: Pick<MerchantOrder, "planKey" | "deliverySpan" | "deliveryStartMonth">) {
+  if ((order.planKey !== "monthly" && order.planKey !== "yearly") || (order.planKey === "yearly" && order.deliverySpan === "once")) return [];
+  if (!order.deliveryStartMonth || !PERIOD_KEY_PATTERN.test(order.deliveryStartMonth)) return null;
+  return Array.from({ length: 12 }, (_, index) => monthOffset(order.deliveryStartMonth!, index));
+}
+
+export function isScheduledSubscriptionPeriod(order: Pick<MerchantOrder, "planKey" | "deliverySpan" | "deliveryStartMonth">, periodKey: string) {
+  if (!PERIOD_KEY_PATTERN.test(periodKey)) return false;
+  const schedule = subscriptionScheduleMonths(order);
+  return schedule === null ? true : schedule.includes(periodKey);
 }
 
 const EXPLICIT_DEMO_ORDER_NAME = /\bdemo\b/i;
@@ -547,6 +574,7 @@ export async function recordSubscriptionShipment(input: { orderId: string; perio
     const order = (await tx.select().from(merchantOrders).where(and(eq(merchantOrders.orderId, input.orderId), eq(merchantOrders.source, "91dab-shop"))).limit(1))[0];
     if (!order || order.paymentStatus !== "paid" || (order.planKey !== "monthly" && order.planKey !== "yearly")) throw new Error("Only paid monthly or yearly subscriptions can be shipped on a schedule");
     if (order.planKey === "yearly" && order.deliverySpan === "once") throw new Error("This yearly subscription is fulfilled all at once and should use its shipment action");
+    if (!isScheduledSubscriptionPeriod(order, input.periodKey)) throw new Error("This shipment month is outside the buyer-selected 12-month delivery schedule");
     const shipment = await applyShipmentAllocation(tx, order, { periodKey: input.periodKey });
     const deliveryKey = `${input.orderId}:${input.periodKey}`;
     try { await tx.insert(subscriptionDeliveryRecords).values({ deliveryKey, orderId: input.orderId, periodKey: input.periodKey }); }
@@ -578,6 +606,44 @@ export async function setSubscriptionDelivery(input: { orderId: string; periodKe
     await db.delete(subscriptionDeliveryRecords).where(eq(subscriptionDeliveryRecords.deliveryKey, deliveryKey));
   }
   return listSubscriptionDeliveryRecords();
+}
+
+export type MerchantQuoteClientCustomizationInput = {
+  clientName: string;
+  clientEmail: string | null;
+  clientPhone: string | null;
+  unitsPurchased: number;
+  revenueInr: number;
+  notes: string | null;
+};
+
+export async function listMerchantQuoteClientCustomizations(): Promise<MerchantQuoteClientCustomization[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for quote client customisations");
+  return db.select().from(merchantQuoteClientCustomizations).orderBy(desc(merchantQuoteClientCustomizations.createdAt));
+}
+
+export async function createMerchantQuoteClientCustomization(input: MerchantQuoteClientCustomizationInput): Promise<MerchantQuoteClientCustomization> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for quote client customisations");
+  const result = await db.insert(merchantQuoteClientCustomizations).values(input);
+  const id = Number(result[0].insertId);
+  const saved = (await db.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, id)).limit(1))[0];
+  if (!saved) throw new Error("Quote client customisation could not be saved");
+  return saved;
+}
+
+export async function listMerchantClinicQuoteLeads(): Promise<MerchantClinicQuoteLead[]> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for clinic quote leads");
+  return db.select().from(merchantClinicQuoteLeads).orderBy(desc(merchantClinicQuoteLeads.updatedAt));
+}
+
+export async function saveMerchantClinicQuoteLead(input: { clientEmail: string; clientPhone: string | null; note: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for clinic quote leads");
+  await db.insert(merchantClinicQuoteLeads).values(input).onDuplicateKeyUpdate({ set: { clientPhone: input.clientPhone, note: input.note } });
+  return listMerchantClinicQuoteLeads();
 }
 
 export async function getSubscriptionReminderSettings() {

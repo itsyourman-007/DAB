@@ -13,6 +13,7 @@ describeWithCheckoutDependencies("checkout to dashboard record lifecycle", () =>
   let baseUrl = "";
   let database: Awaited<ReturnType<typeof getDb>>;
   let orderId: string | undefined;
+  let subscriptionOrderId: string | undefined;
 
   beforeAll(async () => {
     database = await getDb();
@@ -32,6 +33,7 @@ describeWithCheckoutDependencies("checkout to dashboard record lifecycle", () =>
 
   afterAll(async () => {
     if (orderId && database) await database.delete(merchantOrders).where(eq(merchantOrders.orderId, orderId));
+    if (subscriptionOrderId && database) await database.delete(merchantOrders).where(eq(merchantOrders.orderId, subscriptionOrderId));
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   });
 
@@ -60,5 +62,33 @@ describeWithCheckoutDependencies("checkout to dashboard record lifecycle", () =>
     expect(payload.qrDataUrl.startsWith("data:image/png;base64,")).toBe(true);
     expect((await getMerchantOrder(orderId))?.paymentStatus).toBe("pending");
     expect((await listMerchantOrders()).some((order) => order.orderId === orderId && order.paymentStatus === "pending")).toBe(true);
+  }, 15_000);
+
+  it("persists the buyer-selected first month for a recurring subscription", async () => {
+    const response = await fetch(`${baseUrl}/api/orders`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        planKey: "yearly",
+        qty: 1,
+        deliverySpan: "monthly",
+        deliveryStartMonth: "2026-10",
+        orderInfo: {
+          name: `Subscription Schedule Test ${Date.now()}`,
+          email: "subscription-schedule@example.test",
+          phone: "9000000000",
+          address: "1 Test Street",
+          city: "Bengaluru",
+          state: "Karnataka",
+          pincode: "560001",
+        },
+      }),
+    });
+    const payload = await response.json() as { orderId: string };
+    subscriptionOrderId = payload.orderId;
+    const saved = await getMerchantOrder(subscriptionOrderId);
+
+    expect(response.status).toBe(200);
+    expect(saved).toMatchObject({ planKey: "yearly", deliverySpan: "monthly", deliveryStartMonth: "2026-10" });
   }, 15_000);
 });

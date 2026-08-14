@@ -219,7 +219,7 @@ describe("real-data-only dashboard integration", () => {
     expect(dashboardHtml).toContain('id="transactionsBody"');
     expect(dashboardHtml).toContain('function renderTransactions()');
     expect(dashboardHtml).toContain("renderActivity(); renderEcommerce(); renderEmails();");
-    expect(dashboardHtml).toContain("renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); updateShopBadges(); refreshHomeStats();");
+    expect(dashboardHtml).toContain("renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); renderCustomisation(); updateShopBadges(); refreshHomeStats();");
     expect(dashboardHtml).toContain('Only purchases recorded by the live 91DAB shop appear here.');
   });
 

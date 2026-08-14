@@ -926,7 +926,13 @@ function upsertShopOrder(record){
   function currentPlan(){ return PLANS[currentPlanKey]; }
   function cartPlan(){ return PLANS[cart.planKey] || PLANS.introductory; }
 
-  let deliverySpan = 'monthly'; // only meaningful for the yearly plan: 'monthly' | 'once'
+  function periodKeyFromDate(date){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
+  function nextMonthKey(periodKey, offset){ const [year,month]=periodKey.split('-').map(Number); const date=new Date(year,month-1+offset,1); return periodKeyFromDate(date); }
+  function monthLabel(periodKey){ const [year,month]=periodKey.split('-').map(Number); return new Date(year,month-1,1).toLocaleDateString('en-IN',{month:'short',year:'numeric'}); }
+  function subscriptionMonths(){ return Array.from({length:12},(_,index)=>nextMonthKey(deliveryStartMonth,index)); }
+  function selectableStartMonths(){ const first=new Date(); first.setDate(1); return Array.from({length:12},(_,index)=>periodKeyFromDate(new Date(first.getFullYear(),first.getMonth()+index,1))); }
+  let deliverySpan = 'monthly'; // monthly delivery or a yearly all-at-once order
+  let deliveryStartMonth = selectableStartMonths()[0];
 
   function scrollToPlans(){
     showScreen('home');
@@ -940,6 +946,7 @@ function upsertShopOrder(record){
     currentPlanKey = planKey;
     productQty = 1;
     deliverySpan = 'monthly';
+    deliveryStartMonth = selectableStartMonths()[0];
     renderProductScreen();
     showScreen('product');
   }
@@ -947,21 +954,15 @@ function upsertShopOrder(record){
   function renderDeliveryOption(){
     const el = document.getElementById('deliveryOption');
     if(!el) return;
-    if(currentPlanKey === 'monthly'){
+    if(currentPlanKey === 'monthly' || currentPlanKey === 'yearly'){
+      const months=selectableStartMonths();
       el.innerHTML = `
         <div class="delivery-block">
-          <span class="d-label">Delivery schedule</span>
-          <div class="delivery-note">Delivered on the 1st of every month.</div>
-        </div>`;
-    } else if(currentPlanKey === 'yearly'){
-      el.innerHTML = `
-        <div class="delivery-block">
-          <span class="d-label">Delivery span</span>
-          <select id="deliverySpanSelect" onchange="onDeliverySpanChange()">
-            <option value="monthly" ${deliverySpan === 'monthly' ? 'selected' : ''}>Deliver across 12 months</option>
-            <option value="once" ${deliverySpan === 'once' ? 'selected' : ''}>Deliver all at once</option>
-          </select>
+          <span class="d-label">First delivery month</span>
+          <select id="deliveryStartMonthSelect" onchange="onDeliveryStartMonthChange()">${months.map(period=>`<option value="${period}" ${deliveryStartMonth===period?'selected':''}>${monthLabel(period)}</option>`).join('')}</select>
+          ${currentPlanKey === 'yearly' ? `<span class="d-label" style="margin-top:.75rem;display:block;">Yearly delivery preference</span><select id="deliverySpanSelect" onchange="onDeliverySpanChange()"><option value="monthly" ${deliverySpan === 'monthly' ? 'selected' : ''}>Across 12 monthly deliveries</option><option value="once" ${deliverySpan === 'once' ? 'selected' : ''}>Together in one delivery</option></select>` : ''}
           <div class="delivery-note" id="deliverySpanNote"></div>
+          <div id="deliveryYearPreview" style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem;"></div>
         </div>`;
       updateDeliverySpanNote();
     } else {
@@ -975,12 +976,21 @@ function upsertShopOrder(record){
     updateDeliverySpanNote();
   }
 
+  function onDeliveryStartMonthChange(){
+    const sel = document.getElementById('deliveryStartMonthSelect');
+    if(sel) deliveryStartMonth = sel.value;
+    updateDeliverySpanNote();
+  }
+
   function updateDeliverySpanNote(){
     const note = document.getElementById('deliverySpanNote');
+    const preview = document.getElementById('deliveryYearPreview');
     if(!note) return;
-    note.textContent = deliverySpan === 'monthly'
-      ? 'Delivered on the 1st of every month.'
-      : 'Your full 1,500-piece order ships together in one delivery.';
+    const isTogether=currentPlanKey==='yearly'&&deliverySpan==='once';
+    note.textContent = isTogether
+      ? `Your full yearly order ships together in ${monthLabel(deliveryStartMonth)}.`
+      : `Your 12-month delivery schedule starts in ${monthLabel(deliveryStartMonth)}.`;
+    if(preview) preview.innerHTML = subscriptionMonths().map((period,index)=>`<span style="font-size:.7rem;padding:.24rem .42rem;border-radius:999px;background:${isTogether&&index===0?'var(--ink)':'var(--cream)'};color:${isTogether&&index===0?'#fff':'var(--ink)'};border:1px solid var(--line);">${monthLabel(period)}${isTogether&&index===0?' · ships together':''}</span>`).join('');
   }
 
   function renderProductScreen(){
@@ -1079,7 +1089,8 @@ function upsertShopOrder(record){
     }
     cart.planKey = currentPlanKey;
     cart.qty += productQty;
-    cart.deliverySpan = currentPlanKey === 'yearly' ? deliverySpan : null;
+    cart.deliverySpan = currentPlanKey === 'introductory' ? null : deliverySpan;
+    cart.deliveryStartMonth = currentPlanKey === 'introductory' ? null : deliveryStartMonth;
     updateCartBadge();
     showToast('Added ' + productQty + ' ' + (productQty === 1 ? currentPlan().unitSingular : currentPlan().unitLabel.toLowerCase()) + ' to cart');
   }
@@ -1087,14 +1098,16 @@ function upsertShopOrder(record){
   function buyNow(){
     cart.planKey = currentPlanKey;
     cart.qty = productQty;
-    cart.deliverySpan = currentPlanKey === 'yearly' ? deliverySpan : null;
+    cart.deliverySpan = currentPlanKey === 'introductory' ? null : deliverySpan;
+    cart.deliveryStartMonth = currentPlanKey === 'introductory' ? null : deliveryStartMonth;
     updateCartBadge();
     showScreen('checkout');
   }
 
   function deliveryScheduleLabel(){
-    if(cart.planKey === 'monthly') return 'Delivered on the 1st of every month';
-    if(cart.planKey === 'yearly') return cart.deliverySpan === 'once' ? 'Delivered all at once' : 'Delivered on the 1st of every month';
+    const start=cart.deliveryStartMonth ? monthLabel(cart.deliveryStartMonth) : null;
+    if(cart.planKey === 'monthly') return start ? `12 monthly deliveries from ${start}` : 'Delivered on the 1st of every month';
+    if(cart.planKey === 'yearly') return cart.deliverySpan === 'once' ? `All yearly units together in ${start||'the selected month'}` : `Across 12 monthly deliveries from ${start||'the selected month'}`;
     return null;
   }
 
@@ -1200,6 +1213,7 @@ function upsertShopOrder(record){
           amount: cartTotal(),
           total: cartTotal(),
           deliverySpan: cart.deliverySpan,
+          deliveryStartMonth: cart.deliveryStartMonth || null,
           orderInfo
         })
       });
@@ -1212,7 +1226,7 @@ function upsertShopOrder(record){
       upsertShopOrder({
         orderId:data.orderId, planKey:cart.planKey, qty:cart.qty, unitPrice:cartPlan().price,
         amount:typeof data.amount === 'number' ? data.amount : cartTotal(), total:cartTotal(),
-        deliverySpan:cart.deliverySpan || null, orderInfo:{...orderInfo}, paymentMethod:'UPI',
+        deliverySpan:cart.deliverySpan || null, deliveryStartMonth:cart.deliveryStartMonth || null, orderInfo:{...orderInfo}, paymentMethod:'UPI',
         paymentStatus:'pending', status:'pending', createdAt:new Date().toISOString()
       });
       if(typeof data.amount === 'number' && data.amount !== cartTotal()){

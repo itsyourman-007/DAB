@@ -9,6 +9,7 @@ const routerSource = readFileSync(resolve(process.cwd(), "server/routers.ts"), "
 const reminderSource = readFileSync(resolve(process.cwd(), "server/subscriptionReminders.ts"), "utf8");
 const checkoutSource = readFileSync(resolve(process.cwd(), "server/checkoutRoutes.ts"), "utf8");
 const schemaSource = readFileSync(resolve(process.cwd(), "drizzle/schema.ts"), "utf8");
+const dbSource = readFileSync(resolve(process.cwd(), "server/db.ts"), "utf8");
 const adminAuthSource = readFileSync(resolve(process.cwd(), "server/adminAuth.ts"), "utf8");
 
 describe("protected merchant dashboard enhancements", () => {
@@ -207,6 +208,43 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("id=\"screen-inventory-products\"");
     expect(dashboardHtml).toContain("function renderInventoryProducts()");
     expect(dashboardHtml).toContain("91dab-subscription-delivery-save");
+  });
+
+  it("records buyer-selected monthly and yearly delivery schedules and displays their full twelve-month horizon", () => {
+    expect(schemaSource).toContain('deliveryStartMonth: varchar("deliveryStartMonth", { length: 7 })');
+    expect(checkoutSource).toContain("function subscriptionScheduleForCheckout(input");
+    expect(checkoutSource).toContain("deliveryStartMonth: schedule.deliveryStartMonth");
+    expect(shopHtml).toContain('id="deliveryStartMonthSelect"');
+    expect(shopHtml).toContain("Yearly delivery preference");
+    expect(shopHtml).toContain('id="deliveryYearPreview"');
+    expect(shopHtml).toContain("deliveryStartMonth: cart.deliveryStartMonth || null");
+    expect(dashboardHtml).toContain("deliveryStartMonth: /^\\d{4}-(0[1-9]|1[0-2])$/.test(raw.deliveryStartMonth||'')");
+    expect(dashboardHtml).toContain("Buyer delivery selection");
+    expect(dashboardHtml).toContain("const selectedStart=/^\\d{4}-(0[1-9]|1[0-2])$/.test(order.deliveryStartMonth||'')");
+    expect(dbSource).toContain("function isScheduledSubscriptionPeriod");
+    expect(dbSource).toContain("outside the buyer-selected 12-month delivery schedule");
+  });
+
+  it("provides a durable administrator-only Customisation workflow for quote clients and includes recorded units and revenue in Home metrics", () => {
+    expect(schemaSource).toContain('mysqlTable("merchantQuoteClientCustomizations"');
+    expect(schemaSource).toContain('mysqlTable("merchantClinicQuoteLeads"');
+    expect(routerSource).toContain("quoteClientCustomizations: publicProcedure");
+    expect(routerSource).toContain("quoteClientLeads: publicProcedure");
+    expect(routerSource).toContain("createQuoteClientCustomization: publicProcedure");
+    expect(checkoutSource).toContain('app.post("/api/clinic-quote"');
+    expect(readFileSync(resolve(process.cwd(), "server/_core/index.ts"), "utf8")).toContain('app.use("/api/clinic-quote", requireTrustedMutationOrigin)');
+    expect(adminSource).toContain("trpc.admin.quoteClientCustomizations.useQuery");
+    expect(adminSource).toContain("trpc.admin.quoteClientLeads.useQuery");
+    expect(adminSource).toContain("91dab-quote-client-customization-create");
+    expect(dashboardHtml).toContain('data-screen="customisation"');
+    expect(dashboardHtml).toContain('id="screen-customisation"');
+    expect(dashboardHtml).toContain('id="customisationQuoteClient"');
+    expect(dashboardHtml).toContain("Add new client");
+    expect(dashboardHtml).toContain("function startNewCustomisationClient()");
+    expect(dashboardHtml).toContain("function saveQuoteClientCustomization(event)");
+    expect(dashboardHtml).toContain("customRevenue=quoteClientCustomizations.reduce");
+    expect(dashboardHtml).toContain("customUnits=quoteClientCustomizations.reduce");
+    expect(dashboardHtml).toContain("Custom client sale saved and Home metrics updated");
   });
 
   it("tracks paid-order fulfillment through the server and exposes shipment controls to authorized dashboard sessions", () => {

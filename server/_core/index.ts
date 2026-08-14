@@ -44,6 +44,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   app.use("/api/orders", rateLimit({ name: "checkout", windowMs: 10 * 60 * 1000, max: 30 }));
   app.use("/api/orders", requireTrustedMutationOrigin);
+  app.use("/api/clinic-quote", rateLimit({ name: "clinic-quote", windowMs: 10 * 60 * 1000, max: 20 }));
+  app.use("/api/clinic-quote", requireTrustedMutationOrigin);
   registerCheckoutRoutes(app);
   app.post("/api/scheduled/demo-order-cleanup", cleanupScheduledDemoOrders);
   app.post("/api/scheduled/monthly-subscription-summary", sendScheduledMonthlySubscriptionSummary);

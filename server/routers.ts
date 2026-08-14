@@ -267,6 +267,37 @@ export const appRouter = router({
       }
       return db.listSubscriptionDeliveryRecords();
     }),
+    quoteClientCustomizations: publicProcedure.query(async ({ ctx }) => {
+      if (!(await isDashboardSession(ctx.req.headers.cookie))) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Dashboard access is required" });
+      }
+      return db.listMerchantQuoteClientCustomizations();
+    }),
+    quoteClientLeads: publicProcedure.query(async ({ ctx }) => {
+      if (!(await isDashboardSession(ctx.req.headers.cookie))) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Dashboard access is required" });
+      }
+      return db.listMerchantClinicQuoteLeads();
+    }),
+    createQuoteClientCustomization: publicProcedure
+      .input(z.object({
+        clientName: z.string().trim().min(2).max(160),
+        clientEmail: z.string().trim().email().max(320).nullable(),
+        clientPhone: z.string().trim().min(6).max(64).nullable(),
+        unitsPurchased: z.number().int().min(1).max(10_000_000),
+        revenueInr: z.number().int().min(0).max(1_000_000_000),
+        notes: z.string().trim().max(1000).nullable(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!(await isAdminSession(ctx.req.headers.cookie))) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        }
+        await db.createMerchantQuoteClientCustomization({
+          ...input,
+          clientEmail: input.clientEmail?.toLowerCase() ?? null,
+        });
+        return db.listMerchantQuoteClientCustomizations();
+      }),
     setSubscriptionDelivery: publicProcedure
       .input(z.object({ orderId: z.string().trim().min(4).max(128), periodKey: z.string().regex(/^\d{4}-\d{2}$/), delivered: z.boolean() }))
       .mutation(async ({ ctx, input }) => {

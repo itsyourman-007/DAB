@@ -26,7 +26,7 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
   let database: Awaited<ReturnType<typeof getDb>>;
   let originalInventory: typeof merchantInventory.$inferSelect | undefined;
 
-  async function createPaidOrder(input: { orderId: string; planKey: "introductory" | "monthly" | "yearly"; quantity: number; deliverySpan: string | null }) {
+  async function createPaidOrder(input: { orderId: string; planKey: "introductory" | "monthly" | "yearly"; quantity: number; deliverySpan: string | null; deliveryStartMonth?: string | null }) {
     await createMerchantCheckoutOrder({
       orderId: input.orderId,
       buyerName: "Inventory Test Buyer",
@@ -42,6 +42,7 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
       amount: 100,
       paymentMethod: "UPI",
       deliverySpan: input.deliverySpan,
+      deliveryStartMonth: input.deliveryStartMonth ?? null,
       createdAt: new Date(),
     });
     await submitMerchantOrderUtr(input.orderId, `UTR-${input.orderId.slice(-12)}`);
@@ -78,8 +79,8 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
   it("keeps paid orders in stock until shipment and deducts each one-time, monthly, and yearly allocation exactly once", async () => {
     await setMerchantInventoryUnits(5_000);
     await createPaidOrder({ orderId: orderIds.introductory, planKey: "introductory", quantity: 3, deliverySpan: null });
-    await createPaidOrder({ orderId: orderIds.monthly, planKey: "monthly", quantity: 2, deliverySpan: null });
-    await createPaidOrder({ orderId: orderIds.yearlyMonthly, planKey: "yearly", quantity: 1, deliverySpan: "monthly" });
+    await createPaidOrder({ orderId: orderIds.monthly, planKey: "monthly", quantity: 2, deliverySpan: "monthly", deliveryStartMonth: "2026-08" });
+    await createPaidOrder({ orderId: orderIds.yearlyMonthly, planKey: "yearly", quantity: 1, deliverySpan: "monthly", deliveryStartMonth: "2026-08" });
     await createPaidOrder({ orderId: orderIds.yearlyOnce, planKey: "yearly", quantity: 1, deliverySpan: "once" });
 
     expect((await getMerchantInventory()).availableUnits).toBe(5_000);
@@ -94,6 +95,9 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
     expect((await getMerchantInventory()).availableUnits).toBe(4_766);
 
     await recordSubscriptionShipment({ orderId: orderIds.yearlyMonthly, periodKey: "2026-08" });
+    expect((await getMerchantInventory()).availableUnits).toBe(4_641);
+
+    await expect(recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2027-08" })).rejects.toThrow("outside the buyer-selected 12-month delivery schedule");
     expect((await getMerchantInventory()).availableUnits).toBe(4_641);
 
     await updateMerchantOrderFulfillment({ orderId: orderIds.yearlyOnce, status: "shipped" });

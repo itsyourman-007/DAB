@@ -501,6 +501,10 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <svg class="n-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"/><path d="M7 7V4h10v3M8 12h8M8 16h5"/></svg>
           <span class="n-text">Inventory &amp; Products</span>
         </button></li>
+        <li data-admin-only><button class="nav-item" data-screen="customisation">
+          <svg class="n-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg>
+          <span class="n-text">Customisation</span>
+        </button></li>
         <li>
           <button class="nav-item expanded" id="analyticsToggle">
             <svg class="n-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -628,21 +632,21 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <div class="stat-num" id="statRevenue">₹0</div>
-            <div class="stat-delta"><b id="statRevenueDelta">0</b> verified payments</div>
+            <div class="stat-delta"><b id="statRevenueDelta">0</b> confirmed sales</div>
           </div>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Active Customers</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div class="stat-num" id="statUsers">0</div>
-            <div class="stat-delta"><b id="statUsersDelta">0</b> active customers</div>
+            <div class="stat-delta"><b id="statUsersDelta">0</b> active customers · <b id="statCustomUnits">0</b> custom DAB units</div>
           </div>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Orders</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
             </div>
             <div class="stat-num" id="statOrders">0</div>
-            <div class="stat-delta"><b id="statOrdersDelta">0</b> qualifying orders</div>
+            <div class="stat-delta"><b id="statOrdersDelta">0</b> qualifying orders and custom sales</div>
           </div>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Conversion Rate</span>
@@ -722,7 +726,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="panel-head" style="padding:0 0 1rem;"><div><h3>Subscription plans</h3><p>Plan catalog and active delivery commitments mirrored from shop.html.</p></div><button class="form-btn" onclick="showToast('Plan settings are managed in shop.html','info')">View storefront plans</button></div>
         <div class="plan-card-grid" id="planCards"></div>
         <div class="card table-card"><div class="panel-head"><div><h3>Customer subscriptions</h3><p>Recurring customers, delivery schedules, and renewal dates.</p></div><select class="status-select" id="subscriptionFilter" onchange="renderSubscriptions()"><option value="all">All statuses</option><option value="active">Active</option><option value="pending">Pending payment</option><option value="paused">Paused</option></select></div><div class="table-wrap">
-          <table class="data-table"><thead><tr><th>Customer</th><th>Plan</th><th>Delivery schedule</th><th>Started</th><th>Next delivery</th><th>Amount</th><th>Status</th><th>Delivery</th></tr></thead><tbody id="subscriptionsBody"></tbody></table>
+          <table class="data-table"><thead><tr><th>Customer</th><th>Plan</th><th>Buyer delivery selection</th><th>First month</th><th>12-month window</th><th>Amount</th><th>Status</th><th>Delivery schedule</th></tr></thead><tbody id="subscriptionsBody"></tbody></table>
         </div></div>
       </section>
 
@@ -762,6 +766,27 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="payment-summary" id="inventoryProductSummary"></div>
         <div class="card table-card" style="margin-bottom:1rem;"><div class="panel-head"><div><h3>Scheduled DAB shipments</h3><p>Record a shipment to deduct the exact DAB allocation once. Monthly subscriptions deduct 99 pieces per subscription unit; yearly monthly plans deduct 125 pieces per subscription unit each month; yearly all-at-once plans deduct 1,500 pieces per subscription unit.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Order</th><th>Buyer</th><th>Fulfillment</th><th>DAB units</th><th>Shipment</th><th>Action</th></tr></thead><tbody id="inventoryShipmentBody"></tbody></table></div></div>
         <div class="card table-card"><div class="panel-head"><div><h3>Stock movement history</h3><p>Every shipment deduction is immutable and keyed to its order and delivery allocation.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Shipped</th><th>Order</th><th>Allocation</th><th>Period</th><th>DAB units</th></tr></thead><tbody id="inventoryAllocationBody"></tbody></table></div></div>
+      </section>
+
+      <!-- ============ QUOTE CLIENT CUSTOMISATION ============ -->
+      <section class="screen" id="screen-customisation" data-admin-only>
+        <div class="panel-head" style="padding:0 0 1rem;"><div><h3>Quote client customisation</h3><p>Record confirmed clinic or bulk sales after agreeing the customised order. Units and revenue are added to the protected Home totals.</p></div></div>
+        <div class="payment-summary" id="customisationSummary"></div>
+        <div class="grid-2">
+          <div class="card" style="padding:1.35rem;">
+            <h3 style="margin-bottom:.3rem;">Record a custom sale</h3><p class="hint" style="margin-top:0;">Select a quote client or add a client manually. Only administrator-recorded values are saved.</p>
+            <form id="customisationForm" onsubmit="saveQuoteClientCustomization(event)">
+              <div class="field"><label for="customisationQuoteClient">Quote client</label><select id="customisationQuoteClient" onchange="applySelectedQuoteClient()"><option value="">Add a new client</option></select><button class="form-btn" type="button" style="margin-top:.55rem;background:var(--card-tint);color:var(--text);" onclick="startNewCustomisationClient()">Add new client</button></div>
+              <div class="field"><label for="customisationClientName">Client / clinic name</label><input id="customisationClientName" maxlength="160" required placeholder="Clinic or contact name"></div>
+              <div class="field"><label for="customisationClientEmail">Client email <span style="font-weight:400;text-transform:none;">(optional)</span></label><input id="customisationClientEmail" type="email" maxlength="320" placeholder="clinic@example.com"></div>
+              <div class="field"><label for="customisationClientPhone">Phone <span style="font-weight:400;text-transform:none;">(optional)</span></label><input id="customisationClientPhone" maxlength="64" placeholder="Mobile or clinic phone"></div>
+              <div class="field-row"><div class="field"><label for="customisationUnits">DAB units purchased</label><input id="customisationUnits" type="number" min="1" max="10000000" step="1" required inputmode="numeric"></div><div class="field"><label for="customisationRevenue">Amount paid (₹)</label><input id="customisationRevenue" type="number" min="0" max="1000000000" step="1" required inputmode="numeric"></div></div>
+              <div class="field"><label for="customisationNotes">Custom order notes <span style="font-weight:400;text-transform:none;">(optional)</span></label><textarea id="customisationNotes" maxlength="1000" placeholder="Delivery, configuration, or commercial notes"></textarea></div>
+              <button class="form-btn" type="submit">Save custom sale</button>
+            </form>
+          </div>
+          <div class="card table-card"><div class="panel-head"><div><h3>Recorded custom clients</h3><p>Confirmed entries only.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Client</th><th>Units</th><th>Revenue</th><th>Recorded</th></tr></thead><tbody id="customisationClientsBody"></tbody></table></div></div>
+        </div>
       </section>
 
       <!-- ============ CUSTOMER DETAIL MODAL ============ -->
@@ -1065,6 +1090,8 @@ let liveStoreMonitor = { status:'connecting', lastSyncedAt:null };
 let inventoryState = null;
 let inventoryAllocations = [];
 let subscriptionDeliveries = [];
+let quoteClientCustomizations = [];
+let quoteClientLeads = [];
 
 const PRODUCTS = [];
 let orders = [];
@@ -1140,6 +1167,7 @@ function orderFromServerRecord(raw){
     amount: Number(raw.amount || 0),
     qty: Number(raw.quantity || 1),
     deliverySpan: raw.deliverySpan || null,
+    deliveryStartMonth: /^\d{4}-(0[1-9]|1[0-2])$/.test(raw.deliveryStartMonth||'') ? raw.deliveryStartMonth : null,
     status: dashboardStatusFromPayment(paymentStatus),
     paymentStatus,
     fulfillmentStatus: raw.fulfillmentStatus || 'not_shipped',
@@ -1238,9 +1266,15 @@ function openInventoryIncreaseDialog(){
 }
 function submitInventoryIncrease(event){ event.preventDefault();const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Adding…';window.parent?.postMessage({type:'91dab-inventory-increase',inventory:{units:Number(document.getElementById('inventoryIncreaseUnits').value),password:document.getElementById('inventoryIncreasePassword').value}},'*'); }
 function periodKeyForDate(value){ const date=new Date(value); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
-function deliveryPeriods(order){ const start=new Date(order.start||order.created||Date.now()); if(order.planKey==='monthly'){ const now=new Date(); const elapsed=Math.max(0,(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth())); return Array.from({length:elapsed+1},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); } return Array.from({length:12},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); }
+function deliveryPeriods(order){
+  const selectedStart=/^\d{4}-(0[1-9]|1[0-2])$/.test(order.deliveryStartMonth||'')?order.deliveryStartMonth:null;
+  if(selectedStart){ const [year,month]=selectedStart.split('-').map(Number); return Array.from({length:12},(_,index)=>periodKeyForDate(new Date(year,month-1+index,1))); }
+  const start=new Date(order.start||order.created||Date.now());
+  if(order.planKey==='monthly'){ const now=new Date(); const elapsed=Math.max(0,(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth())); return Array.from({length:elapsed+1},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); }
+  return Array.from({length:12},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);});
+}
 function isDeliveryRecorded(orderId,periodKey){ return subscriptionDeliveries.some(record=>record.orderId===orderId&&record.periodKey===periodKey); }
-function deliveryCheckboxes(order){ if(order.planKey==='yearly'&&order.deliverySpan==='once') return '<button class="action-btn action-btn-shipped" onclick="navigate(\'inventory-products\')">Record all-at-once shipment</button>'; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${String(order.id).replace(/'/g,'\\\'')}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
+function deliveryCheckboxes(order){ const safeOrderId=String(order.id).replace(/'/g,''); if(order.planKey==='yearly'&&order.deliverySpan==='once') return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;margin-bottom:.45rem;">${deliveryPeriods(order).map((period,index)=>`<span style="font-size:.68rem;white-space:nowrap;color:${index===0?'var(--accent-soft-text)':'var(--text-faint)'};font-weight:${index===0?'700':'500'};">${period.slice(5)}${index===0?' · shipment':''}</span>`).join('')}</div><button class="action-btn action-btn-shipped" onclick="navigate('inventory-products')">Record all-at-once shipment</button>`; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${safeOrderId}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
 function setSubscriptionDelivery(orderId,periodKey,delivered){ if(!delivered){ showToast('Recorded shipments stay in history. Use a password-confirmed stock adjustment to correct inventory.','info'); return; } window.parent?.postMessage({type:'91dab-subscription-delivery-save',delivery:{orderId,periodKey,delivered:true}},'*'); }
 function allocationKeyForRow(order,periodKey){ if(order.planKey==='introductory') return `${order.id}:one-time`; if(order.planKey==='yearly'&&order.deliverySpan==='once') return `${order.id}:yearly-all-at-once`; return `${order.id}:${order.planKey==='monthly'?'monthly':'yearly-monthly'}:${periodKey}`; }
 function allocationUnitsForRow(order){ const quantity=Math.max(1,Number(order.qty)||1); if(order.planKey==='introductory') return quantity*12; if(order.planKey==='yearly'&&order.deliverySpan==='once') return quantity*1500; if(order.planKey==='monthly') return quantity*99; return quantity*125; }
@@ -1256,9 +1290,42 @@ function renderInventoryProducts(){
   shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-btn action-btn-shipped" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-btn action-btn-shipped" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td>${order.plan}<div style="font-size:.7rem;color:var(--text-faint);">${recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment')}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'Awaiting shipment'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
   allocationBody.innerHTML=inventoryAllocations.map(allocation=>`<tr><td>${formatDate(new Date(allocation.shippedAt).getTime())}</td><td class="mono">${allocation.orderId}</td><td>${allocation.allocationKind}</td><td>${allocation.periodKey||'—'}</td><td class="mono">${Number(allocation.units||0).toLocaleString('en-IN')}</td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">No DAB stock has been deducted yet. Record a shipment to create the first allocation.</td></tr>`;
 }
+function renderCustomisation(){
+  const summary=document.getElementById('customisationSummary'); const select=document.getElementById('customisationQuoteClient'); const body=document.getElementById('customisationClientsBody');
+  const units=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.unitsPurchased)||0),0); const revenue=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.revenueInr)||0),0);
+  if(summary) summary.innerHTML=`<div class="summary-card"><span>Custom clients</span><b>${quoteClientCustomizations.length.toLocaleString('en-IN')}</b><small>Confirmed quote records</small></div><div class="summary-card"><span>Custom DAB units</span><b>${units.toLocaleString('en-IN')}</b><small>Administrator-recorded purchases</small></div><div class="summary-card"><span>Custom revenue</span><b>${fmtINR(revenue)}</b><small>Included in Home revenue</small></div>`;
+  if(select){
+    const chosen=select.value;
+    const durableLeads=quoteClientLeads.map(lead=>({key:`lead:${lead.id}`,email:lead.clientEmail,phone:lead.clientPhone||''}));
+    const localLeads=quoteRequests.filter(quote=>!durableLeads.some(lead=>lead.email.toLowerCase()===String(quote.email||'').toLowerCase())).map(quote=>({key:`local:${quote.id}`,email:quote.email,phone:quote.phone||''}));
+    const options=[...durableLeads,...localLeads].map(lead=>`<option value="${escapeText(lead.key)}">${escapeText(lead.email)}${lead.phone?` · ${escapeText(lead.phone)}`:''}</option>`).join('');
+    select.innerHTML=`<option value="">Add a new client</option>${options}`;
+    if(chosen) select.value=chosen;
+  }
+  if(body) body.innerHTML=quoteClientCustomizations.map(item=>`<tr><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td class="mono">${Number(item.unitsPurchased||0).toLocaleString('en-IN')}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td>${formatDate(new Date(item.createdAt).getTime())}</td></tr>`).join('')||'<tr><td colspan="4" class="empty-state">No custom client sale has been recorded yet.</td></tr>';
+}
+function applySelectedQuoteClient(){
+  const id=String(document.getElementById('customisationQuoteClient')?.value||'');
+  const durable=id.startsWith('lead:')?quoteClientLeads.find(item=>`lead:${item.id}`===id):null;
+  const quote=durable?{email:durable.clientEmail,phone:durable.clientPhone||''}:quoteRequests.find(item=>`local:${item.id}`===id); if(!quote) return;
+  const name=document.getElementById('customisationClientName'); const email=document.getElementById('customisationClientEmail'); const phone=document.getElementById('customisationClientPhone');
+  if(name) name.value=quote.email.split('@')[0]||quote.email; if(email) email.value=quote.email||''; if(phone) phone.value=quote.phone||'';
+}
+function startNewCustomisationClient(){
+  const select=document.getElementById('customisationQuoteClient'); if(select) select.value='';
+  ['customisationClientName','customisationClientEmail','customisationClientPhone'].forEach(id=>{const field=document.getElementById(id);if(field) field.value='';});
+  document.getElementById('customisationClientName')?.focus();
+}
+function saveQuoteClientCustomization(event){
+  event.preventDefault();
+  if(dashboardRole!=='admin') return;
+  const button=event.currentTarget.querySelector('button[type="submit"]'); if(button){button.disabled=true;button.textContent='Saving…';}
+  const value=id=>String(document.getElementById(id)?.value||'').trim();
+  window.parent?.postMessage({type:'91dab-quote-client-customization-create',customization:{clientName:value('customisationClientName'),clientEmail:value('customisationClientEmail')||null,clientPhone:value('customisationClientPhone')||null,unitsPurchased:Number(value('customisationUnits')),revenueInr:Number(value('customisationRevenue')),notes:value('customisationNotes')||null}},'*');
+}
 function syncDashboardViews(){
   renderBars(); renderTopProducts(); renderOrders(document.getElementById('orderSearch')?.value || '');
-  renderActivity(); renderEcommerce(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); updateShopBadges(); refreshHomeStats();
+  renderActivity(); renderEcommerce(); renderEmails(); renderQuotes(); renderCustomers(); renderPlanCards(); renderSubscriptions(); renderPayments(); renderTransactions(); renderDeliveryTracking(); renderInventoryProducts(); renderCustomisation(); updateShopBadges(); refreshHomeStats();
 }
 syncNotificationSoundControl();
 window.addEventListener('storage', (event)=>{
@@ -1508,13 +1575,13 @@ function renderPlanCards(){
   el.innerHTML=Object.values(PLANS).map(p=>`<div class="card plan-card"><div class="plan-kicker">${p.recurring?'Recurring plan':p.custom?'Quote only':'One-time order'}</div><h4>${p.name}</h4><div class="plan-price">${p.custom?'Custom':fmtINR(p.price)}</div><div class="plan-meta">${p.period} · ${p.unit}</div><div class="plan-count">${counts[p.key]||0} recorded ${p.custom?'lead':'order'}${(counts[p.key]||0)===1?'':'s'}</div></div>`).join('');
 }
 function subscriptionRows(){
-  return orders.filter(o=>o.planKey==='monthly'||o.planKey==='yearly').map(o=>{ const start=new Date(o.created||Date.now()); const next=new Date(start); if(o.planKey==='monthly') next.setMonth(next.getMonth()+1); else next.setFullYear(next.getFullYear()+1); const info=o.orderInfo||{}; return {...o,info,start,next,status:o.paymentStatus==='paid'?'active':'pending'}; });
+  return orders.filter(o=>o.planKey==='monthly'||o.planKey==='yearly').map(o=>{ const periods=deliveryPeriods(o); const [year,month]=periods[0].split('-').map(Number); const start=new Date(year,month-1,1); const [endYear,endMonth]=periods.at(-1).split('-').map(Number); const end=new Date(endYear,endMonth-1,1); const info=o.orderInfo||{}; return {...o,info,start,end,periods,status:o.paymentStatus==='paid'?'active':'pending'}; });
 }
 function renderSubscriptions(){
   const body=document.getElementById('subscriptionsBody'); if(!body) return;
   const filter=document.getElementById('subscriptionFilter')?.value||'all';
   const rows=subscriptionRows().filter(o=>filter==='all'||o.status===filter);
-  body.innerHTML=rows.map(o=>`<tr onclick="openCustomer('${encodeURIComponent((o.info.email||o.customer).toLowerCase())}')"><td><div class="customer-name">${o.info.name||o.customer}</div><div class="customer-email">${o.info.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${o.unit}</div></td><td class="secondary-cell">${o.planKey==='yearly'?(o.deliverySpan==='once'?'All at once':'1st of every month'):'1st of every month'}</td><td class="secondary-cell">${formatDate(o.start)}</td><td class="secondary-cell">${formatDate(o.next)}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus)}</td><td onclick="event.stopPropagation()">${o.paymentStatus==='paid'?deliveryCheckboxes(o):'<span class="secondary-cell">Awaiting payment</span>'}</td></tr>`).join('')||`<tr><td colspan="8" class="empty-state">No subscriptions match this status.</td></tr>`;
+  body.innerHTML=rows.map(o=>{const first=o.periods[0];const last=o.periods.at(-1);const yearlyTogether=o.planKey==='yearly'&&o.deliverySpan==='once';const selection=yearlyTogether?`Together in ${first}`:`Across 12 months`;return `<tr onclick="openCustomer('${encodeURIComponent((o.info.email||o.customer).toLowerCase())}')"><td><div class="customer-name">${o.info.name||o.customer}</div><div class="customer-email">${o.info.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${o.unit}</div></td><td class="secondary-cell">${selection}<div style="font-size:.7rem;color:var(--text-faint);">${yearlyTogether?'Yearly all-at-once':'Monthly shipment allocation'}</div></td><td class="secondary-cell">${first}</td><td class="secondary-cell">${first} → ${last}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus)}</td><td onclick="event.stopPropagation()">${o.paymentStatus==='paid'?deliveryCheckboxes(o):'<span class="secondary-cell">Awaiting payment</span>'}</td></tr>`;}).join('')||`<tr><td colspan="8" class="empty-state">No subscriptions match this status.</td></tr>`;
 }
 function paymentEmailAction(o){
   if(dashboardRole!=='admin') return `<button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
@@ -1788,7 +1855,8 @@ let evIdSeq = 100;
 function persistCalendarEvents(){ try{ localStorage.setItem(CALENDAR_EVENTS_KEY,JSON.stringify(calEvents)); }catch(err){} }
 function subscriptionReminderEvents(key){
   const parts=key.split('-').map(Number); if(parts.length!==3||parts[2]!==1) return [];
-  return orders.filter(order=>order.planKey==='monthly'&&order.paymentStatus==='paid').map(order=>({id:`subscription-${order.id}-${key}`,title:`Monthly delivery · ${order.customer}`,time:'09:00',type:'reminder',readOnly:true}));
+  const periodKey=`${parts[0]}-${String(parts[1]).padStart(2,'0')}`;
+  return orders.filter(order=>order.planKey==='monthly'&&order.paymentStatus==='paid'&&(!order.deliveryStartMonth||deliveryPeriods(order).includes(periodKey))).map(order=>({id:`subscription-${order.id}-${key}`,title:`Monthly delivery · ${order.customer}`,time:'09:00',type:'reminder',readOnly:true}));
 }
 function calendarEventsForDay(key){ return [...(calEvents[key]||[]),...subscriptionReminderEvents(key)].sort((a,b)=>String(a.time).localeCompare(String(b.time))); }
 
@@ -2065,6 +2133,13 @@ window.addEventListener('message',(event)=>{
     if(data.success){ subscriptionDeliveries=Array.isArray(data.deliveries)?data.deliveries:subscriptionDeliveries; if(data.inventory) applyInventory(data.inventory); renderSubscriptions(); renderInventoryProducts(); showToast('Subscription shipment recorded and DAB stock deducted','success'); }
     else showToast(data.message||'Delivery status could not be updated.','error');
   }
+  if(data.type==='91dab-quote-client-customizations'){ quoteClientCustomizations=Array.isArray(data.customizations)?data.customizations:[]; renderCustomisation(); refreshHomeStats(); }
+  if(data.type==='91dab-quote-client-leads'){ quoteClientLeads=Array.isArray(data.leads)?data.leads:[]; renderCustomisation(); }
+  if(data.type==='91dab-quote-client-customization-result'){
+    const button=document.querySelector('#customisationForm button[type="submit"]'); if(button){button.disabled=false;button.textContent='Save custom sale';}
+    if(data.success){ quoteClientCustomizations=Array.isArray(data.customizations)?data.customizations:quoteClientCustomizations; const form=document.getElementById('customisationForm'); if(form) form.reset(); renderCustomisation(); refreshHomeStats(); showToast('Custom client sale saved and Home metrics updated','success'); }
+    else showToast(data.message||'Custom client sale could not be saved.','error');
+  }
   if(data.type==='91dab-reminder-status'){ applyReminderStatus(data.reminder); }
   if(data.type==='91dab-reminder-activation-result'){
     if(data.success){ applyReminderStatus(data.reminder); showToast('Automatic first-of-month email reminder is active','success'); }
@@ -2104,7 +2179,7 @@ const SCREEN_TITLES = {
   home:'Overview', inbox:'Inbox', customers:'Customers', subscriptions:'Subscriptions', payments:'Payments', transactions:'Transaction history', tracking:'E-commerce', marketing:'Marketing Overview',
   mobile:'Mobile App', events:'Events', calendar:'Calendar', activity:'Activity',
   teams:'All teams', 'team-eng':'Engineering', 'team-mkt':'Marketing', 'team-sales':'Sales',
-  support:'Support', settings:'Settings', access:'Access status', 'inventory-products':'Inventory & Products'
+  support:'Support', settings:'Settings', access:'Access status', 'inventory-products':'Inventory & Products', customisation:'Customisation'
 };
 function navigate(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -2125,6 +2200,7 @@ function navigate(screen){
   if(screen==='payments') renderPayments();
   if(screen==='transactions') renderTransactions();
   if(screen==='inventory-products') renderInventoryProducts();
+  if(screen==='customisation') renderCustomisation();
   if(screen==='calendar') requestAnimationFrame(renderCalendar);
   document.getElementById('app').classList.remove('mobile-open');
 }
@@ -2192,12 +2268,22 @@ function pulseStat(id){
 }
 function refreshHomeStats(){
   const paid=orders.filter(o=>o.paymentStatus==='paid');
-  const revenue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0);
-  const customers=customerRecords().filter(c=>c.orders.some(o=>o.paymentStatus==='paid')).length;
+  const customRevenue=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.revenueInr)||0),0);
+  const customUnits=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.unitsPurchased)||0),0);
+  const paidCustomerKeys=customerRecords().filter(c=>c.orders.some(o=>o.paymentStatus==='paid')).map(c=>(c.email||c.name||'').toLowerCase()).filter(Boolean);
+  const customCustomerKeys=quoteClientCustomizations.map(item=>(item.clientEmail||item.clientName||'').toLowerCase()).filter(Boolean);
+  const customers=new Set([...paidCustomerKeys,...customCustomerKeys]).size;
+  const commercialEntries=orders.length+quoteClientCustomizations.length;
+  const confirmedSales=paid.length+quoteClientCustomizations.length;
+  const revenue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0)+customRevenue;
   const revenueEl=document.getElementById('statRevenue'); if(revenueEl) revenueEl.textContent=fmtINR(revenue);
   const usersEl=document.getElementById('statUsers'); if(usersEl) usersEl.textContent=customers.toLocaleString('en-IN');
-  const ordersEl=document.getElementById('statOrders'); if(ordersEl) ordersEl.textContent=orders.length.toLocaleString('en-IN');
-  const convEl=document.getElementById('statConv'); if(convEl) convEl.textContent=orders.length ? ((paid.length/orders.length)*100).toFixed(2)+'%' : '0%';
+  const customUnitsEl=document.getElementById('statCustomUnits'); if(customUnitsEl) customUnitsEl.textContent=customUnits.toLocaleString('en-IN');
+  const revenueDelta=document.getElementById('statRevenueDelta'); if(revenueDelta) revenueDelta.textContent=confirmedSales.toLocaleString('en-IN');
+  const usersDelta=document.getElementById('statUsersDelta'); if(usersDelta) usersDelta.textContent=customers.toLocaleString('en-IN');
+  const ordersEl=document.getElementById('statOrders'); if(ordersEl) ordersEl.textContent=commercialEntries.toLocaleString('en-IN');
+  const ordersDelta=document.getElementById('statOrdersDelta'); if(ordersDelta) ordersDelta.textContent=commercialEntries.toLocaleString('en-IN');
+  const convEl=document.getElementById('statConv'); if(convEl) convEl.textContent=commercialEntries ? ((confirmedSales/commercialEntries)*100).toFixed(2)+'%' : '0%';
 }
 /* ============================================================
    INIT

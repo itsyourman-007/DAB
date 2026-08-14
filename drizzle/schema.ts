@@ -125,6 +125,8 @@ export const merchantOrders = mysqlTable("merchantOrders", {
   paymentMethod: varchar("paymentMethod", { length: 64 }).default("UPI").notNull(),
   utr: varchar("utr", { length: 128 }),
   deliverySpan: varchar("deliverySpan", { length: 64 }),
+  /** Buyer-selected first delivery month for recurring monthly or yearly schedules, formatted YYYY-MM. */
+  deliveryStartMonth: varchar("deliveryStartMonth", { length: 7 }),
   paymentStatus: mysqlEnum("paymentStatus", ["pending", "utr_submitted", "paid", "expired"]).default("pending").notNull(),
   fulfillmentStatus: mysqlEnum("fulfillmentStatus", ["not_shipped", "shipped", "delivered"]).default("not_shipped").notNull(),
   source: varchar("source", { length: 32 }).default("91dab-shop").notNull(),
@@ -184,6 +186,33 @@ export const subscriptionDeliveryRecords = mysqlTable("subscriptionDeliveryRecor
 });
 
 export type SubscriptionDeliveryRecord = typeof subscriptionDeliveryRecords.$inferSelect;
+
+/** Administrator-recorded commercial details for a clinic or bulk quote client; these records contribute to protected Home metrics. */
+export const merchantQuoteClientCustomizations = mysqlTable("merchantQuoteClientCustomizations", {
+  id: int("id").autoincrement().primaryKey(),
+  clientName: varchar("clientName", { length: 160 }).notNull(),
+  clientEmail: varchar("clientEmail", { length: 320 }),
+  clientPhone: varchar("clientPhone", { length: 64 }),
+  unitsPurchased: int("unitsPurchased").notNull(),
+  revenueInr: int("revenueInr").notNull(),
+  notes: varchar("notes", { length: 1000 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MerchantQuoteClientCustomization = typeof merchantQuoteClientCustomizations.$inferSelect;
+
+/** Public clinic quote requests stored server-side so administrators can select a real quote lead for a later custom commercial record. */
+export const merchantClinicQuoteLeads = mysqlTable("merchantClinicQuoteLeads", {
+  id: int("id").autoincrement().primaryKey(),
+  clientEmail: varchar("clientEmail", { length: 320 }).notNull().unique(),
+  clientPhone: varchar("clientPhone", { length: 64 }),
+  note: varchar("note", { length: 1000 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MerchantClinicQuoteLead = typeof merchantClinicQuoteLeads.$inferSelect;
 
 /** Project-level controls for the single automatic monthly subscription-summary job. */
 export const subscriptionReminderSettings = mysqlTable("subscriptionReminderSettings", {
