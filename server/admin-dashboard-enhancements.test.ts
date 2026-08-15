@@ -66,11 +66,20 @@ describe("protected merchant dashboard enhancements", () => {
 
   it("provides a responsive Connect app QR and direct signed APK download with accurate update guidance", () => {
     expect(dashboardHtml).toContain('class="card app-download-panel"');
-    expect(dashboardHtml).toContain('/manus-storage/91dab-dashboard-shortcut-qr_901b87c3.png');
+    expect(dashboardHtml).toContain('src="data:image/svg+xml;base64,');
     expect(dashboardHtml).toContain('https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-shortcut.apk');
     expect(dashboardHtml).toContain('Download dashboard APK');
     expect(dashboardHtml).toContain('changes to the live website and dashboard appear automatically when the app opens after deployment');
     expect(dashboardHtml).toContain('@media(max-width:620px){.app-download-panel{grid-template-columns:1fr;text-align:center;');
+  });
+
+  it("shows saved Calendar events in the Events view without inventing event records", () => {
+    expect(dashboardHtml).toContain('id="storeEventsList"');
+    expect(dashboardHtml).toContain('function calendarEventRecords()');
+    expect(dashboardHtml).toContain('Object.entries(calEvents)');
+    expect(dashboardHtml).toContain('function renderStoreEvents()');
+    expect(dashboardHtml).toContain("if(screen==='events') renderStoreEvents();");
+    expect(dashboardHtml).toContain('No Calendar events have been saved yet.');
   });
 
   it("keeps persistent team and member creation, editing, and removal password-confirmed with selectable teams and salary fields", () => {

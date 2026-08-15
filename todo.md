@@ -199,3 +199,5 @@
 - [x] Verify the dashboard shortcut’s phone layout and document that live website updates appear in existing APK installs, while native-wrapper updates require a new APK install.
 - [x] Make the dashboard notification bell open live protected notifications, add an audible adjustable bell volume control in Settings, and cover the interaction with regression tests.
 - [x] Export UTR/reference IDs as Excel-safe text so complete numeric values up to 128 digits remain visible without scientific notation or precision loss.
+- [x] Repair the Connect app QR image so it renders reliably in the deployed dashboard while preserving the signed APK download destination.
+- [x] Show saved Calendar events in the Events sidebar view using the same dashboard event data, with no fabricated entries.
