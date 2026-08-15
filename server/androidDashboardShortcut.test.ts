@@ -23,5 +23,8 @@ describe("Android dashboard shortcut", () => {
     expect(activitySource).toContain("setMediaPlaybackRequiresUserGesture(false)");
     expect(activitySource).toContain("91DABDashboard/1.1");
     expect(activitySource).toContain("setWebChromeClient(new WebChromeClient())");
+    expect(activitySource).toContain("createLaunchPanel()");
+    expect(activitySource).toContain("Opening your private merchant console");
+    expect(activitySource).toContain("setAlpha(0f)");
   });
 });

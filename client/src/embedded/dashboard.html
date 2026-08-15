@@ -448,6 +448,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 		  .set-row{align-items:flex-start;}
 		  .set-row .action-btn{margin-left:0!important;}
 		  .field-row{display:grid;grid-template-columns:1fr;gap:0;}
+		  #screen-inventory-products .panel-head p{line-height:1.55;max-width:100%;}
+		  .shipment-plan{min-width:175px;}
 		  .toast-root{left:.75rem;right:.75rem;bottom:.75rem;}
 		  .toast{max-width:none;}
 		}
@@ -1165,7 +1167,7 @@ async function toggleNotificationSound(){
 }
 async function enableNativeAppNotificationAudio(){
   if(!notificationSoundEnabled){ notificationSoundEnabled=true; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'true');}catch(err){} }
-  try{ if(!localStorage.getItem(NOTIFICATION_SOUND_VOLUME_KEY)) localStorage.setItem(NOTIFICATION_SOUND_VOLUME_KEY,String(notificationSoundVolume)); }catch(err){}
+  try{ if(!localStorage.getItem(NOTIFICATION_SOUND_VOLUME_KEY)){ notificationSoundVolume=1; localStorage.setItem(NOTIFICATION_SOUND_VOLUME_KEY,'1'); } }catch(err){}
   syncNotificationSoundControl();
   try{ await prepareNotificationAudio(); }catch(err){}
 }
@@ -1338,7 +1340,7 @@ function renderInventoryProducts(){
     if(order.planKey==='introductory'||(order.planKey==='yearly'&&order.deliverySpan==='once')) scheduled.push({order,periodKey:null});
     else if(order.planKey==='monthly'||order.planKey==='yearly') deliveryPeriods(order).forEach(periodKey=>scheduled.push({order,periodKey}));
   });
-  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-btn action-btn-shipped" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-btn action-btn-shipped" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td>${order.plan}<div style="font-size:.7rem;color:var(--text-faint);">${recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment')}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'Awaiting shipment'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
+  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const shipmentLabel=recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment'); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-btn action-btn-shipped" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-btn action-btn-shipped" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td class="shipment-plan"><div class="customer-name">${order.plan}</div><div class="secondary-cell" style="margin-top:.22rem;line-height:1.45;white-space:normal;">${shipmentLabel}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'<span class="secondary-cell">Awaiting shipment</span>'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
   allocationBody.innerHTML=inventoryAllocations.map(allocation=>`<tr><td>${formatDate(new Date(allocation.shippedAt).getTime())}</td><td class="mono">${allocation.orderId}</td><td>${allocation.allocationKind}</td><td>${allocation.periodKey||'—'}</td><td class="mono">${Number(allocation.units||0).toLocaleString('en-IN')}</td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">No DAB stock has been deducted yet. Record a shipment to create the first allocation.</td></tr>`;
 }
 function renderCustomisation(){

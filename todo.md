@@ -205,3 +205,8 @@
 - [x] Validate Customisation revenue as a correctly stored whole-INR amount and cover create/edit persistence with database-backed regression tests.
 - [x] Enable dashboard notification audio in the downloaded Android shortcut while preserving the user-selected sound/volume settings.
 - [x] Audit and refine the protected dashboard phone layout, then rebuild and validate the signed Android shortcut APK.
+- [ ] Add secure push notifications that can ring on the Android phone when a trusted dashboard alert arrives while the app is closed, subject to Firebase project configuration.
+- [x] Replace the plain Android-wrapper presentation with a branded 91DAB native launch and loading experience while retaining the secure fixed-dashboard WebView.
+- [x] Correct the Inventory & Products Scheduled DAB shipments formatting at phone and desktop widths without changing fulfillment data or actions.
+- [x] Tune the dashboard bell to a louder audible level while retaining the user’s volume control and avoiding unsafe automatic device-volume changes.
+- [x] Improve the 91DAB Android shortcut launcher icon and branded loading presentation, then rebuild and validate the signed APK.
