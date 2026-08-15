@@ -284,8 +284,10 @@ export const appRouter = router({
         clientName: z.string().trim().min(2).max(160),
         clientEmail: z.string().trim().email().max(320).nullable(),
         clientPhone: z.string().trim().min(6).max(64).nullable(),
+        deliveryAddress: z.string().trim().min(5).max(1000),
+        paymentMode: z.enum(["upi", "bank_transfer", "cash", "card", "other"]),
         unitsPurchased: z.number().int().min(1).max(10_000_000),
-        revenueInr: z.number().int().min(0).max(1_000_000_000),
+        revenueInr: z.number().finite().int().min(0).max(1_000_000_000),
         notes: z.string().trim().max(1000).nullable(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -304,8 +306,10 @@ export const appRouter = router({
         clientName: z.string().trim().min(2).max(160),
         clientEmail: z.string().trim().email().max(320).nullable(),
         clientPhone: z.string().trim().min(6).max(64).nullable(),
+        deliveryAddress: z.string().trim().min(5).max(1000),
+        paymentMode: z.enum(["upi", "bank_transfer", "cash", "card", "other"]),
         unitsPurchased: z.number().int().min(1).max(10_000_000),
-        revenueInr: z.number().int().min(0).max(1_000_000_000),
+        revenueInr: z.number().finite().int().min(0).max(1_000_000_000),
         notes: z.string().trim().max(1000).nullable(),
         password: z.string().min(1).max(256),
       }))

@@ -612,6 +612,8 @@ export type MerchantQuoteClientCustomizationInput = {
   clientName: string;
   clientEmail: string | null;
   clientPhone: string | null;
+  deliveryAddress: string;
+  paymentMode: "upi" | "bank_transfer" | "cash" | "card" | "other";
   unitsPurchased: number;
   revenueInr: number;
   notes: string | null;
@@ -643,6 +645,8 @@ export async function updateMerchantQuoteClientCustomization(input: MerchantQuot
     clientName: input.clientName,
     clientEmail: input.clientEmail,
     clientPhone: input.clientPhone,
+    deliveryAddress: input.deliveryAddress,
+    paymentMode: input.paymentMode,
     unitsPurchased: input.unitsPurchased,
     revenueInr: input.revenueInr,
     notes: input.notes,

@@ -201,3 +201,5 @@
 - [x] Export UTR/reference IDs as Excel-safe text so complete numeric values up to 128 digits remain visible without scientific notation or precision loss.
 - [x] Repair the Connect app QR image so it renders reliably in the deployed dashboard while preserving the signed APK download destination.
 - [x] Show saved Calendar events in the Events sidebar view using the same dashboard event data, with no fabricated entries.
+- [x] Add delivery address and payment mode fields to Customisation records, persist them securely, and display them in the relevant protected dashboard views.
+- [x] Validate Customisation revenue as a correctly stored whole-INR amount and cover create/edit persistence with database-backed regression tests.

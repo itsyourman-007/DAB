@@ -1,0 +1,2 @@
+ALTER TABLE `merchantQuoteClientCustomizations` ADD `deliveryAddress` varchar(1000);--> statement-breakpoint
+ALTER TABLE `merchantQuoteClientCustomizations` ADD `paymentMode` varchar(32) DEFAULT 'other' NOT NULL;

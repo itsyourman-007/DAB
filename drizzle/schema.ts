@@ -195,6 +195,8 @@ export const merchantQuoteClientCustomizations = mysqlTable("merchantQuoteClient
   clientName: varchar("clientName", { length: 160 }).notNull(),
   clientEmail: varchar("clientEmail", { length: 320 }),
   clientPhone: varchar("clientPhone", { length: 64 }),
+  deliveryAddress: varchar("deliveryAddress", { length: 1000 }),
+  paymentMode: varchar("paymentMode", { length: 32 }).notNull().default("other"),
   unitsPurchased: int("unitsPurchased").notNull(),
   revenueInr: int("revenueInr").notNull(),
   notes: varchar("notes", { length: 1000 }),

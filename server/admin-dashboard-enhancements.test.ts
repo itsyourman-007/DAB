@@ -284,6 +284,15 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("customRevenue=quoteClientCustomizations.reduce");
     expect(dashboardHtml).toContain("customUnits=quoteClientCustomizations.reduce");
     expect(dashboardHtml).toContain("Custom client sale saved and Home metrics updated");
+    expect(schemaSource).toContain('deliveryAddress: varchar("deliveryAddress", { length: 1000 })');
+    expect(schemaSource).toContain('paymentMode: varchar("paymentMode", { length: 32 })');
+    expect(routerSource).toContain('deliveryAddress: z.string().trim().min(5).max(1000)');
+    expect(routerSource).toContain('paymentMode: z.enum(["upi", "bank_transfer", "cash", "card", "other"])');
+    expect(routerSource).toContain('revenueInr: z.number().finite().int().min(0).max(1_000_000_000)');
+    expect(dashboardHtml).toContain('id="customisationDeliveryAddress"');
+    expect(dashboardHtml).toContain('id="customisationPaymentMode"');
+    expect(dashboardHtml).toContain('function customisationWholeInr(fieldId)');
+    expect(dashboardHtml).toContain('function customPaymentModeLabel(mode)');
   });
 
   it("tracks paid-order fulfillment through the server and exposes shipment controls to authorized dashboard sessions", () => {
@@ -322,7 +331,7 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("function customSaleFulfillmentAction(item)");
     expect(dashboardHtml).toContain("function customSaleMatches(item,search)");
     expect(dashboardHtml).toContain("CUSTOM-${item.id}");
-    expect(dashboardHtml).toContain("Custom record");
+    expect(dashboardHtml).toContain("customPaymentModeLabel(item.paymentMode)");
     expect(dashboardHtml).toContain("customSalePlan(item)");
     expect(dashboardHtml).toContain("quoteClientCustomizations.filter(item=>item.fulfillmentStatus!=='delivered')");
     expect(dashboardHtml).toContain("if(data.type==='91dab-quote-client-customizations'){ quoteClientCustomizations=Array.isArray(data.customizations)?data.customizations:[]; syncDashboardViews(); }");
