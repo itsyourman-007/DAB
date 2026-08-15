@@ -7,6 +7,14 @@ import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import dashboardHtml from "../embedded/dashboard.html?raw";
 
+const dashboardLogoUrl = "/manus-storage/91-danta-dashboard-logo_d2a87fee.png";
+
+function isUploadableProfileImage(value: unknown): value is { type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as { type?: unknown; size?: unknown; arrayBuffer?: unknown };
+  return typeof candidate.type === "string" && typeof candidate.size === "number" && typeof candidate.arrayBuffer === "function";
+}
+
 export default function Admin() {
   const isAndroidDashboardShortcut = /91DABDashboard\/\d/i.test(navigator.userAgent);
   const [username, setUsername] = useState("");
@@ -291,7 +299,7 @@ export default function Admin() {
       }
       if (event.data.type === "91dab-dashboard-profile-image-upload") {
         const file = event.data.file;
-        if (!(file instanceof File)) {
+        if (!isUploadableProfileImage(file)) {
           respond({ type: "91dab-dashboard-profile-image-result", success: false, message: "Choose a valid image file." });
           return;
         }
@@ -307,7 +315,7 @@ export default function Admin() {
               headers: { "Content-Type": file.type },
               body: await file.arrayBuffer(),
             });
-            const payload = await response.json() as { profile?: unknown; error?: string };
+            const payload = await response.json().catch(() => ({})) as { profile?: unknown; error?: string };
             if (!response.ok || !payload.profile) throw new Error(payload.error || "Profile picture could not be saved.");
             await utils.admin.profile.invalidate();
             respond({ type: "91dab-dashboard-profile-image-result", success: true, profile: payload.profile });
@@ -509,7 +517,7 @@ export default function Admin() {
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-violet-600 text-sm font-black text-white shadow-sm">91</span>
           <span>
             <span className="block text-sm font-semibold tracking-tight text-slate-950">91DAB</span>
-            <span className="hidden text-xs text-slate-500 sm:block">Private merchant console</span>
+            <img src={dashboardLogoUrl} alt="91 DANTA" className="mt-0.5 h-5 w-5 rounded-md object-cover shadow-sm" />
           </span>
         </div>
         <div className="flex items-center gap-2">

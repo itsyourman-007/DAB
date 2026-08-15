@@ -7,6 +7,7 @@ const indexSource = readFileSync(resolve(process.cwd(), "server/_core/index.ts")
 const schemaSource = readFileSync(resolve(process.cwd(), "drizzle/schema.ts"), "utf8");
 const dbSource = readFileSync(resolve(process.cwd(), "server/db.ts"), "utf8");
 const dashboardHtml = readFileSync(resolve(process.cwd(), "client/src/embedded/dashboard.html"), "utf8");
+const adminSource = readFileSync(resolve(process.cwd(), "client/src/pages/Admin.tsx"), "utf8");
 
 describe("protected dashboard profile images", () => {
   it("accepts only a small, valid image from an active administrator session and stores it through managed storage", () => {
@@ -21,11 +22,15 @@ describe("protected dashboard profile images", () => {
     expect(indexSource).toContain('registerDashboardProfileImageRoute(app)');
   });
 
-  it("persists only the managed image URL and renders the supplied console logo", () => {
+	  it("persists only the managed image URL and renders the supplied console logo", () => {
     expect(schemaSource).toContain('profileImageUrl: varchar("profileImageUrl", { length: 1024 })');
     expect(dbSource).toContain("profileImageUrl?: string | null");
     expect(dashboardHtml).toContain('/manus-storage/91-danta-dashboard-logo_d2a87fee.png');
     expect(dashboardHtml).toContain('id="dashboardProfileAvatarImage"');
-    expect(dashboardHtml).toContain('id="dashboardProfilePhotoPreview"');
-  });
+	    expect(dashboardHtml).toContain('id="dashboardProfilePhotoPreview"');
+	    expect(adminSource).toContain("function isUploadableProfileImage(value: unknown)");
+	    expect(adminSource).not.toContain("file instanceof File");
+	    expect(adminSource).toContain('const dashboardLogoUrl = "/manus-storage/91-danta-dashboard-logo_d2a87fee.png"');
+	    expect(adminSource).not.toContain("Private merchant console");
+	  });
 });

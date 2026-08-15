@@ -222,3 +222,5 @@
 - [x] Fix the protected notification layout at phone widths.
 - [x] Make each new dashboard notification ring louder five times while preserving volume controls.
 - [x] Display the latest protected account sign-in time in the dashboard with phone-friendly formatting.
+- [x] Repair the protected profile-picture save flow so valid chosen images persist successfully.
+- [x] Replace the private merchant console header text with the supplied 91 DANTA logo.
