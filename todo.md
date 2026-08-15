@@ -191,3 +191,6 @@
 - [x] Replace the Android URL setup flow with a fixed `/admin` website shortcut that presents only the existing dashboard login and uses no separate native dashboard implementation.
 - [x] Require a numeric UTR/reference ID in the shop payment interface, clearly mark the field with an asterisk, and prevent payment-reference submission until it is valid.
 - [x] Persist the exact UTR-submission timestamp and display it in the protected Payments and Transaction History views with regression coverage.
+- [x] Trigger the rocket dashboard notification when a buyer’s trusted checkout successfully reaches the payment QR stage, with regression coverage that prevents duplicate sounds on later polling updates.
+- [x] Rebuild and validate the Android dashboard shortcut release after adding the payment-stage rocket notification.
+- [x] Save the payment-stage rocket checkpoint and push this release to GitHub for Render auto-deploy.
