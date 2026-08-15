@@ -1,0 +1,1 @@
+ALTER TABLE `merchantDashboardProfiles` ADD `profileImageUrl` varchar(1024);

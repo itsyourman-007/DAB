@@ -69,6 +69,7 @@ const ADDITIVE_COLUMNS = {
   "merchantQuoteClientCustomizations.deliveredAt": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `deliveredAt` timestamp",
   "merchantQuoteClientCustomizations.deliveryAddress": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `deliveryAddress` varchar(1000)",
   "merchantQuoteClientCustomizations.paymentMode": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `paymentMode` varchar(32) NOT NULL DEFAULT 'other'",
+  "merchantDashboardProfiles.profileImageUrl": "ALTER TABLE `merchantDashboardProfiles` ADD COLUMN `profileImageUrl` varchar(1024)",
 };
 
 const REQUIRED_TABLES = [...BASE_TABLES, ...Object.keys(ADDITIVE_TABLES)];
@@ -92,6 +93,7 @@ async function getMissingSchema() {
     const missingColumns = [];
     const requiredColumns = {
       merchantOrders: ["deliveryStartMonth", "utrSubmittedAt"],
+      merchantDashboardProfiles: ["profileImageUrl"],
       merchantQuoteClientCustomizations: ["fulfillmentStatus", "shippedAt", "deliveredAt", "deliveryAddress", "paymentMode"],
     };
     for (const [table, columnsRequired] of Object.entries(requiredColumns)) {

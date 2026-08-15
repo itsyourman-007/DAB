@@ -102,6 +102,7 @@ export const merchantDashboardProfiles = mysqlTable("merchantDashboardProfiles",
   id: int("id").primaryKey(),
   displayName: varchar("displayName", { length: 160 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
+  profileImageUrl: varchar("profileImageUrl", { length: 1024 }),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 

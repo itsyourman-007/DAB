@@ -294,10 +294,14 @@ export async function getMerchantDashboardProfile(): Promise<MerchantDashboardPr
   return result[0];
 }
 
-export async function saveMerchantDashboardProfile(input: { displayName: string; email: string }) {
+export async function saveMerchantDashboardProfile(input: { displayName: string; email: string; profileImageUrl?: string | null }) {
   const db = await getDb();
   if (!db) throw new Error("Database is required for dashboard profile settings");
-  await db.insert(merchantDashboardProfiles).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: input });
+  const values = { id: 1, displayName: input.displayName, email: input.email, profileImageUrl: input.profileImageUrl ?? null };
+  const update = input.profileImageUrl === undefined
+    ? { displayName: input.displayName, email: input.email }
+    : { displayName: input.displayName, email: input.email, profileImageUrl: input.profileImageUrl };
+  await db.insert(merchantDashboardProfiles).values(values).onDuplicateKeyUpdate({ set: update });
   return getMerchantDashboardProfile();
 }
 

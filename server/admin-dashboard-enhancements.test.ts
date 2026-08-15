@@ -100,15 +100,20 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("removeTeamPassword");
   });
 
-  it("replaces the hardcoded profile with a protected editable administrator profile", () => {
+	  it("replaces the hardcoded profile with a protected editable administrator profile", () => {
     expect(dashboardHtml).not.toContain("sarah@91dab.com");
     expect(dashboardHtml).not.toContain("Sarah Johnson");
     expect(dashboardHtml).toContain("saveDashboardProfile()");
     expect(routerSource).toContain("updateProfile: publicProcedure");
     expect(adminSource).toContain("91dab-dashboard-profile-save");
     expect(dashboardHtml).toContain('data-screen="access"');
-    expect(dashboardHtml).toContain('id="screen-access"');
-  });
+	    expect(dashboardHtml).toContain('id="screen-access"');
+	    expect(dashboardHtml).toContain('id="dashboardProfileImageInput"');
+	    expect(dashboardHtml).toContain("function uploadDashboardProfileImage(input)");
+	    expect(dashboardHtml).toContain("91dab-dashboard-profile-image-upload");
+	    expect(adminSource).toContain('event.data.type === "91dab-dashboard-profile-image-upload"');
+	    expect(routerSource).toContain('profileImageUrl: null');
+	  });
 
   it("keeps Security Settings behind a password re-confirmation gate and leaves the administrator email blank at /admin", () => {
     expect(routerSource).toContain("verifySecuritySettingsPassword: publicProcedure");

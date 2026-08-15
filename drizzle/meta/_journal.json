@@ -127,6 +127,13 @@
       "when": 1786807359676,
       "tag": "0017_fantastic_firebrand",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1786817677379,
+      "tag": "0019_fearless_starhawk",
+      "breakpoints": true
     }
   ]
 }

@@ -128,10 +128,11 @@ export const appRouter = router({
       if (!session) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Dashboard access is required" });
       }
-      if (session.role === "employee") return { displayName: "Authorized employee", email: session.email ?? "" };
+      if (session.role === "employee") return { displayName: "Authorized employee", email: session.email ?? "", profileImageUrl: null };
       return (await db.getMerchantDashboardProfile()) ?? {
         displayName: "91DAB Administrator",
         email: adminOtpRecipient(),
+        profileImageUrl: null,
       };
     }),
     updateProfile: publicProcedure
