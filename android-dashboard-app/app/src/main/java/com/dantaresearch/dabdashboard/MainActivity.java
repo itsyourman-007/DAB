@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -16,6 +14,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -23,8 +22,6 @@ public final class MainActivity extends Activity {
     private static final String DASHBOARD_URL = "https://dab-1-cizz.onrender.com/admin";
     private static final String DASHBOARD_HOST = "dab-1-cizz.onrender.com";
     private static final int DAB_CREAM = Color.rgb(247, 244, 238);
-    private static final int DAB_INK = Color.rgb(21, 19, 15);
-    private static final int DAB_GOLD = Color.rgb(194, 147, 58);
     private WebView webView;
 
     @Override
@@ -83,30 +80,15 @@ public final class MainActivity extends Activity {
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setGravity(Gravity.CENTER);
-        panel.setPadding(48, 48, 48, 48);
+        int padding = dp(24);
+        panel.setPadding(padding, padding, padding, padding);
 
-        TextView mark = new TextView(this);
-        mark.setText("91\nDAB");
-        mark.setTextColor(DAB_CREAM);
-        mark.setTextSize(20);
-        mark.setTypeface(Typeface.DEFAULT_BOLD);
-        mark.setGravity(Gravity.CENTER);
-        mark.setLetterSpacing(.04f);
-        GradientDrawable markBackground = new GradientDrawable();
-        markBackground.setShape(GradientDrawable.OVAL);
-        markBackground.setColor(DAB_GOLD);
-        mark.setBackground(markBackground);
-        panel.addView(mark, new LinearLayout.LayoutParams(112, 112));
-
-        TextView title = new TextView(this);
-        title.setText("91DAB");
-        title.setTextColor(DAB_INK);
-        title.setTextSize(24);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
-        title.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        titleParams.topMargin = 22;
-        panel.addView(title, titleParams);
+        ImageView logo = new ImageView(this);
+        logo.setImageResource(R.drawable.danta_logo);
+        logo.setContentDescription("91 DANTA logo");
+        logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        int logoSize = dp(248);
+        panel.addView(logo, new LinearLayout.LayoutParams(logoSize, logoSize));
 
         TextView subtitle = new TextView(this);
         subtitle.setText("Opening your private merchant console");
@@ -114,9 +96,13 @@ public final class MainActivity extends Activity {
         subtitle.setTextSize(14);
         subtitle.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        subtitleParams.topMargin = 8;
+        subtitleParams.topMargin = dp(16);
         panel.addView(subtitle, subtitleParams);
         return panel;
+    }
+
+    private int dp(int value) {
+        return Math.round(value * getResources().getDisplayMetrics().density);
     }
 
     @Override

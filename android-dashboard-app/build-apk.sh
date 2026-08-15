@@ -19,9 +19,9 @@ rm -rf "$OUT/classes" "$OUT/dex" "$OUT/gen" "$OUT/resources.zip" "$UNSIGNED" "$A
 mkdir -p "$OUT/classes" "$OUT/dex"
 
 "$BUILD_TOOLS/aapt2" compile --dir "$ROOT/app/src/main/res" -o "$OUT/resources.zip"
-"$BUILD_TOOLS/aapt2" link -o "$UNSIGNED" -I "$ANDROID_JAR" --manifest "$ROOT/app/src/main/AndroidManifest.xml" -R "$OUT/resources.zip" --auto-add-overlay --min-sdk-version 24 --target-sdk-version 35
+"$BUILD_TOOLS/aapt2" link -o "$UNSIGNED" -I "$ANDROID_JAR" --manifest "$ROOT/app/src/main/AndroidManifest.xml" -R "$OUT/resources.zip" --java "$OUT/gen" --auto-add-overlay --min-sdk-version 24 --target-sdk-version 35
 
-javac --release 8 -classpath "$ANDROID_JAR" -d "$OUT/classes" "$ROOT/app/src/main/java/com/dantaresearch/dabdashboard/MainActivity.java"
+javac --release 8 -classpath "$ANDROID_JAR" -d "$OUT/classes" "$OUT/gen/com/dantaresearch/dabdashboard/R.java" "$ROOT/app/src/main/java/com/dantaresearch/dabdashboard/MainActivity.java"
 mapfile -t CLASS_FILES < <(find "$OUT/classes" -type f -name '*.class' | sort)
 "$BUILD_TOOLS/d8" --lib "$ANDROID_JAR" --min-api 24 --output "$OUT/dex" "${CLASS_FILES[@]}"
 (cd "$OUT/dex" && zip -q "$UNSIGNED" classes.dex)

@@ -213,3 +213,6 @@
 - [x] Make all weekly sales chart bars purple and retain accessible hover values without altering trusted revenue data.
 - [x] Reconcile weekly and monthly sales chart totals with the authoritative dashboard total revenue, including confirmed custom-client sales where applicable.
 - [x] Audit the dashboard for revenue/chart calculation or display irregularities and add regression coverage for the confirmed fixes.
+- [x] Use the supplied 91 DANTA logo exactly as provided for the Android launcher icon and branded app launch screen.
+- [x] Correct the spacing and hierarchy immediately above Scheduled DAB shipments in Inventory & Products at phone and desktop widths.
+- [x] Replace the Android application logo resource with the newly supplied smaller 91 DANTA artwork and reissue the signed APK.
