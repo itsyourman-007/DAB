@@ -221,3 +221,4 @@
 - [x] Replace the DAB Dashboard console brand mark with the supplied 91 DANTA logo.
 - [x] Fix the protected notification layout at phone widths.
 - [x] Make each new dashboard notification ring louder five times while preserving volume controls.
+- [x] Display the latest protected account sign-in time in the dashboard with phone-friendly formatting.

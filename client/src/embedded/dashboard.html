@@ -1078,6 +1078,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="card" style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:.5rem;">Login &amp; access</h3>
           <p class="set-sub" id="dashboardLoginStatus">Checking protected administrator session…</p>
+		  <div class="set-row" style="margin-top:1rem;"><div><div class="set-label">Latest successful sign-in</div><div class="set-sub" id="dashboardLastSignIn">Checking protected sign-in history…</div></div><span class="badge paid" id="dashboardLastSignInRole">—</span></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;">
           <h3 style="margin-bottom:.5rem;">Monthly subscription reminders</h3>
@@ -1097,6 +1098,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <h3 style="margin-bottom:.45rem;">Protected login status</h3>
           <p class="set-sub" id="accessSessionStatus">Checking the administrator session…</p>
           <div class="set-row" style="margin-top:1rem;"><div><div class="set-label">Signed-in profile</div><div class="set-sub" id="accessProfileIdentity">Loading protected profile…</div></div><span class="badge paid">Active</span></div>
+		  <div class="set-row"><div><div class="set-label">Latest successful sign-in</div><div class="set-sub" id="accessLastSignIn">Checking protected sign-in history…</div></div><span class="badge paid" id="accessLastSignInRole">—</span></div>
           <div class="set-row"><div><div class="set-label">Customer and payment data</div><div class="set-sub">Only server-created checkout records with a submitted UPI reference are eligible for dashboard review.</div></div><span class="badge paid">Protected</span></div>
           <div class="set-row"><div><div class="set-label">Automatic reminders</div><div class="set-sub" id="accessReminderStatus">Checking reminder status…</div></div><span class="badge processing" id="accessReminderBadge">Ready</span></div>
         </div>
@@ -2185,9 +2187,23 @@ function submitSupportRequest(event){
 let dashboardRole=null;
 let employeeAccounts=[];
 let loginAudits=[];
+function getLatestLoginAudit(){
+  return loginAudits.reduce((latest,audit)=>{
+    const auditTime=Date.parse(audit?.signedInAt||''); const latestTime=Date.parse(latest?.signedInAt||'');
+    return Number.isFinite(auditTime)&&(!Number.isFinite(latestTime)||auditTime>latestTime)?audit:latest;
+  },null);
+}
+function renderLatestLoginAudit(){
+  const latest=getLatestLoginAudit();
+  const timeText=latest?formatDate(latest.signedInAt):'No successful dashboard sign-ins have been recorded yet.';
+  const roleText=latest?(latest.role==='admin'?'Administrator':'Employee'):'—';
+  ['dashboardLastSignIn','accessLastSignIn'].forEach(id=>{const target=document.getElementById(id); if(target) target.textContent=timeText;});
+  ['dashboardLastSignInRole','accessLastSignInRole'].forEach(id=>{const target=document.getElementById(id); if(target) target.textContent=roleText;});
+}
 function renderLoginAudits(){
   const root=document.getElementById('loginAuditList'); if(!root) return;
   root.innerHTML=loginAudits.length?loginAudits.map(audit=>`<tr><td>${escapeText(audit.email||'—')}</td><td>${audit.role==='admin'?'Administrator':'Employee'}</td><td class="secondary-cell">${formatDate(audit.signedInAt)}</td></tr>`).join(''):'<tr><td colspan="3" class="empty-state">No successful dashboard sign-ins have been recorded yet.</td></tr>';
+	  renderLatestLoginAudit();
 }
 function employeeAccountCard(account){ return `<article class="card team-card"><div class="team-card-head"><div class="avatar">${escapeText(initials(account.name))}</div><div class="team-card-meta"><div class="m-name">${escapeText(account.name)}</div><div class="team-card-email">${escapeText(account.email)}</div><div class="team-card-email">Restricted read-only dashboard access</div></div></div><div class="team-card-actions"><span class="badge paid">Authorized</span><span><button class="action-link" onclick="openEmployeeAccountDialog('reset',${Number(account.id)})">Reset password</button> · <button class="action-link" onclick="openEmployeeAccountDialog('remove',${Number(account.id)})">Remove</button></span></div></article>`; }
 function renderEmployeeAccounts(){ const root=document.getElementById('employeeAccountsList'); if(root) root.innerHTML=employeeAccounts.length?employeeAccounts.map(employeeAccountCard).join(''):'<div class="empty-state">No employee accounts have been authorized yet.</div>'; }

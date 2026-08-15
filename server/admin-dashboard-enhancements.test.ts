@@ -373,9 +373,13 @@ describe("protected merchant dashboard enhancements", () => {
     expect(routerSource).toContain("await db.recordMerchantDashboardLogin({ email, role })");
     expect(routerSource).toContain("loginAudits: publicProcedure");
     expect(routerSource).toContain("listMerchantDashboardLoginAudits");
-    expect(dashboardHtml).toContain("Successful login activity");
-    expect(dashboardHtml).toContain("renderLoginAudits()");
-    expect(dashboardHtml).toContain("91dab-login-audits");
+	    expect(dashboardHtml).toContain("Successful login activity");
+	    expect(dashboardHtml).toContain("renderLoginAudits()");
+	    expect(dashboardHtml).toContain('id="dashboardLastSignIn"');
+	    expect(dashboardHtml).toContain('id="accessLastSignIn"');
+	    expect(dashboardHtml).toContain("function getLatestLoginAudit()");
+	    expect(dashboardHtml).toContain("function renderLatestLoginAudit()");
+	    expect(dashboardHtml).toContain("91dab-login-audits");
     expect(adminSource).toContain('type: "91dab-login-audits"');
   });
 
