@@ -23,13 +23,14 @@ describe("dashboard notification sound", () => {
     expect(adminSource).toContain('type: "91dab-native-app-audio"');
   });
 
-  it("creates an audible browser-native two-ring bell only after the enabled sound context is running", () => {
+	  it("creates a louder browser-native five-ring bell only after the enabled sound context is running", () => {
     expect(dashboardHtml).toContain("async function prepareNotificationAudio()");
     expect(dashboardHtml).toContain("function playNotificationChime()");
     expect(dashboardHtml).toContain("if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false");
-    expect(dashboardHtml).toContain("[0,.42].forEach");
-    expect(dashboardHtml).toContain("[659.25,1318.51,1975.53].forEach");
-    expect(dashboardHtml).toContain(".11*notificationSoundVolume");
+	    expect(dashboardHtml).toContain("[0,.36,.72,1.08,1.44].forEach");
+	    expect(dashboardHtml).toContain("[659.25,1318.51,1975.53].forEach");
+	    expect(dashboardHtml).toContain(".17*notificationSoundVolume");
+	    expect(dashboardHtml).toContain("Each new alert rings five times.");
   });
 
   it("uses a distinct rocket-style sound only when a genuinely new trusted checkout reaches the payment QR stage", () => {
@@ -54,11 +55,14 @@ describe("dashboard notification sound", () => {
     expect(adminSource).toContain("if (orders.data !== undefined) event.currentTarget.contentWindow?.postMessage({ type: \"91dab-server-orders\"");
   });
 
-  it("opens the live notification bell reliably and keeps the control accessible", () => {
+	  it("opens the live notification bell reliably and keeps the control accessible", () => {
     expect(dashboardHtml).toContain('id="notificationBellButton"');
     expect(dashboardHtml).toContain('aria-controls="notifDd"');
     expect(dashboardHtml).toContain('role="region" aria-label="Live notifications"');
     expect(dashboardHtml).toContain("function toggleNotifDd(){");
-    expect(dashboardHtml).toContain("bell.setAttribute('aria-expanded',String(opening))");
-  });
+	    expect(dashboardHtml).toContain("bell.setAttribute('aria-expanded',String(opening))");
+	    expect(dashboardHtml).toContain("function positionNotificationDropdown()");
+	    expect(dashboardHtml).toContain("phone-notification-overlay");
+	    expect(dashboardHtml).toContain("notification-dropdown.phone-notification-overlay{position:fixed");
+	  });
 });

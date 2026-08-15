@@ -219,3 +219,5 @@
 - [x] Further tighten the spacing and formatting immediately above Scheduled DAB shipments in Inventory & Products.
 - [x] Add a protected dashboard profile-picture setting backed by secure file storage.
 - [x] Replace the DAB Dashboard console brand mark with the supplied 91 DANTA logo.
+- [x] Fix the protected notification layout at phone widths.
+- [x] Make each new dashboard notification ring louder five times while preserving volume controls.

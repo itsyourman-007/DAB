@@ -466,6 +466,11 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 		  .data-toolbar input,.data-toolbar select{min-width:0;flex-basis:100%;}
 		  .set-row{align-items:flex-start;}
 		  .set-row .action-btn{margin-left:0!important;}
+		  .notification-dropdown.phone-notification-overlay{position:fixed;top:var(--notification-top,108px);left:.75rem;right:.75rem;width:auto;max-height:calc(100dvh - var(--notification-top,108px) - .75rem);border-radius:14px;box-shadow:0 18px 42px rgba(16,24,40,.22);}
+		  .notification-dropdown.phone-notification-overlay .dd-list{max-height:calc(100dvh - var(--notification-top,108px) - 4.55rem);overscroll-behavior:contain;}
+		  .notification-dropdown.phone-notification-overlay .dd-item{align-items:flex-start;gap:.55rem;padding:.82rem .9rem;}
+		  .notification-dropdown.phone-notification-overlay .dd-item .dd-text{min-width:0;}
+		  .notification-dropdown.phone-notification-overlay .dd-time{padding-top:.12rem;}
 		  .field-row{display:grid;grid-template-columns:1fr;gap:0;}
 		  #screen-inventory-products .panel-head p{line-height:1.55;max-width:100%;}
 		  .shipment-plan{min-width:175px;}
@@ -1048,8 +1053,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <div class="set-row"><div><div class="set-label">New order alerts</div><div class="set-sub">Get a live notification when a buyer checks out</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Payment confirmations</div><div class="set-sub">Notify when a UPI reference is submitted</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Low stock warnings</div><div class="set-sub">Alert when any product drops below 50 units</div></div><button class="switch" onclick="this.classList.toggle('on')"></button></div>
-          <div class="set-row"><div><div class="set-label">Notification bell sound</div><div class="set-sub">Muted by default. Turn on an audible bell for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification bell sound" onclick="toggleNotificationSound()"></button></div>
-          <div class="set-row" style="align-items:flex-start;"><div style="flex:1;min-width:0;"><label class="set-label" for="notificationSoundVolume" style="display:block;margin-bottom:.3rem;">Bell volume <output id="notificationSoundVolumeValue">85%</output></label><input id="notificationSoundVolume" type="range" min="20" max="100" step="5" value="85" aria-label="Notification bell volume" oninput="setNotificationSoundVolume(this.value)"><div class="set-sub">Use Test bell to hear the selected volume.</div></div><button class="action-btn action-btn-customer" type="button" style="margin-left:1rem;" onclick="testNotificationBell()">Test bell</button></div>
+		  <div class="set-row"><div><div class="set-label">Notification bell sound</div><div class="set-sub">Muted by default. Turn on a louder five-ring bell for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification bell sound" onclick="toggleNotificationSound()"></button></div>
+		  <div class="set-row" style="align-items:flex-start;"><div style="flex:1;min-width:0;"><label class="set-label" for="notificationSoundVolume" style="display:block;margin-bottom:.3rem;">Bell volume <output id="notificationSoundVolumeValue">85%</output></label><input id="notificationSoundVolume" type="range" min="20" max="100" step="5" value="85" aria-label="Notification bell volume" oninput="setNotificationSoundVolume(this.value)"><div class="set-sub">Each new alert rings five times. Use Test bell to hear the selected volume.</div></div><button class="action-btn action-btn-customer" type="button" style="margin-left:1rem;" onclick="testNotificationBell()">Test bell</button></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
@@ -1192,7 +1197,7 @@ async function enableNativeAppNotificationAudio(){
 function playNotificationChime(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
   const now=notificationAudioContext.currentTime;
-  [0,.42].forEach((offset)=>{const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(.0001,now+offset); gain.gain.exponentialRampToValueAtTime(.11*notificationSoundVolume,now+offset+.012); gain.gain.exponentialRampToValueAtTime(.0001,now+offset+.34); gain.connect(notificationAudioContext.destination); [659.25,1318.51,1975.53].forEach((frequency)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+offset); oscillator.connect(gain); oscillator.start(now+offset); oscillator.stop(now+offset+.35);});});
+  [0,.36,.72,1.08,1.44].forEach((offset)=>{const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(.0001,now+offset); gain.gain.exponentialRampToValueAtTime(.17*notificationSoundVolume,now+offset+.012); gain.gain.exponentialRampToValueAtTime(.0001,now+offset+.29); gain.connect(notificationAudioContext.destination); [659.25,1318.51,1975.53].forEach((frequency)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+offset); oscillator.connect(gain); oscillator.start(now+offset); oscillator.stop(now+offset+.3);});});
   return true;
 }
 function playNewOrderRocketSound(){
@@ -2091,7 +2096,14 @@ function renderNotifications(){
 }
 function toggleNotifDd(){
   const dropdown=document.getElementById('notifDd'); const bell=document.getElementById('notificationBellButton'); if(!dropdown||!bell) return;
-  const opening=!dropdown.classList.contains('open'); dropdown.classList.toggle('open',opening); bell.setAttribute('aria-expanded',String(opening)); if(opening) renderNotifications();
+  const opening=!dropdown.classList.contains('open'); dropdown.classList.toggle('open',opening); bell.setAttribute('aria-expanded',String(opening)); if(opening){ renderNotifications(); positionNotificationDropdown(); } else { dropdown.classList.remove('phone-notification-overlay'); dropdown.style.removeProperty('--notification-top'); }
+}
+function positionNotificationDropdown(){
+  const dropdown=document.getElementById('notifDd'); const bell=document.getElementById('notificationBellButton'); if(!dropdown||!bell) return;
+  const phone=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
+  dropdown.classList.toggle('phone-notification-overlay',Boolean(phone));
+  if(phone){ const top=Math.min(Math.round(bell.getBoundingClientRect().bottom+10),Math.max(72,window.innerHeight-180)); dropdown.style.setProperty('--notification-top',`${top}px`); }
+  else dropdown.style.removeProperty('--notification-top');
 }
 function markAllRead(){
   notifications.forEach(n=>n.unread=false);
@@ -2104,6 +2116,7 @@ document.addEventListener('click', (e)=>{
   const pd = document.getElementById('profileDd');
   if(pd.classList.contains('open') && !e.target.closest('#profileDd') && !e.target.closest('.more-btn')) pd.classList.remove('open');
 });
+window.addEventListener('resize',()=>{ const dd=document.getElementById('notifDd'); if(dd?.classList.contains('open')) positionNotificationDropdown(); });
 
 /* ============================================================
    TEAM MANAGEMENT + SUPPORT
