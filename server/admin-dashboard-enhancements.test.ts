@@ -249,10 +249,13 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("id=\"screen-inventory-products\"");
     expect(dashboardHtml).toContain("function renderInventoryProducts()");
 	    expect(dashboardHtml).toContain("91dab-subscription-delivery-save");
+	    expect(dashboardHtml).toContain('class="inventory-shipment-region"');
+	    expect(dashboardHtml).toContain('Fulfillment queue');
+	    expect(dashboardHtml).toContain('Record scheduled allocations below');
 	    expect(dashboardHtml).toContain('class="card table-card inventory-shipment-card"');
-	    expect(dashboardHtml).toContain('class="inventory-shipment-intro"');
-	    expect(dashboardHtml).toContain('.inventory-shipment-card{margin-top:1.1rem;margin-bottom:1.1rem;overflow:hidden;}');
-	    expect(dashboardHtml).toContain('@media(max-width:620px){.inventory-shipment-card{margin-top:.85rem;margin-bottom:.9rem;}');
+	    expect(dashboardHtml).toContain('class="card table-card inventory-movement-card"');
+	    expect(dashboardHtml).toContain('.inventory-shipment-region{margin-top:1.45rem;padding-top:1.15rem;border-top:1px solid var(--border);}');
+	    expect(dashboardHtml).toContain('@media(max-width:620px){.inventory-shipment-region{margin-top:1.1rem;padding-top:1rem;}');
 	  });
 
   it("records buyer-selected monthly and yearly delivery schedules and displays their full twelve-month horizon", () => {

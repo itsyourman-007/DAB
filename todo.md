@@ -216,3 +216,4 @@
 - [x] Use the supplied 91 DANTA logo exactly as provided for the Android launcher icon and branded app launch screen.
 - [x] Correct the spacing and hierarchy immediately above Scheduled DAB shipments in Inventory & Products at phone and desktop widths.
 - [x] Replace the Android application logo resource with the newly supplied smaller 91 DANTA artwork and reissue the signed APK.
+- [x] Further tighten the spacing and formatting immediately above Scheduled DAB shipments in Inventory & Products.
