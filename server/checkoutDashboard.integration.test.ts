@@ -64,6 +64,23 @@ describeWithCheckoutDependencies("checkout to dashboard record lifecycle", () =>
     expect((await listMerchantOrders()).some((order) => order.orderId === orderId && order.paymentStatus === "pending")).toBe(true);
   }, 15_000);
 
+  it("persists the numeric UTR and its server-recorded submission timestamp", async () => {
+    if (!orderId) throw new Error("The checkout order fixture was not created");
+    const response = await fetch(`${baseUrl}/api/orders/${orderId}/utr`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ utr: "123456789012" }),
+    });
+    const payload = await response.json() as { status: string; utrSubmittedAt: string };
+    const saved = await getMerchantOrder(orderId);
+
+    expect(response.status).toBe(200);
+    expect(payload.status).toBe("utr_submitted");
+    expect(saved).toMatchObject({ utr: "123456789012", paymentStatus: "utr_submitted" });
+    expect(saved?.utrSubmittedAt).toBeInstanceOf(Date);
+    expect(new Date(payload.utrSubmittedAt).toISOString()).toBe(saved?.utrSubmittedAt?.toISOString());
+  }, 15_000);
+
   it("persists the buyer-selected first month for a recurring subscription", async () => {
     const response = await fetch(`${baseUrl}/api/orders`, {
       method: "POST",

@@ -40,6 +40,9 @@ const ADDITIVE_TABLES = {
     \`unitsPurchased\` int NOT NULL,
     \`revenueInr\` int NOT NULL,
     \`notes\` varchar(1000),
+    \`fulfillmentStatus\` varchar(32) NOT NULL DEFAULT 'not_shipped',
+    \`shippedAt\` timestamp,
+    \`deliveredAt\` timestamp,
     \`createdAt\` timestamp NOT NULL DEFAULT (now()),
     \`updatedAt\` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT \`merchantQuoteClientCustomizations_id\` PRIMARY KEY(\`id\`)
@@ -58,6 +61,10 @@ const ADDITIVE_TABLES = {
 
 const ADDITIVE_COLUMNS = {
   "merchantOrders.deliveryStartMonth": "ALTER TABLE `merchantOrders` ADD COLUMN `deliveryStartMonth` varchar(7)",
+  "merchantOrders.utrSubmittedAt": "ALTER TABLE `merchantOrders` ADD COLUMN `utrSubmittedAt` timestamp NULL",
+  "merchantQuoteClientCustomizations.fulfillmentStatus": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `fulfillmentStatus` varchar(32) NOT NULL DEFAULT 'not_shipped'",
+  "merchantQuoteClientCustomizations.shippedAt": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `shippedAt` timestamp",
+  "merchantQuoteClientCustomizations.deliveredAt": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `deliveredAt` timestamp",
 };
 
 const REQUIRED_TABLES = [...BASE_TABLES, ...Object.keys(ADDITIVE_TABLES)];
@@ -79,12 +86,17 @@ async function getMissingSchema() {
     const available = new Set(rows.map((row) => row.table_name));
     const missingTables = REQUIRED_TABLES.filter((table) => !available.has(table));
     const missingColumns = [];
-    if (available.has("merchantOrders")) {
+    const requiredColumns = {
+      merchantOrders: ["deliveryStartMonth", "utrSubmittedAt"],
+      merchantQuoteClientCustomizations: ["fulfillmentStatus", "shippedAt", "deliveredAt"],
+    };
+    for (const [table, columnsRequired] of Object.entries(requiredColumns)) {
+      if (!available.has(table)) continue;
       const [columns] = await connection.query(
-        "SELECT column_name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'merchantOrders'"
+        `SELECT column_name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '${table}'`
       );
       const existingColumns = new Set(columns.map((column) => column.column_name));
-      if (!existingColumns.has("deliveryStartMonth")) missingColumns.push("merchantOrders.deliveryStartMonth");
+      for (const column of columnsRequired) if (!existingColumns.has(column)) missingColumns.push(`${table}.${column}`);
     }
     return { missingTables, missingColumns };
   } finally {

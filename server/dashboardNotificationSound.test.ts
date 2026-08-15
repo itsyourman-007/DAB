@@ -21,6 +21,15 @@ describe("dashboard notification sound", () => {
     expect(dashboardHtml).toContain("[880,1320].forEach");
   });
 
+  it("uses a distinct rocket-style sound only for genuinely new trusted checkout orders", () => {
+    expect(dashboardHtml).toContain("function playNewOrderRocketSound()");
+    expect(dashboardHtml).toContain("oscillator.type='sawtooth'");
+    expect(dashboardHtml).toContain("oscillator.frequency.exponentialRampToValueAtTime(980,now+.27)");
+    expect(dashboardHtml).toContain("function notifyReceivedUpdate(title,text,sound='chime')");
+    expect(dashboardHtml).toContain("sound==='rocket'?playNewOrderRocketSound():playNotificationChime()");
+    expect(dashboardHtml).toContain("isNewCheckout?'rocket':'chime'");
+  });
+
   it("never chimes for the initial order hydration and only tracks trusted incoming order states or live-message events", () => {
     expect(dashboardHtml).toContain("let serverOrdersInitialized = false");
     expect(dashboardHtml).toContain("const receivedAlerts=serverOrdersInitialized?nextRecords.filter");

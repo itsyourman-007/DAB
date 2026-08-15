@@ -298,6 +298,50 @@ export const appRouter = router({
         });
         return db.listMerchantQuoteClientCustomizations();
       }),
+    updateQuoteClientCustomization: publicProcedure
+      .input(z.object({
+        id: z.number().int().positive(),
+        clientName: z.string().trim().min(2).max(160),
+        clientEmail: z.string().trim().email().max(320).nullable(),
+        clientPhone: z.string().trim().min(6).max(64).nullable(),
+        unitsPurchased: z.number().int().min(1).max(10_000_000),
+        revenueInr: z.number().int().min(0).max(1_000_000_000),
+        notes: z.string().trim().max(1000).nullable(),
+        password: z.string().min(1).max(256),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!(await isAdminSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        if (!(await passwordMatchesAdminPassword(input.password))) throw new TRPCError({ code: "UNAUTHORIZED", message: "Administrator password was not accepted" });
+        try {
+          await db.updateMerchantQuoteClientCustomization({ ...input, clientEmail: input.clientEmail?.toLowerCase() ?? null });
+        } catch (error) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error instanceof Error ? error.message : "Custom client sale could not be updated" });
+        }
+        return db.listMerchantQuoteClientCustomizations();
+      }),
+    deleteQuoteClientCustomization: publicProcedure
+      .input(z.object({ id: z.number().int().positive(), password: z.string().min(1).max(256) }))
+      .mutation(async ({ ctx, input }) => {
+        if (!(await isAdminSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        if (!(await passwordMatchesAdminPassword(input.password))) throw new TRPCError({ code: "UNAUTHORIZED", message: "Administrator password was not accepted" });
+        try {
+          await db.deleteMerchantQuoteClientCustomization(input.id);
+        } catch (error) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error instanceof Error ? error.message : "Custom client sale could not be deleted" });
+        }
+        return db.listMerchantQuoteClientCustomizations();
+      }),
+    updateQuoteClientCustomizationFulfillment: publicProcedure
+      .input(z.object({ id: z.number().int().positive(), status: z.enum(["shipped", "delivered"]) }))
+      .mutation(async ({ ctx, input }) => {
+        if (!(await isAdminSession(ctx.req.headers.cookie))) throw new TRPCError({ code: "FORBIDDEN", message: "Administrator access is required" });
+        try {
+          const customization = await db.updateMerchantQuoteClientCustomizationFulfillment(input);
+          return { customization, customizations: await db.listMerchantQuoteClientCustomizations(), inventory: await db.getMerchantInventory() };
+        } catch (error) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error instanceof Error ? error.message : "Custom client fulfillment could not be updated" });
+        }
+      }),
     setSubscriptionDelivery: publicProcedure
       .input(z.object({ orderId: z.string().trim().min(4).max(128), periodKey: z.string().regex(/^\d{4}-\d{2}$/), delivered: z.boolean() }))
       .mutation(async ({ ctx, input }) => {

@@ -1,5 +1,9 @@
 # Validation Record
 
+## Published dashboard shortcut endpoint
+
+On 15 August 2026, `https://dab-1-cizz.onrender.com/admin` was opened over HTTPS and completed its access check to show the existing protected 91DAB merchant dashboard login. The page presents the authorized username/email field, password field, and **Open dashboard** control; no password was entered or stored during this verification. This is the fixed URL to embed in the Android shortcut APK.
+
 The integrated site was opened in a browser under one origin. On first-load Dashboard view, the sidebar counters were zero, the Overview metrics showed ₹0 revenue, 0 active customers, 0 qualifying orders, and a 0% paid-order ratio. The sales, products, recent orders, and activity panels each displayed empty states rather than seeded records.
 
 The updated HTML scripts also passed syntax validation, while the project test suite passed with four tests, including the real-data-only regression coverage.

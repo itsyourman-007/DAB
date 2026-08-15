@@ -409,7 +409,7 @@ export async function getMerchantOrder(orderId: string): Promise<MerchantOrder |
 export async function submitMerchantOrderUtr(orderId: string, utr: string): Promise<MerchantOrder | undefined> {
   const db = await getDb();
   if (!db) throw new Error("Database is required for checkout records");
-  await db.update(merchantOrders).set({ utr, paymentStatus: "utr_submitted" }).where(and(
+  await db.update(merchantOrders).set({ utr, paymentStatus: "utr_submitted", utrSubmittedAt: new Date() }).where(and(
     eq(merchantOrders.orderId, orderId),
     eq(merchantOrders.source, "91dab-shop"),
     eq(merchantOrders.paymentStatus, "pending"),
@@ -631,6 +631,66 @@ export async function createMerchantQuoteClientCustomization(input: MerchantQuot
   const saved = (await db.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, id)).limit(1))[0];
   if (!saved) throw new Error("Quote client customisation could not be saved");
   return saved;
+}
+
+export async function updateMerchantQuoteClientCustomization(input: MerchantQuoteClientCustomizationInput & { id: number }): Promise<MerchantQuoteClientCustomization> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for quote client customisations");
+  const existing = (await db.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, input.id)).limit(1))[0];
+  if (!existing) throw new Error("Custom client sale was not found");
+  if (existing.fulfillmentStatus !== "not_shipped") throw new Error("A shipped custom client sale cannot be edited; record a correction instead");
+  await db.update(merchantQuoteClientCustomizations).set({
+    clientName: input.clientName,
+    clientEmail: input.clientEmail,
+    clientPhone: input.clientPhone,
+    unitsPurchased: input.unitsPurchased,
+    revenueInr: input.revenueInr,
+    notes: input.notes,
+  }).where(eq(merchantQuoteClientCustomizations.id, input.id));
+  const saved = (await db.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, input.id)).limit(1))[0];
+  if (!saved) throw new Error("Custom client sale could not be saved");
+  return saved;
+}
+
+export async function deleteMerchantQuoteClientCustomization(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for quote client customisations");
+  const existing = (await db.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, id)).limit(1))[0];
+  if (!existing) throw new Error("Custom client sale was not found");
+  if (existing.fulfillmentStatus !== "not_shipped") throw new Error("A shipped custom client sale cannot be deleted; record a correction instead");
+  await db.delete(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, id));
+}
+
+export async function updateMerchantQuoteClientCustomizationFulfillment(input: { id: number; status: "shipped" | "delivered" }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is required for quote client customisations");
+  return db.transaction(async (tx) => {
+    const existing = (await tx.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, input.id)).limit(1))[0];
+    if (!existing) throw new Error("Custom client sale was not found");
+    if (existing.fulfillmentStatus === "delivered") throw new Error("This custom client sale is already delivered");
+    if (input.status === "shipped") {
+      if (existing.fulfillmentStatus !== "not_shipped") throw new Error("This custom client sale is already shipped");
+      const allocationKey = `custom-client:${existing.id}:shipment`;
+      const existingAllocation = (await tx.select().from(merchantInventoryShipmentAllocations).where(eq(merchantInventoryShipmentAllocations.allocationKey, allocationKey)).limit(1))[0];
+      if (!existingAllocation) {
+        const inventory = (await tx.select().from(merchantInventory).where(eq(merchantInventory.id, 1)).limit(1))[0] ?? { id: 1, productKey: "dab", productName: "DAB", availableUnits: 0, configured: false, updatedAt: new Date() };
+        if (inventory.configured && inventory.availableUnits < existing.unitsPurchased) throw new Error(`Insufficient DAB stock for this shipment. ${existing.unitsPurchased} units are required and ${inventory.availableUnits} are available.`);
+        await tx.insert(merchantInventoryShipmentAllocations).values({ allocationKey, orderId: `CUSTOM-${existing.id}`, productKey: "dab", allocationKind: "custom-client", periodKey: null, units: existing.unitsPurchased });
+        if (inventory.configured) await tx.update(merchantInventory).set({ availableUnits: sql`${merchantInventory.availableUnits} - ${existing.unitsPurchased}` }).where(eq(merchantInventory.id, 1));
+      }
+    } else if (existing.fulfillmentStatus !== "shipped") {
+      throw new Error("Ship this custom client sale before marking it delivered");
+    }
+    const now = new Date();
+    await tx.update(merchantQuoteClientCustomizations).set({
+      fulfillmentStatus: input.status,
+      shippedAt: input.status === "shipped" ? now : existing.shippedAt ?? now,
+      deliveredAt: input.status === "delivered" ? now : existing.deliveredAt,
+    }).where(eq(merchantQuoteClientCustomizations.id, input.id));
+    const saved = (await tx.select().from(merchantQuoteClientCustomizations).where(eq(merchantQuoteClientCustomizations.id, input.id)).limit(1))[0];
+    if (!saved) throw new Error("Custom client fulfillment could not be saved");
+    return saved;
+  });
 }
 
 export async function listMerchantClinicQuoteLeads(): Promise<MerchantClinicQuoteLead[]> {

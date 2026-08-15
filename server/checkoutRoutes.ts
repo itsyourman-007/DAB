@@ -28,7 +28,7 @@ const createOrderInput = z.object({
   }),
 });
 
-const utrInput = z.object({ utr: z.string().trim().regex(/^[A-Za-z0-9-]{6,128}$/) });
+const utrInput = z.object({ utr: z.string().trim().regex(/^\d{6,128}$/) });
 const clinicQuoteInput = z.object({
   email: z.string().trim().email().max(320),
   phone: z.string().trim().min(6).max(64).nullable().optional(),
@@ -150,12 +150,12 @@ export function registerCheckoutRoutes(app: Express) {
       if (!order) return res.status(404).json({ error: "Order not found" });
       if (order.paymentStatus === "expired") return res.status(410).json({ error: "This payment request has expired" });
       if (order.paymentStatus === "paid") return res.status(409).json({ error: "This payment has already been confirmed" });
-      if (order.paymentStatus === "utr_submitted") return res.json({ ok: true, status: "utr_submitted" });
+      if (order.paymentStatus === "utr_submitted") return res.json({ ok: true, status: "utr_submitted", utrSubmittedAt: order.utrSubmittedAt });
       const updated = await db.submitMerchantOrderUtr(order.orderId, utr);
       if (!updated || updated.paymentStatus !== "utr_submitted") return res.status(409).json({ error: "The payment reference could not be recorded" });
-      return res.json({ ok: true, status: updated.paymentStatus });
+      return res.json({ ok: true, status: updated.paymentStatus, utrSubmittedAt: updated.utrSubmittedAt });
     } catch (error) {
-      if (error instanceof z.ZodError) return res.status(400).json({ error: "Enter a valid UPI reference" });
+      if (error instanceof z.ZodError) return res.status(400).json({ error: "Enter a numeric UPI reference containing 6 to 128 digits" });
       return res.status(500).json({ error: "Could not save reference number" });
     }
   });

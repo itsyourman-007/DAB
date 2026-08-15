@@ -63,8 +63,8 @@
 - [x] Add a production release-APK signing configuration path while retaining the verified installable debug APK for immediate testing.
 - [x] Visually inspect the temporary phone cart screen to confirm its product controls, totals, and checkout action remain usable and contained.
 - [x] Create and validate a PC-friendly website-only Render ZIP that excludes Android wrapper and build-script files while keeping the APK separate.
-- [ ] Replace the configurable Android wrapper with a fixed deployed dashboard shortcut that opens `/admin` directly and relies only on the existing administrator password login.
-- [ ] Replace the Android URL entry with a native password-first login screen that validates against a fixed stable server and opens the live dashboard only after successful authentication.
+- [x] Replace the configurable Android wrapper with a fixed deployed dashboard shortcut that opens `/admin` directly and relies only on the existing administrator password login.
+- [x] Supersede the separate native password-first screen with the requested fixed website shortcut; the existing server-validated website login remains the only login implementation.
 - [x] Collect and implement the user’s next requested website changes.
 - [x] Save the completed website checkpoint and export the project to the confirmed GitHub repository.
 - [x] Correct the landing-page MeitY TIDE 2.0 EIR Grant and Women’s Hackathon 3.0 recognition titles.
@@ -97,7 +97,7 @@
 - [x] Add durable Shipped and Delivered order status tracking with role-appropriate updates by administrators and authorized employees.
 - [x] Record protected dashboard logins and show the administrator a login audit list in Settings.
 - [x] Perform a final security-hardening, shop-flow, dashboard-flow, mobile-wrapper, and production launch-readiness review.
-- [ ] Build the fixed Android dashboard shortcut after receiving the final published HTTPS dashboard URL.
+- [x] Build the fixed Android dashboard shortcut after receiving and validating the final published HTTPS dashboard URL.
 - [x] Validate the post-change trusted lifecycle from checkout and UTR submission through payment verification, Shipped, Delivered, and successful-login audit persistence using self-cleaning database integration coverage.
 - [x] Inspect the existing Android debug APK: its packaged destination remains the intentional placeholder `https://yourdomain.com/admin`, so it must be rebuilt after the final public HTTPS URL is known.
 - [x] Delete only test orders whose buyer name is explicitly marked with “demo” after they have been retained for 24 hours, without deleting genuine customer orders.
@@ -180,3 +180,14 @@
 - [x] Add selected-month and complete 12-month scheduling for monthly and yearly subscriptions, record yearly monthly-versus-all-at-once delivery selection, and expose the schedule in the dashboard.
 - [x] Add a Customisation sidebar workflow for quote clients that supports selecting or adding a client and recording units purchased and revenue, then include those durable records in Home dashboard metrics.
 - [x] Add schema migrations, protected server procedures, regression coverage, validation, and GitHub synchronization for subscription schedules and quote-client customizations.
+- [ ] Add a scannable dashboard-app download QR control in the Connect app view, validate the available package target, and synchronize it to GitHub.
+- [x] Add a distinct user-enabled rocket-style sound for genuinely new trusted buyer checkout orders and regression coverage.
+- [x] Build a password-first downloadable Android dashboard APK that opens the dashboard login without requiring the user to enter a URL, then expose a valid download path.
+- [x] Add password-protected edit and delete actions for unshipped Customisation client sales, lock records after shipment, and preserve durable data integrity.
+- [x] Display confirmed custom-client sales in Payments, Transaction History, and Delivery Tracking with the same protected data model used by buyer records.
+- [x] Add custom-client fulfillment schema migration checks to the Render-safe additive database bootstrap and database-backed regression coverage.
+- [x] Rebuild and validate the fixed password-first Android dashboard APK after receiving the stable public HTTPS dashboard URL; no in-app URL entry is included.
+- [ ] Run the full application regression suite and production build, save a checkpoint, and synchronize this release—including the APK when its endpoint is known—to GitHub for Render auto-deploy.
+- [x] Replace the Android URL setup flow with a fixed `/admin` website shortcut that presents only the existing dashboard login and uses no separate native dashboard implementation.
+- [x] Require a numeric UTR/reference ID in the shop payment interface, clearly mark the field with an asterisk, and prevent payment-reference submission until it is valid.
+- [x] Persist the exact UTR-submission timestamp and display it in the protected Payments and Transaction History views with regression coverage.

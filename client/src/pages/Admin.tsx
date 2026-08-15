@@ -108,6 +108,9 @@ export default function Admin() {
   const increaseInventory = trpc.admin.increaseInventory.useMutation();
   const setSubscriptionDelivery = trpc.admin.setSubscriptionDelivery.useMutation();
   const createQuoteClientCustomization = trpc.admin.createQuoteClientCustomization.useMutation();
+  const updateQuoteClientCustomization = trpc.admin.updateQuoteClientCustomization.useMutation();
+  const deleteQuoteClientCustomization = trpc.admin.deleteQuoteClientCustomization.useMutation();
+  const updateQuoteClientCustomizationFulfillment = trpc.admin.updateQuoteClientCustomizationFulfillment.useMutation();
   const activateSubscriptionReminders = trpc.admin.activateSubscriptionReminders.useMutation();
   const activateDemoOrderCleanup = trpc.admin.activateDemoOrderCleanup.useMutation();
   const submitSupportRequest = trpc.admin.submitSupportRequest.useMutation();
@@ -347,6 +350,33 @@ export default function Admin() {
           onError: (error) => respond({ type: "91dab-quote-client-customization-result", success: false, message: error.message }),
         });
       }
+      if (event.data.type === "91dab-quote-client-customization-update") {
+        updateQuoteClientCustomization.mutate(event.data.customization, {
+          onSuccess: async (customizations) => {
+            await utils.admin.quoteClientCustomizations.invalidate();
+            respond({ type: "91dab-quote-client-customization-result", success: true, action: "update", customizations });
+          },
+          onError: (error) => respond({ type: "91dab-quote-client-customization-result", success: false, action: "update", message: error.message }),
+        });
+      }
+      if (event.data.type === "91dab-quote-client-customization-delete") {
+        deleteQuoteClientCustomization.mutate(event.data.customization, {
+          onSuccess: async (customizations) => {
+            await utils.admin.quoteClientCustomizations.invalidate();
+            respond({ type: "91dab-quote-client-customization-result", success: true, action: "delete", customizations });
+          },
+          onError: (error) => respond({ type: "91dab-quote-client-customization-result", success: false, action: "delete", message: error.message }),
+        });
+      }
+      if (event.data.type === "91dab-quote-client-customization-fulfillment") {
+        updateQuoteClientCustomizationFulfillment.mutate(event.data.customization, {
+          onSuccess: async ({ customization, customizations, inventory }) => {
+            await Promise.all([utils.admin.quoteClientCustomizations.invalidate(), utils.admin.inventory.invalidate(), utils.admin.inventoryAllocations.invalidate()]);
+            respond({ type: "91dab-quote-client-customization-fulfillment-result", success: true, customization, customizations, inventory });
+          },
+          onError: (error) => respond({ type: "91dab-quote-client-customization-fulfillment-result", success: false, message: error.message }),
+        });
+      }
       if (event.data.type === "91dab-reminder-activate") {
         activateSubscriptionReminders.mutate(undefined, {
           onSuccess: async (reminder) => {
@@ -374,7 +404,7 @@ export default function Admin() {
     };
     window.addEventListener("message", handleEmbeddedDashboardAction);
     return () => window.removeEventListener("message", handleEmbeddedDashboardAction);
-  }, [createTeamMember, updateTeamMember, removeTeamMember, createTeam, updateTeam, removeTeam, createEmployeeAccount, resetEmployeePassword, removeEmployeeAccount, updateProfile, markOrderPaid, updateFulfillment, resendFulfillmentEmail, setInventory, increaseInventory, setSubscriptionDelivery, createQuoteClientCustomization, activateSubscriptionReminders, activateDemoOrderCleanup, submitSupportRequest, utils]);
+  }, [createTeamMember, updateTeamMember, removeTeamMember, createTeam, updateTeam, removeTeam, createEmployeeAccount, resetEmployeePassword, removeEmployeeAccount, updateProfile, markOrderPaid, updateFulfillment, resendFulfillmentEmail, setInventory, increaseInventory, setSubscriptionDelivery, createQuoteClientCustomization, updateQuoteClientCustomization, deleteQuoteClientCustomization, updateQuoteClientCustomizationFulfillment, activateSubscriptionReminders, activateDemoOrderCleanup, submitSupportRequest, utils]);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

@@ -37,6 +37,9 @@ describe("trusted checkout QR endpoint", () => {
 
   beforeEach(() => {
     vi.mocked(db.createMerchantCheckoutOrder).mockClear();
+    vi.mocked(db.getMerchantOrder).mockReset();
+    vi.mocked(db.expireMerchantOrder).mockReset();
+    vi.mocked(db.submitMerchantOrderUtr).mockReset();
   });
 
   afterEach(() => {
@@ -91,5 +94,36 @@ describe("trusted checkout QR endpoint", () => {
     expect(response.status).toBe(503);
     expect(body.error).toContain("Merchant payment configuration is incomplete");
     expect(db.createMerchantCheckoutOrder).not.toHaveBeenCalled();
+  });
+
+  it("accepts only a numeric UTR and returns the server-recorded submission time", async () => {
+    const order = { orderId: "91DAB-UTR-TEST", createdAt: new Date(), paymentStatus: "pending" as const };
+    const submittedAt = new Date("2026-08-15T06:07:00.000Z");
+    vi.mocked(db.getMerchantOrder).mockResolvedValue(order as never);
+    vi.mocked(db.submitMerchantOrderUtr).mockResolvedValue({ ...order, utr: "123456789012", paymentStatus: "utr_submitted", utrSubmittedAt: submittedAt } as never);
+
+    const response = await fetch(`${baseUrl}/api/orders/${order.orderId}/utr`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ utr: "123456789012" }),
+    });
+    const body = await response.json() as { status: string; utrSubmittedAt: string };
+    expect(response.status).toBe(200);
+    expect(db.submitMerchantOrderUtr).toHaveBeenCalledWith(order.orderId, "123456789012");
+    expect(body.status).toBe("utr_submitted");
+    expect(new Date(body.utrSubmittedAt).toISOString()).toBe(submittedAt.toISOString());
+  });
+
+  it("rejects non-numeric or too-short buyer UTR values before checking an order", async () => {
+    const response = await fetch(`${baseUrl}/api/orders/91DAB-UTR-INVALID/utr`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ utr: "UPI-12AB" }),
+    });
+    const body = await response.json() as { error: string };
+    expect(response.status).toBe(400);
+    expect(body.error).toContain("numeric UPI reference");
+    expect(db.getMerchantOrder).not.toHaveBeenCalled();
+    expect(db.submitMerchantOrderUtr).not.toHaveBeenCalled();
   });
 });

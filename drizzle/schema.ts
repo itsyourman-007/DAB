@@ -132,6 +132,8 @@ export const merchantOrders = mysqlTable("merchantOrders", {
   source: varchar("source", { length: 32 }).default("91dab-shop").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  /** Server-recorded instant at which the buyer submitted a numeric UPI UTR/reference ID. */
+  utrSubmittedAt: timestamp("utrSubmittedAt"),
   verifiedAt: timestamp("verifiedAt"),
   inventoryDeductedAt: timestamp("inventoryDeductedAt"),
   shippedAt: timestamp("shippedAt"),
@@ -196,6 +198,9 @@ export const merchantQuoteClientCustomizations = mysqlTable("merchantQuoteClient
   unitsPurchased: int("unitsPurchased").notNull(),
   revenueInr: int("revenueInr").notNull(),
   notes: varchar("notes", { length: 1000 }),
+  fulfillmentStatus: varchar("fulfillmentStatus", { length: 32 }).notNull().default("not_shipped"),
+  shippedAt: timestamp("shippedAt"),
+  deliveredAt: timestamp("deliveredAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

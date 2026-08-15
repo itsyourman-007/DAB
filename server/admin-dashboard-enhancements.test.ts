@@ -30,6 +30,23 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).not.toContain("maskedUtr(o.utr)");
   });
 
+  it("requires a numeric buyer UTR/reference and shows the durable trusted submission time in protected payment records", () => {
+    expect(schemaSource).toContain('utrSubmittedAt: timestamp("utrSubmittedAt")');
+    expect(checkoutSource).toContain("regex(/^\\d{6,128}$/)");
+    expect(checkoutSource).toContain('utrSubmittedAt: updated.utrSubmittedAt');
+    expect(dbSource).toContain('utrSubmittedAt: new Date()');
+    expect(shopHtml).toContain('UPI UTR / reference ID <span class="required-mark" aria-hidden="true">*</span>');
+    expect(shopHtml).toContain('inputmode="numeric"');
+    expect(shopHtml).toContain('pattern="[0-9]{6,128}"');
+    expect(shopHtml).toContain("const digitsOnly=this.value.replace(/\\D/g,'');");
+    expect(shopHtml).toContain("if(!/^\\d{6,128}$/.test(val))");
+    expect(dashboardHtml).toContain("utrSubmittedAt: raw.utrSubmittedAt || null");
+    expect(dashboardHtml).toContain("function formatDateTime(value)");
+    expect(dashboardHtml).toContain("<th>UTR submitted</th>");
+    expect(dashboardHtml).toContain("formatDateTime(o.utrSubmittedAt)");
+    expect(dashboardHtml).toContain("'UTR submitted at'");
+  });
+
   it("shows a clickable Live Store Data monitor that distinguishes connected protected polling from an offline feed", () => {
     expect(dashboardHtml).toContain('id="liveStoreMonitor"');
     expect(dashboardHtml).toContain('onclick="showLiveStoreStatus()"');
@@ -267,6 +284,26 @@ describe("protected merchant dashboard enhancements", () => {
     expect(schemaSource).toContain('mysqlTable("fulfillmentNotificationEmails"');
     expect(routerSource).toContain("sendBuyerFulfillmentConfirmation");
     expect(routerSource).toContain("reserveFulfillmentNotificationEmail");
+  });
+
+  it("carries confirmed custom-client sales into Payments, Transaction History, and Delivery Tracking with locked shipment lifecycle controls", () => {
+    expect(schemaSource).toContain('fulfillmentStatus: varchar("fulfillmentStatus", { length: 32 })');
+    expect(routerSource).toContain("updateQuoteClientCustomization: publicProcedure");
+    expect(routerSource).toContain("deleteQuoteClientCustomization: publicProcedure");
+    expect(routerSource).toContain("updateQuoteClientCustomizationFulfillment: publicProcedure");
+    expect(dbSource).toContain("A shipped custom client sale cannot be edited; record a correction instead");
+    expect(dbSource).toContain("A shipped custom client sale cannot be deleted; record a correction instead");
+    expect(dbSource).toContain("custom-client:${existing.id}:shipment");
+    expect(adminSource).toContain("91dab-quote-client-customization-update");
+    expect(adminSource).toContain("91dab-quote-client-customization-delete");
+    expect(adminSource).toContain("91dab-quote-client-customization-fulfillment");
+    expect(dashboardHtml).toContain("function customSaleFulfillmentAction(item)");
+    expect(dashboardHtml).toContain("function customSaleMatches(item,search)");
+    expect(dashboardHtml).toContain("CUSTOM-${item.id}");
+    expect(dashboardHtml).toContain("Custom record");
+    expect(dashboardHtml).toContain("customSalePlan(item)");
+    expect(dashboardHtml).toContain("quoteClientCustomizations.filter(item=>item.fulfillmentStatus!=='delivered')");
+    expect(dashboardHtml).toContain("if(data.type==='91dab-quote-client-customizations'){ quoteClientCustomizations=Array.isArray(data.customizations)?data.customizations:[]; syncDashboardViews(); }");
   });
 
   it("records only successful dashboard logins and displays the protected audit list to administrators", () => {
