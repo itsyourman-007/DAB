@@ -392,6 +392,7 @@ tbody tr:last-child td{border-bottom:none;}
 /* notif dropdown */
 .dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(16,24,40,.14);z-index:60;display:none;overflow:hidden;}
 .dropdown.open{display:block;}
+.notification-dropdown{width:min(340px,calc(100vw - 24px));}
 .dd-head{padding:.9rem 1.1rem;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;}
 .dd-head h4{margin:0;font-size:.9rem;}
 .dd-head button{font-size:.74rem;color:var(--accent);font-weight:600;}
@@ -612,11 +613,11 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <svg class="icon" id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
         <div style="position:relative;">
-          <button class="icon-btn" title="Notifications" onclick="toggleNotifDd()">
+          <button class="icon-btn" id="notificationBellButton" type="button" title="Notifications" aria-label="Open live notifications" aria-expanded="false" aria-controls="notifDd" onclick="toggleNotifDd()">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="bell-dot" id="bellDot">0</span>
           </button>
-          <div class="dropdown" id="notifDd">
+          <div class="dropdown notification-dropdown" id="notifDd" role="region" aria-label="Live notifications">
             <div class="dd-head"><h4>Notifications</h4><button onclick="markAllRead()">Mark all read</button></div>
             <div class="dd-list" id="notifList"></div>
           </div>
@@ -1020,7 +1021,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <div class="set-row"><div><div class="set-label">New order alerts</div><div class="set-sub">Get a live notification when a buyer checks out</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Payment confirmations</div><div class="set-sub">Notify when a UPI reference is submitted</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Low stock warnings</div><div class="set-sub">Alert when any product drops below 50 units</div></div><button class="switch" onclick="this.classList.toggle('on')"></button></div>
-          <div class="set-row"><div><div class="set-label">Notification sound</div><div class="set-sub">Muted by default. Turn on a gentle chime for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification sound" onclick="toggleNotificationSound()"></button></div>
+          <div class="set-row"><div><div class="set-label">Notification bell sound</div><div class="set-sub">Muted by default. Turn on an audible bell for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification bell sound" onclick="toggleNotificationSound()"></button></div>
+          <div class="set-row" style="align-items:flex-start;"><div style="flex:1;min-width:0;"><label class="set-label" for="notificationSoundVolume" style="display:block;margin-bottom:.3rem;">Bell volume <output id="notificationSoundVolumeValue">85%</output></label><input id="notificationSoundVolume" type="range" min="20" max="100" step="5" value="85" aria-label="Notification bell volume" oninput="setNotificationSoundVolume(this.value)"><div class="set-sub">Use Test bell to hear the selected volume.</div></div><button class="action-btn action-btn-customer" type="button" style="margin-left:1rem;" onclick="testNotificationBell()">Test bell</button></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
@@ -1118,7 +1120,9 @@ let activeQuote = null;
 const paymentEmailStates = {};
 const fulfillmentEmailStates = {};
 const NOTIFICATION_SOUND_KEY = '91dab_notification_sound_enabled';
+const NOTIFICATION_SOUND_VOLUME_KEY = '91dab_notification_sound_volume';
 let notificationSoundEnabled = localStorage.getItem(NOTIFICATION_SOUND_KEY) === 'true';
+let notificationSoundVolume = Math.min(1,Math.max(.2,Number(localStorage.getItem(NOTIFICATION_SOUND_VOLUME_KEY)||'.85')));
 let notificationAudioContext = null;
 let serverOrdersInitialized = false;
 
@@ -1126,7 +1130,14 @@ function syncNotificationSoundControl(){
   const control=document.getElementById('notificationSoundSwitch'); if(!control||typeof control.setAttribute!=='function') return;
   control.classList.toggle('on',notificationSoundEnabled);
   control.setAttribute('aria-pressed',String(notificationSoundEnabled));
-  control.setAttribute('aria-label',notificationSoundEnabled?'Mute notification sound':'Enable notification sound');
+  control.setAttribute('aria-label',notificationSoundEnabled?'Mute notification bell sound':'Enable notification bell sound');
+  const volumeInput=document.getElementById('notificationSoundVolume'); if(volumeInput) volumeInput.value=String(Math.round(notificationSoundVolume*100));
+  const volumeValue=document.getElementById('notificationSoundVolumeValue'); if(volumeValue) volumeValue.textContent=`${Math.round(notificationSoundVolume*100)}%`;
+}
+function setNotificationSoundVolume(value){
+  notificationSoundVolume=Math.min(1,Math.max(.2,Number(value)/100||.85));
+  try{localStorage.setItem(NOTIFICATION_SOUND_VOLUME_KEY,String(notificationSoundVolume));}catch(err){}
+  syncNotificationSoundControl();
 }
 async function prepareNotificationAudio(){
   const AudioContextClass=window.AudioContext||window.webkitAudioContext;
@@ -1139,28 +1150,33 @@ async function toggleNotificationSound(){
   notificationSoundEnabled=!notificationSoundEnabled;
   try{localStorage.setItem(NOTIFICATION_SOUND_KEY,String(notificationSoundEnabled));}catch(err){}
   if(notificationSoundEnabled){
-    try{await prepareNotificationAudio(); showToast('Notification sound enabled. It will chime only for new received updates.','success');}
+    try{await prepareNotificationAudio(); showToast('Notification bell enabled. It rings only for new received updates.','success');}
     catch(err){notificationSoundEnabled=false; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'false');}catch(storageErr){} showToast('Your browser blocked notification sound. Try the switch again after interacting with this page.','info');}
-  } else { showToast('Notification sound muted.','info'); }
+  } else { showToast('Notification bell muted.','info'); }
   syncNotificationSoundControl();
 }
 function playNotificationChime(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
   const now=notificationAudioContext.currentTime;
-  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.055,now+.015); gain.gain.exponentialRampToValueAtTime(0.0001,now+.32); gain.connect(notificationAudioContext.destination);
-  [880,1320].forEach((frequency,index)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+index*.1); oscillator.connect(gain); oscillator.start(now+index*.1); oscillator.stop(now+index*.1+.15);});
+  [0,.42].forEach((offset)=>{const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(.0001,now+offset); gain.gain.exponentialRampToValueAtTime(.11*notificationSoundVolume,now+offset+.012); gain.gain.exponentialRampToValueAtTime(.0001,now+offset+.34); gain.connect(notificationAudioContext.destination); [659.25,1318.51,1975.53].forEach((frequency)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+offset); oscillator.connect(gain); oscillator.start(now+offset); oscillator.stop(now+offset+.35);});});
   return true;
 }
 function playNewOrderRocketSound(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
   const now=notificationAudioContext.currentTime;
-  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.075,now+.025); gain.gain.exponentialRampToValueAtTime(0.0001,now+.46); gain.connect(notificationAudioContext.destination);
+  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(.075*notificationSoundVolume,now+.025); gain.gain.exponentialRampToValueAtTime(0.0001,now+.46); gain.connect(notificationAudioContext.destination);
   const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sawtooth'; oscillator.frequency.setValueAtTime(150,now); oscillator.frequency.exponentialRampToValueAtTime(980,now+.27); oscillator.frequency.exponentialRampToValueAtTime(340,now+.46); oscillator.connect(gain); oscillator.start(now); oscillator.stop(now+.48);
   return true;
 }
 function notifyReceivedUpdate(title,text,sound='chime'){
   notifications.unshift({title,text,time:'Just now',unread:true}); notifications=notifications.slice(0,20);
   renderNotifications(); sound==='rocket'?playNewOrderRocketSound():playNotificationChime();
+}
+async function testNotificationBell(){
+  if(!notificationSoundEnabled){ notificationSoundEnabled=true; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'true');}catch(err){} syncNotificationSoundControl(); }
+  const ready=await prepareNotificationAudio();
+  if(!ready){ showToast('Your browser blocked the bell. Try Test bell again after interacting with this page.','info'); return; }
+  playNotificationChime(); showToast(`Bell tested at ${Math.round(notificationSoundVolume*100)}% volume.`,'success');
 }
 
 function readShopStorage(key){
@@ -1775,7 +1791,8 @@ function updateShopBadges(){
   const d=document.getElementById('deliveryTrackingBadge'); if(d){const count=orders.filter(o=>o.paymentStatus==='paid'&&o.fulfillmentStatus!=='delivered').length+quoteClientCustomizations.filter(item=>item.fulfillmentStatus!=='delivered').length;d.textContent=count;d.style.display=count?'':'none';}
 }
 function csvCell(value){ return `"${String(value??'').replace(/"/g,'""')}"`; }
-function downloadCsv(filename,headers,rows){ const csv=[headers, ...rows].map(row=>row.map(csvCell).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
+function excelTextCsvCell(value){ return csvCell(`="${String(value??'')}"`); }
+function downloadCsv(filename,headers,rows){ const csv='\uFEFF'+[headers, ...rows].map((row,rowIndex)=>row.map((value,columnIndex)=>rowIndex>0&&headers[columnIndex]==='UPI UTR / reference (full)'?excelTextCsvCell(value):csvCell(value)).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
 const ORDER_CSV_HEADERS=['Order ID','Customer name','Customer email','Phone number','Delivery address','City','State','PIN code','Plan','Quantity','Amount INR','Payment method','UPI UTR / reference (full)','UTR submitted at','Payment status','Order date'];
 function orderCsvRows(){ return orders.map(o=>{ const info=o.orderInfo||{}; return [o.id,o.customer,info.email||'',info.phone||'',info.address||'',info.city||'',info.state||'',info.pincode||'',o.plan,Number(o.qty)||1,o.amount,o.paymentMethod||'UPI',String(o.utr??''),formatDateTime(o.utrSubmittedAt),o.paymentStatus||'pending',formatDate(o.created)]; }); }
 function exportCustomersCSV(){ downloadCsv('91dab-customers.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete customer and order details exported to CSV','success'); }
@@ -1999,18 +2016,20 @@ document.getElementById('dayModal').addEventListener('click', (e)=>{ if(e.target
 
 /* ---------- notifications ---------- */
 function renderNotifications(){
-  document.getElementById('notifList').innerHTML = notifications.map(n=>`
+  const list=document.getElementById('notifList'); const bellDot=document.getElementById('bellDot'); if(!list||!bellDot) return;
+  list.innerHTML = notifications.map(n=>`
     <div class="dd-item">
       <div class="act-ic" style="width:30px;height:30px;">${ICONS.cart}</div>
       <div class="dd-text"><b>${n.title}</b><span>${n.text}</span></div>
       <div class="dd-time">${n.time}</div>
     </div>`).join('') || '<div class="empty-state">No notifications yet.</div>';
   const unread = notifications.filter(n=>n.unread).length;
-  document.getElementById('bellDot').style.display = unread ? '' : 'none';
-  document.getElementById('bellDot').textContent = unread;
+  bellDot.style.display = unread ? '' : 'none';
+  bellDot.textContent = unread;
 }
 function toggleNotifDd(){
-  document.getElementById('notifDd').classList.toggle('open');
+  const dropdown=document.getElementById('notifDd'); const bell=document.getElementById('notificationBellButton'); if(!dropdown||!bell) return;
+  const opening=!dropdown.classList.contains('open'); dropdown.classList.toggle('open',opening); bell.setAttribute('aria-expanded',String(opening)); if(opening) renderNotifications();
 }
 function markAllRead(){
   notifications.forEach(n=>n.unread=false);
@@ -2018,7 +2037,8 @@ function markAllRead(){
 }
 document.addEventListener('click', (e)=>{
   const dd = document.getElementById('notifDd');
-  if(dd.classList.contains('open') && !e.target.closest('#notifDd') && !e.target.closest('[title="Notifications"]')) dd.classList.remove('open');
+  const bell=document.getElementById('notificationBellButton');
+  if(dd&&dd.classList.contains('open') && !e.target.closest('#notifDd') && !e.target.closest('#notificationBellButton')){ dd.classList.remove('open'); bell?.setAttribute('aria-expanded','false'); }
   const pd = document.getElementById('profileDd');
   if(pd.classList.contains('open') && !e.target.closest('#profileDd') && !e.target.closest('.more-btn')) pd.classList.remove('open');
 });

@@ -197,3 +197,5 @@
 - [x] Replace only the buyer-facing UTR instruction with the requested “Mandatorily enter the payment UTR/reference ID after the payment *” wording, retaining numeric-only validation and full UTR CSV export.
 - [x] Replace the Connect app placeholder with a scannable QR code and direct signed-APK download action, using a stable public release destination.
 - [x] Verify the dashboard shortcut’s phone layout and document that live website updates appear in existing APK installs, while native-wrapper updates require a new APK install.
+- [x] Make the dashboard notification bell open live protected notifications, add an audible adjustable bell volume control in Settings, and cover the interaction with regression tests.
+- [x] Export UTR/reference IDs as Excel-safe text so complete numeric values up to 128 digits remain visible without scientific notation or precision loss.

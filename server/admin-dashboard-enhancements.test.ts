@@ -19,6 +19,9 @@ describe("protected merchant dashboard enhancements", () => {
     });
     expect(dashboardHtml).toContain("function orderCsvRows()");
     expect(dashboardHtml).toContain("String(o.utr??'')");
+    expect(dashboardHtml).toContain("function excelTextCsvCell(value)");
+    expect(dashboardHtml).toContain("'UPI UTR / reference (full)'?excelTextCsvCell(value):csvCell(value)");
+    expect(dashboardHtml).toContain("'\\uFEFF'+[headers, ...rows]");
     expect(dashboardHtml).toContain("downloadCsv('91dab-orders.csv',ORDER_CSV_HEADERS,orderCsvRows())");
   });
 
