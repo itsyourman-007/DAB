@@ -187,7 +187,7 @@
 - [x] Display confirmed custom-client sales in Payments, Transaction History, and Delivery Tracking with the same protected data model used by buyer records.
 - [x] Add custom-client fulfillment schema migration checks to the Render-safe additive database bootstrap and database-backed regression coverage.
 - [x] Rebuild and validate the fixed password-first Android dashboard APK after receiving the stable public HTTPS dashboard URL; no in-app URL entry is included.
-- [ ] Run the full application regression suite and production build, save a checkpoint, and synchronize this release—including the APK when its endpoint is known—to GitHub for Render auto-deploy.
+- [x] Run the full application regression suite and production build, save a checkpoint, and synchronize this release—including the APK when its endpoint is known—to GitHub for Render auto-deploy.
 - [x] Replace the Android URL setup flow with a fixed `/admin` website shortcut that presents only the existing dashboard login and uses no separate native dashboard implementation.
 - [x] Require a numeric UTR/reference ID in the shop payment interface, clearly mark the field with an asterisk, and prevent payment-reference submission until it is valid.
 - [x] Persist the exact UTR-submission timestamp and display it in the protected Payments and Transaction History views with regression coverage.
