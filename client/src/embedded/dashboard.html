@@ -161,8 +161,8 @@ svg{display:block;}
 .bars.many .bar-day{font-size:.66rem;}
 .y-axis{position:absolute;left:0;top:0;bottom:26px;display:flex;flex-direction:column;justify-content:space-between;font-size:.72rem;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;}
-.bar{width:60%;max-width:46px;border-radius:8px 8px 3px 3px;background:var(--card);border:1px solid var(--border);transition:height .5s cubic-bezier(.2,.8,.2,1),background .2s;cursor:pointer;}
-.bar.hi{background:linear-gradient(180deg,var(--accent-2),var(--accent));border-color:transparent;}
+	.bar{width:60%;max-width:46px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#8b5cf6,#6d28d9);border:1px solid transparent;transition:height .5s cubic-bezier(.2,.8,.2,1),filter .2s;cursor:pointer;}
+	.bar.hi{background:linear-gradient(180deg,#a78bfa,#5b21b6);border-color:transparent;filter:brightness(1.08);}
 .bar-day{font-size:.76rem;color:var(--text-faint);margin-top:.7rem;}
 .bar-col.hi .bar-day{color:var(--text);font-weight:700;}
 .bar-tip{position:absolute;top:-52px;left:50%;transform:translateX(-50%);background:#111318;color:#fff;padding:.45rem .65rem;border-radius:8px;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;text-align:center;z-index:3;}
@@ -1417,27 +1417,37 @@ let chartMode = 'weekly';
 function fmtMoney(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function fmtINR(n){ return '\u20B9' + Math.round(n).toLocaleString('en-IN'); }
 
+function confirmedRevenueRecords(){
+  const paidBuyerSales=orders.filter(order=>order.paymentStatus==='paid').map(order=>({amount:Number(order.amount)||0,createdAt:order.created,source:'buyer'}));
+  const confirmedCustomSales=quoteClientCustomizations.map(item=>({amount:Number(item.revenueInr)||0,createdAt:item.createdAt,source:'custom'}));
+  return [...paidBuyerSales,...confirmedCustomSales].filter(record=>Number.isFinite(record.amount)&&record.amount>=0&&record.createdAt&&!Number.isNaN(new Date(record.createdAt).getTime()));
+}
+function confirmedRevenueTotal(){ return confirmedRevenueRecords().reduce((sum,record)=>sum+record.amount,0); }
+
 function renderBars(){
   const wrap = document.getElementById('barsWrap');
-  const paidOrders = orders.filter(order=>order.paymentStatus==='paid');
-  if(!paidOrders.length){
+  const confirmedSales=confirmedRevenueRecords();
+  if(!confirmedSales.length){
     wrap.classList.remove('many');
     wrap.innerHTML = '<div class="empty-state" style="margin:auto;">No paid sales yet. Sales performance will appear after a payment is confirmed.</div>';
     return;
   }
-  const now = new Date();
   const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const mondayOffset = (now.getDay()+6)%7;
   const data = chartMode === 'weekly'
-    ? Array.from({length:7},(_,index)=>{const date=new Date(now);date.setHours(0,0,0,0);date.setDate(now.getDate()-mondayOffset+index);return {key:date.toDateString(),d:WEEKDAY_LABELS[index],v:0};})
-    : Array.from({length:12},(_,index)=>{const date=new Date(now.getFullYear(),index,1);return {key:`${date.getFullYear()}-${date.getMonth()}`,d:MONTH_LABELS[index],v:0};});
-  paidOrders.forEach(order=>{
-    const date = new Date(order.created);
-    const key = chartMode === 'weekly' ? date.toDateString() : `${date.getFullYear()}-${date.getMonth()}`;
+    ? WEEKDAY_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))
+    : MONTH_LABELS.map((label,index)=>({key:String(index),d:label,v:0}));
+  confirmedSales.forEach(record=>{
+    const date = new Date(record.createdAt);
+    if(Number.isNaN(date.getTime())) return;
+    const key = chartMode === 'weekly' ? String((date.getDay()+6)%7) : String(date.getMonth());
     const bucket = data.find(item=>item.key===key);
-    if(bucket) bucket.v += Number(order.amount)||0;
+    if(bucket) bucket.v += record.amount;
   });
+  const periodRevenue=data.reduce((sum,item)=>sum+item.v,0);
+  const totalRevenue=confirmedRevenueTotal();
+  const subtitle=document.getElementById('salesSubtitle');
+  if(subtitle) subtitle.textContent=chartMode==='weekly' ? `Confirmed revenue by weekday: ${fmtINR(periodRevenue)} total` : `Confirmed revenue by month: ${fmtINR(periodRevenue)} total`;
   const highest = Math.max(...data.map(item=>item.v),1);
   const max = highest * 1.15;
   wrap.classList.toggle('many', data.length > 7);
@@ -1456,7 +1466,6 @@ function setChartMode(mode){
   document.getElementById('btnWeekly').classList.toggle('active', mode==='weekly');
   document.getElementById('btnMonthly').classList.toggle('active', mode==='monthly');
   document.getElementById('salesTitle').textContent = mode==='weekly' ? 'Weekly Sales' : 'Monthly Sales';
-  document.getElementById('salesSubtitle').textContent = mode==='weekly' ? 'Sales performance from Monday to Sunday' : 'Sales performance from January to December';
   renderBars();
 }
 
@@ -2397,7 +2406,7 @@ function refreshHomeStats(){
   const customers=new Set([...paidCustomerKeys,...customCustomerKeys]).size;
   const commercialEntries=orders.length+quoteClientCustomizations.length;
   const confirmedSales=paid.length+quoteClientCustomizations.length;
-  const revenue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0)+customRevenue;
+  const revenue=confirmedRevenueTotal();
   const revenueEl=document.getElementById('statRevenue'); if(revenueEl) revenueEl.textContent=fmtINR(revenue);
   const usersEl=document.getElementById('statUsers'); if(usersEl) usersEl.textContent=customers.toLocaleString('en-IN');
   const customUnitsEl=document.getElementById('statCustomUnits'); if(customUnitsEl) customUnitsEl.textContent=customUnits.toLocaleString('en-IN');

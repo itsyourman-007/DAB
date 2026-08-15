@@ -130,16 +130,18 @@ describe("protected merchant dashboard enhancements", () => {
 
   it("uses Monday-to-Sunday and January-to-December ordering with sales amounts shown only on a black chart tooltip", () => {
     expect(dashboardHtml).toContain("const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']");
-    expect(dashboardHtml).toContain("date.setDate(now.getDate()-mondayOffset+index)");
+    expect(dashboardHtml).toContain("WEEKDAY_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
     expect(dashboardHtml).toContain("const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']");
-    expect(dashboardHtml).toContain("new Date(now.getFullYear(),index,1)");
+    expect(dashboardHtml).toContain("MONTH_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
+    expect(dashboardHtml).toContain("String((date.getDay()+6)%7)");
+    expect(dashboardHtml).toContain("String(date.getMonth())");
     expect(dashboardHtml).toContain("const first = (new Date(y,m,1).getDay()+6)%7");
     expect(dashboardHtml).toContain("['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach");
     expect(dashboardHtml).toContain("background:#111318;color:#fff");
     expect(dashboardHtml).toContain(".bar-col:hover .bar-tip, .bar-col:focus-within .bar-tip{opacity:1;}");
     expect(dashboardHtml).not.toContain(".bar-col.hi .bar-tip{opacity:1;}");
-    expect(dashboardHtml).toContain("Sales performance from Monday to Sunday");
-    expect(dashboardHtml).toContain("Sales performance from January to December");
+    expect(dashboardHtml).toContain("Confirmed revenue by weekday");
+    expect(dashboardHtml).toContain("Confirmed revenue by month");
   });
 
   it("persists server-created UPI orders and marks only submitted trusted records paid through protected admin operations", () => {
@@ -292,7 +294,23 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain('id="customisationDeliveryAddress"');
     expect(dashboardHtml).toContain('id="customisationPaymentMode"');
     expect(dashboardHtml).toContain('function customisationWholeInr(fieldId)');
-    expect(dashboardHtml).toContain('function customPaymentModeLabel(mode)');
+    expect(dashboardHtml).toContain("function customPaymentModeLabel(mode)");
+  });
+
+  it("uses one authoritative confirmed-revenue dataset for purple weekly and monthly sales bars and the headline revenue metric", () => {
+    expect(dashboardHtml).toContain("function confirmedRevenueRecords()");
+    expect(dashboardHtml).toContain("const confirmedCustomSales=quoteClientCustomizations.map");
+    expect(dashboardHtml).toContain("function confirmedRevenueTotal()");
+    expect(dashboardHtml).toContain("const confirmedSales=confirmedRevenueRecords()");
+    expect(dashboardHtml).toContain("const periodRevenue=data.reduce");
+    expect(dashboardHtml).toContain("const totalRevenue=confirmedRevenueTotal()");
+    expect(dashboardHtml).toContain("WEEKDAY_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
+    expect(dashboardHtml).toContain("MONTH_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
+    expect(dashboardHtml).toContain("String((date.getDay()+6)%7)");
+    expect(dashboardHtml).toContain("String(date.getMonth())");
+    expect(dashboardHtml).toContain("const revenue=confirmedRevenueTotal()");
+    expect(dashboardHtml).toContain("background:linear-gradient(180deg,#8b5cf6,#6d28d9)");
+    expect(dashboardHtml).toContain("function fmtINR(n){ return '\\u20B9'");
   });
 
   it("tracks paid-order fulfillment through the server and exposes shipment controls to authorized dashboard sessions", () => {

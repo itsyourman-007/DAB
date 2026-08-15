@@ -210,3 +210,6 @@
 - [x] Correct the Inventory & Products Scheduled DAB shipments formatting at phone and desktop widths without changing fulfillment data or actions.
 - [x] Tune the dashboard bell to a louder audible level while retaining the user’s volume control and avoiding unsafe automatic device-volume changes.
 - [x] Improve the 91DAB Android shortcut launcher icon and branded loading presentation, then rebuild and validate the signed APK.
+- [x] Make all weekly sales chart bars purple and retain accessible hover values without altering trusted revenue data.
+- [x] Reconcile weekly and monthly sales chart totals with the authoritative dashboard total revenue, including confirmed custom-client sales where applicable.
+- [x] Audit the dashboard for revenue/chart calculation or display irregularities and add regression coverage for the confirmed fixes.
