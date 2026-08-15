@@ -1239,7 +1239,7 @@ function applyServerOrders(records){
   hydrateShopData();
   syncDashboardViews();
   serverOrdersInitialized=true;
-  receivedAlerts.forEach(record=>{const isNewCheckout=record.paymentStatus==='pending';notifyReceivedUpdate(isNewCheckout?'New buyer checkout':'UPI reference submitted',`${record.orderId} · ${record.buyerName||'Buyer'}`,isNewCheckout?'rocket':'chime');});
+  receivedAlerts.forEach(record=>{const reachedPaymentQr=record.paymentStatus==='pending';notifyReceivedUpdate(reachedPaymentQr?'Buyer reached payment QR':'UPI reference submitted',`${record.orderId} · ${record.buyerName||'Buyer'}`,reachedPaymentQr?'rocket':'chime');});
 }
 function applyTrustedLiveMessage(message){
   if(!message?.id||!message?.name||!message?.text) return;

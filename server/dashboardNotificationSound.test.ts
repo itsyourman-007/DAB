@@ -21,13 +21,16 @@ describe("dashboard notification sound", () => {
     expect(dashboardHtml).toContain("[880,1320].forEach");
   });
 
-  it("uses a distinct rocket-style sound only for genuinely new trusted checkout orders", () => {
+  it("uses a distinct rocket-style sound only when a genuinely new trusted checkout reaches the payment QR stage", () => {
     expect(dashboardHtml).toContain("function playNewOrderRocketSound()");
     expect(dashboardHtml).toContain("oscillator.type='sawtooth'");
     expect(dashboardHtml).toContain("oscillator.frequency.exponentialRampToValueAtTime(980,now+.27)");
     expect(dashboardHtml).toContain("function notifyReceivedUpdate(title,text,sound='chime')");
     expect(dashboardHtml).toContain("sound==='rocket'?playNewOrderRocketSound():playNotificationChime()");
-    expect(dashboardHtml).toContain("isNewCheckout?'rocket':'chime'");
+    expect(dashboardHtml).toContain("const reachedPaymentQr=record.paymentStatus==='pending'");
+    expect(dashboardHtml).toContain("Buyer reached payment QR");
+    expect(dashboardHtml).toContain("reachedPaymentQr?'rocket':'chime'");
+    expect(dashboardHtml).toContain("const previousStates=new Set(serverOrderRecords.map(record=>`${record.orderId}:${record.paymentStatus}`))");
   });
 
   it("never chimes for the initial order hydration and only tracks trusted incoming order states or live-message events", () => {
