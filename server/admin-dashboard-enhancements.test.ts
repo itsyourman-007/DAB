@@ -35,9 +35,10 @@ describe("protected merchant dashboard enhancements", () => {
     expect(checkoutSource).toContain("regex(/^\\d{6,128}$/)");
     expect(checkoutSource).toContain('utrSubmittedAt: updated.utrSubmittedAt');
     expect(dbSource).toContain('utrSubmittedAt: new Date()');
-    expect(shopHtml).toContain('UPI UTR / reference ID <span class="required-mark" aria-hidden="true">*</span>');
+    expect(shopHtml).toContain('Mandatorily enter the payment UTR/reference ID after the payment <span class="required-mark" aria-hidden="true">*</span>');
     expect(shopHtml).toContain('inputmode="numeric"');
     expect(shopHtml).toContain('pattern="[0-9]{6,128}"');
+    expect(shopHtml).not.toContain('placeholder="Enter numbers only"');
     expect(shopHtml).toContain("const digitsOnly=this.value.replace(/\\D/g,'');");
     expect(shopHtml).toContain("if(!/^\\d{6,128}$/.test(val))");
     expect(dashboardHtml).toContain("utrSubmittedAt: raw.utrSubmittedAt || null");

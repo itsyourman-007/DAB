@@ -194,3 +194,4 @@
 - [x] Trigger the rocket dashboard notification when a buyer’s trusted checkout successfully reaches the payment QR stage, with regression coverage that prevents duplicate sounds on later polling updates.
 - [x] Rebuild and validate the Android dashboard shortcut release after adding the payment-stage rocket notification.
 - [x] Save the payment-stage rocket checkpoint and push this release to GitHub for Render auto-deploy.
+- [x] Replace only the buyer-facing UTR instruction with the requested “Mandatorily enter the payment UTR/reference ID after the payment *” wording, retaining numeric-only validation and full UTR CSV export.

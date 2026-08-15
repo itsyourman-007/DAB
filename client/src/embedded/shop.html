@@ -1256,12 +1256,12 @@ function upsertShopOrder(record){
       <div class="qr-wrap"><img class="qr-img" src="${data.qrDataUrl}" alt="UPI payment QR code"></div>
       <div class="countdown" id="countdownLabel">Expires in 5:00</div>
       <div class="status-pill" id="statusPill">Waiting for payment…</div>
-      <label class="utr-label" for="utrInput">UPI UTR / reference ID <span class="required-mark" aria-hidden="true">*</span></label>
+      <label class="utr-label" for="utrInput">Mandatorily enter the payment UTR/reference ID after the payment <span class="required-mark" aria-hidden="true">*</span></label>
       <div class="utr-row">
-        <input type="text" id="utrInput" inputmode="numeric" pattern="[0-9]{6,128}" maxlength="128" autocomplete="off" aria-describedby="utrHelp" aria-required="true" placeholder="Enter numbers only" required>
+        <input type="text" id="utrInput" inputmode="numeric" pattern="[0-9]{6,128}" maxlength="128" autocomplete="off" aria-describedby="utrHelp" aria-required="true" required>
         <button onclick="submitUtr()">Submit</button>
       </div>
-      <div class="utr-help" id="utrHelp"><span class="required-mark" aria-hidden="true">*</span> Required — enter the 6–128 digit reference from your UPI app's payment receipt.</div>
+      <div class="utr-help" id="utrHelp" aria-live="polite"></div>
       <div class="lock-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
         Scan with any UPI app · pays directly into 91DAB's account
@@ -1273,7 +1273,7 @@ function upsertShopOrder(record){
       if(this.value!==digitsOnly) this.value=digitsOnly;
       utrInput.classList.remove('field-error');
       const help = document.getElementById('utrHelp');
-      if(help){ help.innerHTML = '<span class="required-mark" aria-hidden="true">*</span> Required — enter the 6–128 digit reference from your UPI app\'s payment receipt.'; help.classList.remove('field-error'); }
+      if(help){ help.textContent = ''; help.classList.remove('field-error'); }
     });
   }
 
@@ -1328,12 +1328,12 @@ function upsertShopOrder(record){
     const val = input ? input.value.trim() : '';
     if(!/^\d{6,128}$/.test(val)){
       if(input) input.classList.add('field-error');
-      if(help){ help.textContent = !val ? 'Please enter your required UPI reference number.' : 'Enter only 6–128 digits from your UPI reference number.'; help.classList.add('field-error'); }
+      if(help){ help.textContent = !val ? 'Please enter the payment UTR/reference ID.' : 'Enter only 6–128 digits from your UTR/reference ID.'; help.classList.add('field-error'); }
       if(input) input.focus();
       return;
     }
     if(input) input.classList.remove('field-error');
-    if(help){ help.innerHTML = '<span class="required-mark" aria-hidden="true">*</span> Required — enter the 6–128 digit reference from your UPI app\'s payment receipt.'; help.classList.remove('field-error'); }
+    if(help){ help.textContent = ''; help.classList.remove('field-error'); }
     if(!currentOrder) return;
     try{
       const res = await fetch(`/api/orders/${currentOrder.orderId}/utr`, {
