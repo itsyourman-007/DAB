@@ -20,5 +20,8 @@ describe("Android dashboard shortcut", () => {
     expect(activitySource).toContain("setAllowFileAccess(false)");
     expect(activitySource).toContain("setAllowContentAccess(false)");
     expect(activitySource).toContain("MIXED_CONTENT_NEVER_ALLOW");
+    expect(activitySource).toContain("setMediaPlaybackRequiresUserGesture(false)");
+    expect(activitySource).toContain("91DABDashboard/1.1");
+    expect(activitySource).toContain("setWebChromeClient(new WebChromeClient())");
   });
 });

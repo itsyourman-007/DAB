@@ -424,27 +424,33 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 	  .stat-grid{grid-template-columns:1fr 1fr;}
 	  .inbox-shell{grid-template-columns:1fr;height:auto;}
 	}
-	@media (max-width:700px){
-	  body{overflow-x:hidden;}
-	  .sidebar{width:min(82vw,300px);}
-	  .topbar{padding:.85rem 1rem;gap:.65rem;}
-	  .crumb{font-size:.86rem;}
-	  .top-actions{width:100%;flex-wrap:wrap;gap:.45rem;}
-	  .date-btn,.range-select{font-size:.75rem;padding:.5rem .65rem;}
-	  .export-btn{padding:.55rem .75rem;font-size:.76rem;}
-	  .page-body{padding:1rem 1rem 2rem;}
-	  .stat-grid{gap:.75rem;margin-bottom:.75rem;}
-	  .stat-card{padding:1rem;}
-	  .stat-num{font-size:1.55rem;}
-	  .stat-top .lbl{font-size:.78rem;}
-	  .grid-2{gap:.75rem;margin-bottom:.75rem;}
-	  .panel-head{padding:1rem 1rem .7rem;gap:.65rem;}
-	  .chart-wrap{padding:.75rem 1rem 1rem;}
-	  .bars{height:190px;padding-left:2rem;}
-	  .table-wrap{padding:0 1rem 1rem;}
-	  .toast-root{left:.75rem;right:.75rem;bottom:.75rem;}
-	  .toast{max-width:none;}
-	}
+		@media (max-width:700px){
+		  body{overflow-x:hidden;}
+		  .app,.main{width:100%;min-width:0;}
+		  .sidebar{width:min(82vw,300px);}
+		  .topbar{padding:.8rem .9rem;gap:.6rem;align-items:flex-start;}
+		  .crumb{font-size:.84rem;min-width:0;flex:1;}
+		  .top-actions{width:100%;flex-wrap:wrap;gap:.45rem;align-items:center;}
+		  .top-actions .icon-btn{width:40px;height:40px;}
+		  .date-btn,.range-select{font-size:.75rem;padding:.5rem .65rem;}
+		  .export-btn{padding:.55rem .75rem;font-size:.76rem;}
+		  .page-body{padding:1rem 1rem 2rem;}
+		  .stat-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.75rem;margin-bottom:.75rem;}
+		  .stat-card{padding:1rem;}
+		  .stat-num{font-size:clamp(1.2rem,7vw,1.55rem);overflow-wrap:anywhere;}
+		  .stat-top .lbl{font-size:.78rem;}
+		  .grid-2{gap:.75rem;margin-bottom:.75rem;}
+		  .panel-head{padding:1rem 1rem .7rem;gap:.65rem;}
+		  .chart-wrap{padding:.75rem 1rem 1rem;}
+		  .bars{height:190px;padding-left:2rem;}
+		  .table-wrap{padding:0 1rem 1rem;}
+		  .data-toolbar input,.data-toolbar select{min-width:0;flex-basis:100%;}
+		  .set-row{align-items:flex-start;}
+		  .set-row .action-btn{margin-left:0!important;}
+		  .field-row{display:grid;grid-template-columns:1fr;gap:0;}
+		  .toast-root{left:.75rem;right:.75rem;bottom:.75rem;}
+		  .toast{max-width:none;}
+		}
 </style>
 </head>
 <body>
@@ -1156,6 +1162,12 @@ async function toggleNotificationSound(){
     catch(err){notificationSoundEnabled=false; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'false');}catch(storageErr){} showToast('Your browser blocked notification sound. Try the switch again after interacting with this page.','info');}
   } else { showToast('Notification bell muted.','info'); }
   syncNotificationSoundControl();
+}
+async function enableNativeAppNotificationAudio(){
+  if(!notificationSoundEnabled){ notificationSoundEnabled=true; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'true');}catch(err){} }
+  try{ if(!localStorage.getItem(NOTIFICATION_SOUND_VOLUME_KEY)) localStorage.setItem(NOTIFICATION_SOUND_VOLUME_KEY,String(notificationSoundVolume)); }catch(err){}
+  syncNotificationSoundControl();
+  try{ await prepareNotificationAudio(); }catch(err){}
 }
 function playNotificationChime(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
@@ -2211,8 +2223,9 @@ window.addEventListener('message',(event)=>{
     if(data.success){ employeeAccounts=Array.isArray(data.accounts)?data.accounts:employeeAccounts; renderEmployeeAccounts(); closeTeamModal(); showToast(data.action==='create'?'Employee access authorized':data.action==='reset'?'Employee password reset':'Employee access removed','success'); }
     else showToast(data.message||'The employee access change could not be completed.','error');
   }
-  if(data.type==='91dab-dashboard-role'){ applyDashboardRole(data.role); }
-  if(data.type==='91dab-dashboard-profile'){ applyDashboardProfile(data.profile); }
+	if(data.type==='91dab-dashboard-role'){ applyDashboardRole(data.role); }
+	if(data.type==='91dab-native-app-audio'){ enableNativeAppNotificationAudio(); }
+	if(data.type==='91dab-dashboard-profile'){ applyDashboardProfile(data.profile); }
   if(data.type==='91dab-dashboard-profile-result'){
     if(data.success){ applyDashboardProfile(data.profile); showToast('Profile saved','success'); }
     else showToast(data.message||'Profile could not be saved.','error');

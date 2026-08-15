@@ -16,6 +16,10 @@ describe("dashboard notification sound", () => {
     expect(dashboardHtml).toContain('id="notificationSoundVolume"');
     expect(dashboardHtml).toContain("function setNotificationSoundVolume(value)");
     expect(dashboardHtml).toContain("async function testNotificationBell()");
+    expect(dashboardHtml).toContain("async function enableNativeAppNotificationAudio()");
+    expect(dashboardHtml).toContain("91dab-native-app-audio");
+    expect(adminSource).toContain("91DABDashboard\\/\\d");
+    expect(adminSource).toContain('type: "91dab-native-app-audio"');
   });
 
   it("creates an audible browser-native two-ring bell only after the enabled sound context is running", () => {

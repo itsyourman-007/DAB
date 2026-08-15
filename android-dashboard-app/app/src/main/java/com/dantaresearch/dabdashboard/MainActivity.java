@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
@@ -36,7 +37,10 @@ public final class MainActivity extends Activity {
         view.getSettings().setAllowFileAccess(false);
         view.getSettings().setAllowContentAccess(false);
         view.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        view.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        view.getSettings().setUserAgentString(view.getSettings().getUserAgentString() + " 91DABDashboard/1.1");
         CookieManager.getInstance().setAcceptCookie(true);
+        view.setWebChromeClient(new WebChromeClient());
         view.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView browser, WebResourceRequest request) {

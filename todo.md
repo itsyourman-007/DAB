@@ -203,3 +203,5 @@
 - [x] Show saved Calendar events in the Events sidebar view using the same dashboard event data, with no fabricated entries.
 - [x] Add delivery address and payment mode fields to Customisation records, persist them securely, and display them in the relevant protected dashboard views.
 - [x] Validate Customisation revenue as a correctly stored whole-INR amount and cover create/edit persistence with database-backed regression tests.
+- [x] Enable dashboard notification audio in the downloaded Android shortcut while preserving the user-selected sound/volume settings.
+- [x] Audit and refine the protected dashboard phone layout, then rebuild and validate the signed Android shortcut APK.
