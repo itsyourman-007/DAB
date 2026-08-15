@@ -180,7 +180,7 @@
 - [x] Add selected-month and complete 12-month scheduling for monthly and yearly subscriptions, record yearly monthly-versus-all-at-once delivery selection, and expose the schedule in the dashboard.
 - [x] Add a Customisation sidebar workflow for quote clients that supports selecting or adding a client and recording units purchased and revenue, then include those durable records in Home dashboard metrics.
 - [x] Add schema migrations, protected server procedures, regression coverage, validation, and GitHub synchronization for subscription schedules and quote-client customizations.
-- [ ] Add a scannable dashboard-app download QR control in the Connect app view, validate the available package target, and synchronize it to GitHub.
+- [x] Add a scannable dashboard-app download QR control in the Connect app view, validate the available package target, and synchronize it to GitHub.
 - [x] Add a distinct user-enabled rocket-style sound for genuinely new trusted buyer checkout orders and regression coverage.
 - [x] Build a password-first downloadable Android dashboard APK that opens the dashboard login without requiring the user to enter a URL, then expose a valid download path.
 - [x] Add password-protected edit and delete actions for unshipped Customisation client sales, lock records after shipment, and preserve durable data integrity.
@@ -195,3 +195,5 @@
 - [x] Rebuild and validate the Android dashboard shortcut release after adding the payment-stage rocket notification.
 - [x] Save the payment-stage rocket checkpoint and push this release to GitHub for Render auto-deploy.
 - [x] Replace only the buyer-facing UTR instruction with the requested “Mandatorily enter the payment UTR/reference ID after the payment *” wording, retaining numeric-only validation and full UTR CSV export.
+- [x] Replace the Connect app placeholder with a scannable QR code and direct signed-APK download action, using a stable public release destination.
+- [x] Verify the dashboard shortcut’s phone layout and document that live website updates appear in existing APK installs, while native-wrapper updates require a new APK install.
