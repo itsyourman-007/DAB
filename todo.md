@@ -205,3 +205,5 @@
 - [x] Repair the visible dashboard app QR code so it opens the valid Android APK download.
 - [x] Restore the dashboard sidebar to fully collapse as before without changing unrelated navigation behavior.
 - [x] Repair the visible dashboard app QR code so it opens the valid Android APK download.
+- [x] Format mobile notification layout properly for mobile screens.
+- [x] Ensure the bottom-left profile picture on mobile matches the dashboard logo.

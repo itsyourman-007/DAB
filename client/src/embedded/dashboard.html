@@ -387,6 +387,7 @@ tbody tr:last-child td{border-bottom:none;}
 
 /* notif dropdown */
 .dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(16,24,40,.14);z-index:60;display:none;overflow:hidden;}
+@media (max-width:480px){.dropdown{width:min(320px,calc(100vw - 2rem));right:-10px;}}
 .dropdown.open{display:block;}
 .dd-head{padding:.9rem 1.1rem;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;}
 .dd-head h4{margin:0;font-size:.9rem;}
