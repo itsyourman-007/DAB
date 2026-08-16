@@ -32,6 +32,12 @@ describe("dashboard notification sound", () => {
     expect(dashboardHtml).toContain("record.paymentStatus==='paid'?'Payment confirmed'");
   });
 
+  it("centers the notification dropdown on phone widths without changing the desktop placement", () => {
+    expect(dashboardHtml).toContain('.topbar > .top-actions > div:has(> #notifDd){position:static!important;}');
+    expect(dashboardHtml).toContain('left:50%;right:auto;transform:translateX(-50%)');
+    expect(dashboardHtml).toContain('width:min(360px,calc(100vw - 2rem))');
+  });
+
   it("never chimes for the initial order hydration and only tracks trusted incoming order states or live-message events", () => {
     expect(dashboardHtml).toContain("let serverOrdersInitialized = false");
     expect(dashboardHtml).toContain("const receivedAlerts=serverOrdersInitialized?nextRecords.filter(record=>!previousStates.has(`${record.orderId}:${record.paymentStatus}`))");

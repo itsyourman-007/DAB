@@ -215,3 +215,6 @@
 - [x] Add regression coverage for four-month monthly and yearly schedules across checkout, dashboard, shipment tracking, and inventory.
 - [x] Save and synchronize the corrected subscription shipment release to GitHub.
 - [x] Clarification: when monthly quantity is 4 months, record four scheduled shipments of 99 DAB pieces each; do not multiply the 99-piece monthly allocation by the duration quantity.
+- [x] Center the dashboard notification panel on phone screens without changing unrelated layouts.
+- [x] Verify five-ring notification sound and live-store updates remain linked in the QR-downloaded dashboard shortcut.
+- [x] Save and synchronize the focused mobile notification fix to GitHub.

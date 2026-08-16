@@ -438,6 +438,9 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 	  .chart-wrap{padding:.75rem 1rem 1rem;}
 	  .bars{height:190px;padding-left:2rem;}
 	  .table-wrap{padding:0 1rem 1rem;}
+	  .topbar > .top-actions > div:has(> #notifDd){position:static!important;}
+	  .topbar > .top-actions > div:has(> #notifDd) > .dropdown{position:fixed;top:7.25rem;left:50%;right:auto;transform:translateX(-50%);width:min(360px,calc(100vw - 2rem));max-height:calc(100dvh - 8.5rem);}
+	  .topbar > .top-actions > div:has(> #notifDd) > .dropdown .dd-list{max-height:calc(100dvh - 13rem);}
 	  .toast-root{left:.75rem;right:.75rem;bottom:.75rem;}
 	  .toast{max-width:none;}
 	}
