@@ -32,5 +32,9 @@ describe("protected dashboard profile images", () => {
 	    expect(adminSource).not.toContain("file instanceof File");
 	    expect(adminSource).toContain('const dashboardLogoUrl = "/manus-storage/91-danta-dashboard-logo_d2a87fee.png"');
 	    expect(adminSource).not.toContain("Private merchant console");
+	    expect(dashboardHtml).toContain("const PROFILE_IMAGE_STORAGE_KEY='91dab_dashboard_profile_image'");
+	    expect(dashboardHtml).toContain("function persistProfileImage(imageUrl)");
+	    expect(dashboardHtml).toContain("reader.readAsDataURL(file)");
+	    expect(dashboardHtml).toContain("Profile picture saved and shown.");
 	  });
 });

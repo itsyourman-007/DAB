@@ -47,7 +47,7 @@ svg{display:block;}
 /* ---------------- app shell ---------------- */
 .app{display:flex;min-height:100vh;}
 .sidebar{width:var(--sidebar-w);flex:none;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;transition:width .2s var(--ease,ease);}
-.app.collapsed .sidebar{width:80px;}
+.app.collapsed .sidebar{width:0;border-right-width:0;overflow:hidden;pointer-events:none;}
 .app.collapsed .hide-collapsed{display:none !important;}
 .app.collapsed .side-search{display:none;}
 .app.collapsed .side-section-label{display:none;}
@@ -64,6 +64,9 @@ svg{display:block;}
 .brand-text .sub{font-size:.78rem;color:var(--text-faint);}
 .collapse-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-soft);flex:none;}
 .collapse-btn:hover{border-color:var(--accent);color:var(--accent);}
+.sidebar-restore{position:fixed;left:.85rem;top:.85rem;z-index:70;width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--accent-soft-text);box-shadow:0 8px 22px rgba(16,24,40,.12);display:none;align-items:center;justify-content:center;}
+.sidebar-restore:hover{border-color:var(--accent);background:var(--accent-soft);}.sidebar-restore svg{width:19px;height:19px;}
+.app.collapsed .sidebar-restore{display:flex;}
 
 .side-search{margin:0 1.1rem 1.1rem;position:relative;}
 .side-search input{width:100%;padding:.6rem .8rem .6rem 2.2rem;border:1px solid var(--border);border-radius:9px;background:var(--card-tint);font-size:.85rem;outline:none;}
@@ -438,6 +441,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 .mobile-toggle{display:none;}
 	@media (max-width:880px){
 	  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:80;transform:translateX(-100%);transition:transform .25s;}
+	  .app.collapsed .sidebar{width:var(--sidebar-w);border-right-width:1px;overflow:visible;pointer-events:auto;}
+	  .app.collapsed .sidebar-restore{display:none;}
 	  .app.mobile-open .sidebar{transform:translateX(0);}
 	  .mobile-toggle{display:flex;}
 	  .stat-grid{grid-template-columns:1fr 1fr;}
@@ -484,9 +489,10 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 <div class="toast-root" id="toastRoot"></div>
 
 <div class="app" id="app">
+	<button class="sidebar-restore" id="sidebarRestoreBtn" type="button" title="Show sidebar" aria-label="Show sidebar" aria-controls="dashboardSidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg></button>
 
   <!-- ===================== SIDEBAR ===================== -->
-  <aside class="sidebar">
+	<aside class="sidebar" id="dashboardSidebar">
     <div class="brand-row">
       <div class="brand-icon"><img src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA logo"></div>
       <div class="brand-text hide-collapsed">
@@ -2223,10 +2229,13 @@ function openEmployeeAccountDialog(mode,id){
 }
 function submitEmployeeAccount(event,action,id){ event.preventDefault(); const button=event.currentTarget.querySelector('button[type="submit"]'); button.disabled=true; button.textContent=action==='create'?'Authorizing…':action==='reset'?'Resetting…':'Removing…'; const adminPassword=document.getElementById('employeeAdminPassword').value; if(action==='create')window.parent?.postMessage({type:'91dab-employee-account-create',account:{name:document.getElementById('employeeAccountName').value.trim(),email:document.getElementById('employeeAccountEmail').value.trim(),employeePassword:document.getElementById('employeeAccountPassword').value,adminPassword}},'*'); else if(action==='reset')window.parent?.postMessage({type:'91dab-employee-account-reset',account:{id:Number(id),employeePassword:document.getElementById('employeeAccountPassword').value,adminPassword}},'*'); else window.parent?.postMessage({type:'91dab-employee-account-remove',account:{id:Number(id),adminPassword}},'*'); }
 function applyDashboardRole(role){ dashboardRole=role; const isAdmin=role==='admin'; document.querySelectorAll('[data-admin-only]').forEach(element=>{element.style.display=isAdmin?'':'none';}); const accessStatus=document.getElementById('accessSessionStatus'); if(accessStatus&&!isAdmin) accessStatus.textContent='Active restricted employee session. This account has read-only access to dashboard records.'; renderTeamMembers(); renderEmployeeAccounts(); renderPayments(); }
+const PROFILE_IMAGE_STORAGE_KEY='91dab_dashboard_profile_image';
 let dashboardProfile={displayName:'91DAB Administrator',email:''};
+function getStoredProfileImage(){ try{const value=localStorage.getItem(PROFILE_IMAGE_STORAGE_KEY); return value&&value.startsWith('data:image/')?value:null;}catch(_){return null;} }
+function persistProfileImage(imageUrl){ try{localStorage.setItem(PROFILE_IMAGE_STORAGE_KEY,imageUrl); return true;}catch(_){return false;} }
 function applyDashboardProfile(profile){
   if(!profile) return;
-  dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||'',profileImageUrl:profile.profileImageUrl||null};
+  dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||'',profileImageUrl:profile.profileImageUrl||getStoredProfileImage()||null};
   const profileInitials=initials(dashboardProfile.displayName)||'91';
   ['dashboardProfileAvatar','dashboardProfilePhotoPreview'].forEach((imageId,index)=>{ const image=document.getElementById(imageId==='dashboardProfileAvatar'?'dashboardProfileAvatarImage':imageId); const initialsEl=document.getElementById(index===0?'dashboardProfileAvatarInitials':'dashboardProfilePhotoInitials'); if(!image||!initialsEl) return; if(dashboardProfile.profileImageUrl){ image.src=dashboardProfile.profileImageUrl; image.hidden=false; initialsEl.hidden=true; } else { image.removeAttribute('src'); image.hidden=true; initialsEl.hidden=false; initialsEl.textContent=profileInitials; } });
   const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
@@ -2240,9 +2249,12 @@ function applyDashboardProfile(profile){
 function uploadDashboardProfileImage(input){
   const file=input?.files?.[0]; if(!file) return;
   const state=document.getElementById('dashboardProfileImageState');
-  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>2*1024*1024){ if(state) state.textContent='Use a PNG, JPEG, or WebP image smaller than 2 MB.'; showToast('Use a PNG, JPEG, or WebP image smaller than 2 MB.','error'); input.value=''; return; }
-  if(state) state.textContent='Uploading profile picture…';
-  window.parent?.postMessage({type:'91dab-dashboard-profile-image-upload',file},'*');
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1500*1024){ if(state) state.textContent='Use a PNG, JPEG, or WebP image smaller than 1.5 MB.'; showToast('Use a PNG, JPEG, or WebP image smaller than 1.5 MB.','error'); input.value=''; return; }
+  if(state) state.textContent='Saving profile picture…';
+  const reader=new FileReader();
+  reader.onerror=()=>{if(state)state.textContent='The selected image could not be read.';showToast('The selected image could not be read.','error');};
+  reader.onload=()=>{const imageUrl=typeof reader.result==='string'?reader.result:''; if(!imageUrl||!persistProfileImage(imageUrl)){if(state)state.textContent='Your browser could not save this picture. Try a smaller image.';showToast('Your browser could not save this picture. Try a smaller image.','error');return;} applyDashboardProfile({...dashboardProfile,profileImageUrl:imageUrl}); if(state)state.textContent='Profile picture saved and shown.'; showToast('Profile picture saved.','success'); input.value='';};
+  reader.readAsDataURL(file);
 }
 function saveDashboardProfile(){
   const displayName=document.getElementById('dashboardProfileNameInput')?.value.trim();
@@ -2406,10 +2418,16 @@ document.getElementById('analyticsToggle').addEventListener('click', function(){
   document.getElementById('analyticsSub').classList.toggle('collapsed-menu');
 });
 document.getElementById('collapseBtn').addEventListener('click', function(){
-  const collapsed=document.getElementById('app').classList.toggle('collapsed');
+  const app=document.getElementById('app');
+  if(window.matchMedia&&window.matchMedia('(max-width:880px)').matches){ app.classList.remove('mobile-open'); return; }
+  const collapsed=app.classList.toggle('collapsed');
   this.title=collapsed?'Expand sidebar':'Collapse sidebar';
   this.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');
   this.setAttribute('aria-expanded',String(!collapsed));
+});
+document.getElementById('sidebarRestoreBtn').addEventListener('click', function(){
+  const app=document.getElementById('app'); app.classList.remove('collapsed');
+  const collapseBtn=document.getElementById('collapseBtn'); if(collapseBtn){ collapseBtn.title='Collapse sidebar'; collapseBtn.setAttribute('aria-label','Collapse sidebar'); collapseBtn.setAttribute('aria-expanded','true'); collapseBtn.focus(); }
 });
 
 /* ============================================================
