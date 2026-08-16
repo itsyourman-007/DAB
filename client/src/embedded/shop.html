@@ -286,16 +286,13 @@
   .layers{padding:clamp(3rem,6vw,4.2rem) 0;background:var(--cream-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
   .layers .section-head{text-align:center;max-width:52ch;margin:0 auto 2rem;}
   .layers h2{font-size:clamp(1.5rem,3vw,1.9rem);margin-bottom:.6rem;}
-  .dab-work-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(1rem,3vw,1.8rem);max-width:780px;margin:0 auto;}
-  .dab-work-card{overflow:hidden;border:1px solid var(--line);background:var(--cream);box-shadow:0 12px 28px rgba(21,19,15,.08);}
-  .dab-work-label{display:flex;align-items:center;justify-content:center;min-height:3.2rem;padding:.75rem 1rem;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line);}
-  .dab-work-video{display:block;width:100%;aspect-ratio:4/3;object-fit:contain;background:#15130f;}
-  .dab-work-result{display:flex;align-items:center;justify-content:center;gap:.6rem;max-width:780px;margin:1.5rem auto 0;padding:1rem 1.2rem;background:var(--ink);color:var(--cream);font-family:'IBM Plex Mono',monospace;font-size:clamp(.78rem,2vw,.9rem);font-weight:600;letter-spacing:.045em;text-align:center;}
+  .dab-work-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(2rem,5vw,5rem);max-width:1120px;margin:0 auto;}
+  .dab-work-card{min-width:0;}
+  .dab-work-label{display:flex;align-items:center;justify-content:center;min-height:3.2rem;padding:.75rem 0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);}
+  .dab-work-video{display:block;width:100%;height:auto;object-fit:contain;background:transparent;}
+  .dab-work-result{display:flex;align-items:center;justify-content:center;gap:.6rem;max-width:1120px;margin:2rem auto 0;padding:1rem 1.2rem;background:var(--ink);color:var(--cream);font-family:'IBM Plex Mono',monospace;font-size:clamp(.78rem,2vw,.9rem);font-weight:600;letter-spacing:.045em;text-align:center;}
   .dab-work-result b{color:var(--gold);font-size:1.1em;}
-  .dab-work-sound{display:flex;align-items:center;justify-content:center;gap:.45rem;width:max-content;max-width:100%;margin:1rem auto 0;padding:.62rem .9rem;border:1px solid var(--ink);background:transparent;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;}
-  .dab-work-sound:hover{background:var(--ink);color:var(--cream);}
-  .dab-work-sound:focus-visible{outline:3px solid var(--gold);outline-offset:3px;}
-  @media (max-width:640px){.dab-work-grid{grid-template-columns:1fr;max-width:360px;}.dab-work-result{margin-top:1rem;}.dab-work-video{max-height:500px;}}
+  @media (max-width:640px){.dab-work-grid{grid-template-columns:1fr;max-width:none;gap:2.5rem;}.dab-work-result{margin-top:1.5rem;}.dab-work-label{justify-content:flex-start;}.dab-work-video{width:100%;}}
 
   /* ---------- faq ---------- */
   .faq-sec{padding:clamp(3rem,6vw,4.2rem) 0;}
@@ -506,19 +503,18 @@
         <div class="dab-work-grid" aria-label="Aerosol spread comparison">
           <figure class="dab-work-card">
             <figcaption class="dab-work-label">Aerosol spread without DAB</figcaption>
-            <video class="dab-work-video" data-dab-work-video muted playsinline loop preload="metadata" aria-label="Dental procedure showing aerosol spread without DAB">
-              <source src="/manus-storage/dab-aerosol-without-dab_f581ebad.mp4" type="video/mp4">
+            <video class="dab-work-video" data-dab-work-video autoplay playsinline loop preload="auto" poster="https://files.manuscdn.com/user_upload_by_module/session_file/310519663882842143/iChqTMKySBBHxBsM.jpg" aria-label="Dental procedure showing aerosol spread without DAB">
+              <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663882842143/YqsaTQLevFFcHTsR.mp4" type="video/mp4">
             </video>
           </figure>
           <figure class="dab-work-card">
             <figcaption class="dab-work-label">Aerosol spread with DAB</figcaption>
-            <video class="dab-work-video" data-dab-work-video muted playsinline loop preload="metadata" aria-label="Dental procedure showing aerosol spread with DAB">
-              <source src="/manus-storage/dab-aerosol-with-dab_59b7da34.mp4" type="video/mp4">
+            <video class="dab-work-video" data-dab-work-video autoplay playsinline loop preload="auto" poster="https://files.manuscdn.com/user_upload_by_module/session_file/310519663882842143/ByVatdvcELbuwUnR.jpg" aria-label="Dental procedure showing aerosol spread with DAB">
+              <source src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663882842143/FMgjVJLPTATTBCiN.mp4" type="video/mp4">
             </video>
           </figure>
         </div>
         <div class="dab-work-result"><b>Blocks 60%</b> aerosol spread</div>
-        <button class="dab-work-sound" id="dabWorkSoundButton" type="button" onclick="enableDabWorkSound()" aria-label="Enable sound for DAB at work videos">Enable video sound</button>
       </div>
     </div>
 
@@ -1395,38 +1391,36 @@ function upsertShopOrder(record){
     showScreen('home');
   }
 
-  let dabWorkSoundEnabled=false;
+  let dabWorkAudioArmed=false;
   function dabWorkVideos(){ return Array.from(document.querySelectorAll('[data-dab-work-video]')); }
-  function updateDabWorkSoundButton(){ const button=document.getElementById('dabWorkSoundButton'); if(button) button.textContent=dabWorkSoundEnabled?'Video sound on':'Enable video sound'; }
   function playDabWorkVideos(){
     dabWorkVideos().forEach(video=>{
-      video.muted=!dabWorkSoundEnabled;
-      video.play().catch(()=>{});
+      video.muted=!dabWorkAudioArmed;
+      video.play().catch(()=>{
+        video.muted=true;
+        video.play().catch(()=>{});
+      });
     });
   }
-  function enableDabWorkSound(){
-    dabWorkSoundEnabled=true;
-    updateDabWorkSoundButton();
-    const videos=dabWorkVideos();
-    Promise.all(videos.map(video=>{ video.muted=false; return video.play(); })).catch(()=>{
-      dabWorkSoundEnabled=false;
-      updateDabWorkSoundButton();
-      videos.forEach(video=>{ video.muted=true; video.play().catch(()=>{}); });
-      showToast('Tap the sound control again to enable video audio.');
-    });
+  function armDabWorkAudio(){
+    dabWorkAudioArmed=true;
+    const section=document.getElementById('dabAtWorkSection');
+    if(section && section.dataset.inView==='true') playDabWorkVideos();
   }
   function setupDabWorkVideos(){
     const section=document.getElementById('dabAtWorkSection');
     if(!section||!('IntersectionObserver' in window)) return;
+    window.addEventListener('pointerdown',armDabWorkAudio,{once:true,passive:true});
+    window.addEventListener('keydown',armDabWorkAudio,{once:true,passive:true});
     const observer=new IntersectionObserver(entries=>{
       entries.forEach(entry=>{
         if(entry.target!==section) return;
         section.dataset.inView=entry.isIntersecting?'true':'false';
         if(entry.isIntersecting) playDabWorkVideos(); else dabWorkVideos().forEach(video=>video.pause());
       });
-    },{threshold:.3});
+    },{threshold:.2});
     observer.observe(section);
-    updateDabWorkSoundButton();
+    playDabWorkVideos();
   }
   setupDabWorkVideos();
 </script>

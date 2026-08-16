@@ -226,3 +226,5 @@
 - [x] Configure the comparison videos to loop and attempt audible playback when the section enters view, with an interaction fallback for browser sound rules.
 - [x] Add regression coverage, validate the responsive shop section, and synchronize the focused update to GitHub.
 - [x] Fix the shop DAB at work section so both videos render reliably, appear larger without outlined boxes, and attempt automatic audible looping playback when the section enters view, with no visible enable-audio button.
+- [x] Simplify DAB at work to two large side-by-side continuously playing videos only, with no visible controls, audio button, outlines, or black video panels.
+- [x] Verify and synchronize the focused two-video-only correction to GitHub.
