@@ -495,7 +495,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
   <!-- ===================== SIDEBAR ===================== -->
 	  <aside class="sidebar" id="dashboardSidebar">
 	    <div class="brand-row">
-	      <div class="brand-icon"><img id="dashboardBrandImage" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA logo"></div>
+	      <div class="brand-icon"><img src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA logo"></div>
       <div class="brand-text hide-collapsed">
         <div class="name">91DAB</div>
         <div class="sub">Merchant Console</div>
@@ -2239,8 +2239,6 @@ function applyDashboardProfile(profile){
   dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||'',profileImageUrl:profile.profileImageUrl||getStoredProfileImage()||null};
 	  ['dashboardProfileAvatar','dashboardProfilePhotoPreview'].forEach((imageId,index)=>{ const image=document.getElementById(imageId==='dashboardProfileAvatar'?'dashboardProfileAvatarImage':imageId); const fallback=document.getElementById(index===0?'dashboardProfileAvatarFallback':'dashboardProfilePhotoFallback'); if(!image||!fallback) return; if(dashboardProfile.profileImageUrl){ image.src=dashboardProfile.profileImageUrl; image.hidden=false; fallback.hidden=true; } else { image.removeAttribute('src'); image.hidden=true; fallback.hidden=false; } });
 	  const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
-	  const brandImage=document.getElementById('dashboardBrandImage'); if(brandImage) brandImage.src=dashboardProfile.profileImageUrl||'/manus-storage/91-danta-dashboard-logo_d2a87fee.png';
-	  window.parent?.postMessage({type:'91dab-dashboard-profile-brand-image',imageUrl:dashboardProfile.profileImageUrl||null},'*');
 	  const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
   const nameInput=document.getElementById('dashboardProfileNameInput'); if(nameInput) nameInput.value=dashboardProfile.displayName;
   const emailInput=document.getElementById('dashboardProfileEmailInput'); if(emailInput) emailInput.value=dashboardProfile.email;
