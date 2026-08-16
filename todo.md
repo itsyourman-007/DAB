@@ -209,5 +209,9 @@
 - [x] Ensure the bottom-left profile picture on mobile matches the dashboard logo.
 - [x] Perform a final source, route, asset, payment-flow, and security review; fix verified findings and run the full release validation.
 - [x] Make every genuinely new online-store notification trigger the dashboard bell sound exactly five times, with duplicate suppression and desktop/mobile verification.
-- [ ] Synchronize the verified five-ring online-store notification update to GitHub and save a project checkpoint.
-- [ ] Report the verified five-ring notification behavior and any required browser sound permission.
+- [x] Synchronize the verified five-ring online-store notification update to GitHub and save a project checkpoint.
+- [x] Report the verified five-ring notification behavior and any required browser sound permission.
+- [x] Correct monthly and yearly subscription shipment scheduling so a buyer-selected 4-month quantity is recorded as a 4-month shipment allocation on each shipment, with the intended total shipment count and inventory deduction.
+- [x] Add regression coverage for four-month monthly and yearly schedules across checkout, dashboard, shipment tracking, and inventory.
+- [x] Save and synchronize the corrected subscription shipment release to GitHub.
+- [x] Clarification: when monthly quantity is 4 months, record four scheduled shipments of 99 DAB pieces each; do not multiply the 99-piece monthly allocation by the duration quantity.

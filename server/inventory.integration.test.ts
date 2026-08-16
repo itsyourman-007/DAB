@@ -79,7 +79,7 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
   it("keeps paid orders in stock until shipment and deducts each one-time, monthly, and yearly allocation exactly once", async () => {
     await setMerchantInventoryUnits(5_000);
     await createPaidOrder({ orderId: orderIds.introductory, planKey: "introductory", quantity: 3, deliverySpan: null });
-    await createPaidOrder({ orderId: orderIds.monthly, planKey: "monthly", quantity: 2, deliverySpan: "monthly", deliveryStartMonth: "2026-08" });
+    await createPaidOrder({ orderId: orderIds.monthly, planKey: "monthly", quantity: 4, deliverySpan: "monthly", deliveryStartMonth: "2026-08" });
     await createPaidOrder({ orderId: orderIds.yearlyMonthly, planKey: "yearly", quantity: 1, deliverySpan: "monthly", deliveryStartMonth: "2026-08" });
     await createPaidOrder({ orderId: orderIds.yearlyOnce, planKey: "yearly", quantity: 1, deliverySpan: "once" });
 
@@ -90,20 +90,25 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
 
     const monthlyFirst = await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-08" });
     const monthlyDuplicate = await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-08" });
-    expect(monthlyFirst).toMatchObject({ applied: true, reason: "deducted" });
-    expect(monthlyDuplicate).toMatchObject({ applied: false, reason: "already-shipped" });
-    expect((await getMerchantInventory()).availableUnits).toBe(4_766);
+    expect(monthlyFirst).toMatchObject({ applied: true, reason: "deducted", allocation: { units: 99, periodKey: "2026-08" } });
+    expect(monthlyDuplicate).toMatchObject({ applied: false, reason: "already-shipped", allocation: { units: 99, periodKey: "2026-08" } });
+    await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-09" });
+    await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-10" });
+    await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-11" });
+    expect((await getMerchantInventory()).availableUnits).toBe(4_568);
 
     await recordSubscriptionShipment({ orderId: orderIds.yearlyMonthly, periodKey: "2026-08" });
-    expect((await getMerchantInventory()).availableUnits).toBe(4_641);
+    expect((await getMerchantInventory()).availableUnits).toBe(4_443);
 
     await expect(recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2027-08" })).rejects.toThrow("outside the buyer-selected 12-month delivery schedule");
-    expect((await getMerchantInventory()).availableUnits).toBe(4_641);
+    expect((await getMerchantInventory()).availableUnits).toBe(4_443);
 
     await updateMerchantOrderFulfillment({ orderId: orderIds.yearlyOnce, status: "shipped" });
-    expect((await getMerchantInventory()).availableUnits).toBe(3_141);
+    expect((await getMerchantInventory()).availableUnits).toBe(2_943);
 
     const allocations = await listMerchantInventoryShipmentAllocations();
-    expect(allocations.filter((allocation) => Object.values(orderIds).includes(allocation.orderId))).toHaveLength(4);
-  }, 20_000);
+    const orderAllocations = allocations.filter((allocation) => Object.values(orderIds).includes(allocation.orderId));
+    expect(orderAllocations).toHaveLength(7);
+    expect(orderAllocations.filter((allocation) => allocation.orderId === orderIds.monthly).map((allocation) => allocation.units)).toEqual([99, 99, 99, 99]);
+  }, 60_000);
 });

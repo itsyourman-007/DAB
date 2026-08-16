@@ -544,7 +544,7 @@ function allocationForOrder(order: MerchantOrder, periodKey?: string) {
   if (order.planKey === "introductory") return { allocationKey: `${order.orderId}:one-time`, allocationKind: "one-time", periodKey: null, units: quantity * 12 };
   if (order.planKey === "yearly" && order.deliverySpan === "once") return { allocationKey: `${order.orderId}:yearly-all-at-once`, allocationKind: "yearly-all-at-once", periodKey: null, units: quantity * 1500 };
   if (!periodKey) throw new Error("A shipment month is required for recurring subscription inventory");
-  if (order.planKey === "monthly") return { allocationKey: `${order.orderId}:monthly:${periodKey}`, allocationKind: "monthly", periodKey, units: quantity * 99 };
+  if (order.planKey === "monthly") return { allocationKey: `${order.orderId}:monthly:${periodKey}`, allocationKind: "monthly", periodKey, units: 99 };
   if (order.planKey === "yearly") return { allocationKey: `${order.orderId}:yearly-monthly:${periodKey}`, allocationKind: "yearly-monthly", periodKey, units: quantity * 125 };
   throw new Error("This order does not have a DAB inventory fulfillment rule");
 }
