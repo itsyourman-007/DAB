@@ -882,12 +882,19 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="card" style="padding:2rem;text-align:center;"><h3 style="margin-bottom:.5rem;">No marketing data connected</h3><p class="hint" style="margin:0;">Traffic, subscribers, ad spend, and attribution will appear only after a real analytics integration is connected.</p></div>
       </section>
 
-      <!-- ============ MOBILE APP (stub analytics) ============ -->
+      <!-- ============ MOBILE APP DOWNLOAD ============ -->
       <section class="screen" id="screen-mobile">
         <div class="card" style="padding:2.4rem;text-align:center;">
-          <h3 style="margin-bottom:.5rem;">No mobile app connected yet</h3>
-          <p class="hint" style="margin-bottom:1.2rem;">Once you launch a mobile storefront, install analytics here to track app sessions and push-notification opt-ins.</p>
-          <button class="form-btn" onclick="showToast('Mobile analytics is not connected yet','info')">Connect app</button>
+          <h3 style="margin-bottom:.5rem;">Install the 91DAB Dashboard app</h3>
+          <p class="hint" style="margin-bottom:1.2rem;">Scan this QR code with an Android phone to download the dashboard shortcut. It opens the protected 91DAB merchant console directly.</p>
+          <div style="display:flex;justify-content:center;margin:0 auto 1.2rem;">
+            <a href="https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-shortcut.apk" target="_blank" rel="noopener noreferrer" aria-label="Download the 91DAB Dashboard Android APK">
+              <img id="dashboardApkQr" src="https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-apk-qr.svg" alt="QR code to download the 91DAB Dashboard Android APK" width="220" height="220" style="display:block;width:220px;height:220px;padding:10px;background:#fff;border:1px solid var(--line);border-radius:16px;" onerror="this.style.display='none';document.getElementById('dashboardApkQrFallback').hidden=false;">
+            </a>
+          </div>
+          <p id="dashboardApkQrFallback" class="hint" hidden style="margin:-.4rem auto 1rem;max-width:28rem;">QR preview is temporarily unavailable. Use the download button below.</p>
+          <a class="form-btn" href="https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-shortcut.apk" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;">Download Android APK</a>
+          <p class="hint" style="margin:1rem auto 0;max-width:32rem;">Android may ask you to allow installation from your browser before opening the app.</p>
         </div>
       </section>
 

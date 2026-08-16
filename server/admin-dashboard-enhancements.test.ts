@@ -257,6 +257,13 @@ describe("protected merchant dashboard enhancements", () => {
     expect(shopHtml).toContain("renderProductScreen();");
   });
 
+  it("provides a working Android dashboard APK QR and direct download link", () => {
+    expect(dashboardHtml).toContain('id="dashboardApkQr"');
+    expect(dashboardHtml).toContain("91dab-dashboard-apk-qr.svg");
+    expect(dashboardHtml).toContain("91dab-dashboard-shortcut.apk");
+    expect(dashboardHtml).toContain("Download Android APK");
+  });
+
   it("provides a durable administrator-only Customisation workflow for quote clients and includes recorded units and revenue in Home metrics", () => {
     expect(schemaSource).toContain('mysqlTable("merchantQuoteClientCustomizations"');
     expect(schemaSource).toContain('mysqlTable("merchantClinicQuoteLeads"');

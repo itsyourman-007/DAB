@@ -198,3 +198,5 @@
 - [x] Make the monthly subscription delivery text and start-month dropdown refresh immediately when quantity changes.
 - [x] Show selected monthly and yearly delivery months with three-letter labels across dashboard order, subscription, payment, and delivery views.
 - [x] Diagnose and fix the user-facing monthly subscription selector so its quantity-based delivery text appears in the served shop page.
+- [x] Restore the dashboard Connect app QR code so it opens a valid downloadable Android dashboard shortcut APK.
+- [x] Replace the Android dashboard shortcut’s broken launcher image with the supplied 91 DANTA logo.

@@ -2,6 +2,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="false"
+        android:icon="@drawable/ic_91dab_logo"
+        android:roundIcon="@drawable/ic_91dab_logo"
         android:label="91DAB Dashboard"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
