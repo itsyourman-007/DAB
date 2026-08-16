@@ -1018,7 +1018,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <div class="set-row"><div><div class="set-label">New order alerts</div><div class="set-sub">Get a live notification when a buyer checks out</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Payment confirmations</div><div class="set-sub">Notify when a UPI reference is submitted</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Low stock warnings</div><div class="set-sub">Alert when any product drops below 50 units</div></div><button class="switch" onclick="this.classList.toggle('on')"></button></div>
-          <div class="set-row"><div><div class="set-label">Notification sound</div><div class="set-sub">Muted by default. Turn on a gentle chime for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification sound" onclick="toggleNotificationSound()"></button></div>
+          <div class="set-row"><div><div class="set-label">Notification sound</div><div class="set-sub">Muted by default. Turn on five bell rings for each genuinely new online-store checkout, UPI reference, or trusted live message.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification sound" onclick="toggleNotificationSound()"></button></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
@@ -1150,28 +1150,28 @@ async function toggleNotificationSound(){
   notificationSoundEnabled=!notificationSoundEnabled;
   try{localStorage.setItem(NOTIFICATION_SOUND_KEY,String(notificationSoundEnabled));}catch(err){}
   if(notificationSoundEnabled){
-    try{await prepareNotificationAudio(); showToast('Notification sound enabled. It will chime only for new received updates.','success');}
+    try{await prepareNotificationAudio(); showToast('Notification sound enabled. New online-store notifications ring five times.','success');}
     catch(err){notificationSoundEnabled=false; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'false');}catch(storageErr){} showToast('Your browser blocked notification sound. Try the switch again after interacting with this page.','info');}
   } else { showToast('Notification sound muted.','info'); }
   syncNotificationSoundControl();
 }
-function playNotificationChime(){
+const NOTIFICATION_BELL_COUNT = 5;
+const NOTIFICATION_BELL_INTERVAL_MS = 420;
+function playNotificationBell(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
   const now=notificationAudioContext.currentTime;
-  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.055,now+.015); gain.gain.exponentialRampToValueAtTime(0.0001,now+.32); gain.connect(notificationAudioContext.destination);
-  [880,1320].forEach((frequency,index)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+index*.1); oscillator.connect(gain); oscillator.start(now+index*.1); oscillator.stop(now+index*.1+.15);});
+  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.085,now+.018); gain.gain.exponentialRampToValueAtTime(0.0001,now+.34); gain.connect(notificationAudioContext.destination);
+  [740,1110].forEach((frequency,index)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+index*.085); oscillator.connect(gain); oscillator.start(now+index*.085); oscillator.stop(now+index*.085+.18);});
   return true;
 }
-function playNewOrderRocketSound(){
+function playNotificationBellFiveTimes(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
-  const now=notificationAudioContext.currentTime;
-  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.075,now+.025); gain.gain.exponentialRampToValueAtTime(0.0001,now+.46); gain.connect(notificationAudioContext.destination);
-  const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sawtooth'; oscillator.frequency.setValueAtTime(150,now); oscillator.frequency.exponentialRampToValueAtTime(980,now+.27); oscillator.frequency.exponentialRampToValueAtTime(340,now+.46); oscillator.connect(gain); oscillator.start(now); oscillator.stop(now+.48);
+  for(let ring=0;ring<NOTIFICATION_BELL_COUNT;ring++) setTimeout(()=>playNotificationBell(),ring*NOTIFICATION_BELL_INTERVAL_MS);
   return true;
 }
-function notifyReceivedUpdate(title,text,sound='chime'){
+function notifyReceivedUpdate(title,text){
   notifications.unshift({title,text,time:'Just now',unread:true}); notifications=notifications.slice(0,20);
-  renderNotifications(); sound==='rocket'?playNewOrderRocketSound():playNotificationChime();
+  renderNotifications(); playNotificationBellFiveTimes();
 }
 
 function readShopStorage(key){
@@ -1256,14 +1256,14 @@ function showLiveStoreStatus(){
 }
 function applyServerOrders(records){
   const previousStates=new Set(serverOrderRecords.map(record=>`${record.orderId}:${record.paymentStatus}`));
-  const nextRecords=Array.isArray(records) ? records.filter(record=>record?.paymentStatus==='pending'||record?.paymentStatus==='utr_submitted'||record?.paymentStatus==='paid') : [];
-  const receivedAlerts=serverOrdersInitialized?nextRecords.filter(record=>['pending','utr_submitted'].includes(record.paymentStatus)&&!previousStates.has(`${record.orderId}:${record.paymentStatus}`)):[];
+  const nextRecords=Array.isArray(records) ? records.filter(record=>['pending','utr_submitted','paid'].includes(record?.paymentStatus)) : [];
+  const receivedAlerts=serverOrdersInitialized?nextRecords.filter(record=>!previousStates.has(`${record.orderId}:${record.paymentStatus}`)):[];
   serverOrderRecords=nextRecords;
   setLiveStoreMonitor({status:'online',lastSyncedAt:Date.now()});
   hydrateShopData();
   syncDashboardViews();
   serverOrdersInitialized=true;
-  receivedAlerts.forEach(record=>{const isNewCheckout=record.paymentStatus==='pending';notifyReceivedUpdate(isNewCheckout?'New buyer checkout':'UPI reference submitted',`${record.orderId} · ${record.buyerName||'Buyer'}`,isNewCheckout?'rocket':'chime');});
+  receivedAlerts.forEach(record=>{const title=record.paymentStatus==='pending'?'New buyer checkout':record.paymentStatus==='paid'?'Payment confirmed':'UPI reference submitted'; notifyReceivedUpdate(title,`${record.orderId} · ${record.buyerName||'Buyer'}`);});
 }
 function applyTrustedLiveMessage(message){
   if(!message?.id||!message?.name||!message?.text) return;

@@ -14,25 +14,27 @@ describe("dashboard notification sound", () => {
     expect(dashboardHtml).toContain("async function toggleNotificationSound()");
   });
 
-  it("creates a small browser-native chime only after the enabled sound context is running", () => {
+  it("creates a browser-native bell only after the enabled sound context is running", () => {
     expect(dashboardHtml).toContain("async function prepareNotificationAudio()");
-    expect(dashboardHtml).toContain("function playNotificationChime()");
+    expect(dashboardHtml).toContain("function playNotificationBell()");
     expect(dashboardHtml).toContain("if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false");
-    expect(dashboardHtml).toContain("[880,1320].forEach");
+    expect(dashboardHtml).toContain("[740,1110].forEach");
   });
 
-  it("uses a distinct rocket-style sound only for genuinely new trusted checkout orders", () => {
-    expect(dashboardHtml).toContain("function playNewOrderRocketSound()");
-    expect(dashboardHtml).toContain("oscillator.type='sawtooth'");
-    expect(dashboardHtml).toContain("oscillator.frequency.exponentialRampToValueAtTime(980,now+.27)");
-    expect(dashboardHtml).toContain("function notifyReceivedUpdate(title,text,sound='chime')");
-    expect(dashboardHtml).toContain("sound==='rocket'?playNewOrderRocketSound():playNotificationChime()");
-    expect(dashboardHtml).toContain("isNewCheckout?'rocket':'chime'");
+  it("rings the bell exactly five times for each genuinely new online-store notification", () => {
+    expect(dashboardHtml).toContain("const NOTIFICATION_BELL_COUNT = 5");
+    expect(dashboardHtml).toContain("const NOTIFICATION_BELL_INTERVAL_MS = 420");
+    expect(dashboardHtml).toContain("function playNotificationBellFiveTimes()");
+    expect(dashboardHtml).toContain("for(let ring=0;ring<NOTIFICATION_BELL_COUNT;ring++) setTimeout(()=>playNotificationBell(),ring*NOTIFICATION_BELL_INTERVAL_MS)");
+    expect(dashboardHtml).toContain("function notifyReceivedUpdate(title,text)");
+    expect(dashboardHtml).toContain("renderNotifications(); playNotificationBellFiveTimes()");
+    expect(dashboardHtml).toContain("['pending','utr_submitted','paid'].includes(record?.paymentStatus)");
+    expect(dashboardHtml).toContain("record.paymentStatus==='paid'?'Payment confirmed'");
   });
 
   it("never chimes for the initial order hydration and only tracks trusted incoming order states or live-message events", () => {
     expect(dashboardHtml).toContain("let serverOrdersInitialized = false");
-    expect(dashboardHtml).toContain("const receivedAlerts=serverOrdersInitialized?nextRecords.filter");
+    expect(dashboardHtml).toContain("const receivedAlerts=serverOrdersInitialized?nextRecords.filter(record=>!previousStates.has(`${record.orderId}:${record.paymentStatus}`))");
     expect(dashboardHtml).toContain("serverOrdersInitialized=true");
     expect(dashboardHtml).toContain("function applyTrustedLiveMessage(message)");
     expect(dashboardHtml).toContain("if(data.type==='91dab-live-message'){ applyTrustedLiveMessage(data.message); }");

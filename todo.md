@@ -208,3 +208,6 @@
 - [x] Format mobile notification layout properly for mobile screens.
 - [x] Ensure the bottom-left profile picture on mobile matches the dashboard logo.
 - [x] Perform a final source, route, asset, payment-flow, and security review; fix verified findings and run the full release validation.
+- [x] Make every genuinely new online-store notification trigger the dashboard bell sound exactly five times, with duplicate suppression and desktop/mobile verification.
+- [ ] Synchronize the verified five-ring online-store notification update to GitHub and save a project checkpoint.
+- [ ] Report the verified five-ring notification behavior and any required browser sound permission.
