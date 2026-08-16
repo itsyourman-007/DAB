@@ -94,15 +94,6 @@ svg{display:block;}
 .submenu li a.active{color:var(--accent-soft-text);font-weight:600;border-left:1.5px solid var(--accent);background:var(--accent-soft);}
 
 .user-row{display:flex;align-items:center;gap:.65rem;padding:.9rem 1.1rem;border-top:1px solid var(--border);}
-	.avatar{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-soft);font-size:.78rem;font-weight:700;flex:none;overflow:hidden;position:relative;}
-	.avatar img,.profile-photo-preview img{width:100%;height:100%;object-fit:cover;display:block;}
-	.avatar .profile-logo-fallback,.profile-photo-preview .profile-logo-fallback{object-fit:contain;padding:3px;}
-	.profile-photo-setting{display:flex;align-items:center;gap:1rem;margin:0 0 1.15rem;padding:.95rem;border:1px solid var(--border);border-radius:12px;background:var(--card-tint);}
-	.profile-photo-preview{width:52px;height:52px;border-radius:50%;background:#fff;border:1px solid var(--border);color:var(--text-soft);font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;}
-	.profile-photo-copy{min-width:0;flex:1;}.profile-photo-copy b{display:block;font-size:.86rem;}.profile-photo-copy p{margin:.2rem 0 .55rem;font-size:.75rem;color:var(--text-soft);}
-	.profile-photo-upload{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:.38rem .65rem;border-radius:8px;background:var(--accent);color:#fff;font-size:.76rem;font-weight:700;cursor:pointer;}.profile-photo-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
-	.profile-photo-state{display:block;margin-top:.4rem;font-size:.72rem;color:var(--text-faint);}
-	@media(max-width:620px){.profile-photo-setting{align-items:flex-start;gap:.75rem;padding:.8rem;}.profile-photo-preview{width:46px;height:46px;}.profile-photo-copy p{line-height:1.45;}}
 .user-meta{flex:1;min-width:0;}
 .user-meta .u-name{font-size:.85rem;font-weight:600;}
 .user-meta .u-email{font-size:.74rem;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -616,8 +607,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <a href="#" onclick="event.preventDefault();navigate('settings');document.getElementById('profileDd').classList.remove('open');">Account settings</a>
         <a href="#" onclick="event.preventDefault();showToast('Sign out is not connected yet','info');document.getElementById('profileDd').classList.remove('open');">Log out</a>
       </div>
-	      <div class="avatar" id="dashboardProfileAvatar"><img id="dashboardProfileAvatarImage" alt="" hidden><img class="profile-logo-fallback" id="dashboardProfileAvatarFallback" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA"></div>
-      <div class="user-meta hide-collapsed">
+	      <div class="user-meta hide-collapsed">
         <div class="u-name" id="dashboardProfileName">91DAB Administrator</div>
         <div class="u-email" id="dashboardProfileEmail">Loading profile…</div>
       </div>
@@ -1065,7 +1055,6 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
-	          <div class="profile-photo-setting"><div class="profile-photo-preview"><img id="dashboardProfilePhotoPreview" alt="" hidden><img class="profile-logo-fallback" id="dashboardProfilePhotoFallback" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA"></div><div class="profile-photo-copy"><b>Profile picture</b><p>PNG, JPEG, or WebP, up to 1.5 MB. Only the protected administrator can change this image.</p><label class="profile-photo-upload">Choose picture<input id="dashboardProfileImageInput" type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadDashboardProfileImage(this)"></label><span class="profile-photo-state" id="dashboardProfileImageState">No profile picture selected.</span></div></div>
           <div class="field"><label for="dashboardProfileNameInput">Name</label><input id="dashboardProfileNameInput" maxlength="160" autocomplete="name"></div>
           <div class="field"><label for="dashboardProfileEmailInput">Email</label><input id="dashboardProfileEmailInput" type="email" maxlength="320" autocomplete="email"></div>
           <button class="form-btn" onclick="saveDashboardProfile()">Save profile</button>
@@ -2230,14 +2219,10 @@ function openEmployeeAccountDialog(mode,id){
 }
 function submitEmployeeAccount(event,action,id){ event.preventDefault(); const button=event.currentTarget.querySelector('button[type="submit"]'); button.disabled=true; button.textContent=action==='create'?'Authorizing…':action==='reset'?'Resetting…':'Removing…'; const adminPassword=document.getElementById('employeeAdminPassword').value; if(action==='create')window.parent?.postMessage({type:'91dab-employee-account-create',account:{name:document.getElementById('employeeAccountName').value.trim(),email:document.getElementById('employeeAccountEmail').value.trim(),employeePassword:document.getElementById('employeeAccountPassword').value,adminPassword}},'*'); else if(action==='reset')window.parent?.postMessage({type:'91dab-employee-account-reset',account:{id:Number(id),employeePassword:document.getElementById('employeeAccountPassword').value,adminPassword}},'*'); else window.parent?.postMessage({type:'91dab-employee-account-remove',account:{id:Number(id),adminPassword}},'*'); }
 function applyDashboardRole(role){ dashboardRole=role; const isAdmin=role==='admin'; document.querySelectorAll('[data-admin-only]').forEach(element=>{element.style.display=isAdmin?'':'none';}); const accessStatus=document.getElementById('accessSessionStatus'); if(accessStatus&&!isAdmin) accessStatus.textContent='Active restricted employee session. This account has read-only access to dashboard records.'; renderTeamMembers(); renderEmployeeAccounts(); renderPayments(); }
-const PROFILE_IMAGE_STORAGE_KEY='91dab_dashboard_profile_image';
 let dashboardProfile={displayName:'91DAB Administrator',email:''};
-function getStoredProfileImage(){ try{const value=localStorage.getItem(PROFILE_IMAGE_STORAGE_KEY); return value&&value.startsWith('data:image/')?value:null;}catch(_){return null;} }
-function persistProfileImage(imageUrl){ try{localStorage.setItem(PROFILE_IMAGE_STORAGE_KEY,imageUrl); return true;}catch(_){return false;} }
 function applyDashboardProfile(profile){
   if(!profile) return;
-  dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||'',profileImageUrl:profile.profileImageUrl||getStoredProfileImage()||null};
-	  ['dashboardProfileAvatar','dashboardProfilePhotoPreview'].forEach((imageId,index)=>{ const image=document.getElementById(imageId==='dashboardProfileAvatar'?'dashboardProfileAvatarImage':imageId); const fallback=document.getElementById(index===0?'dashboardProfileAvatarFallback':'dashboardProfilePhotoFallback'); if(!image||!fallback) return; if(dashboardProfile.profileImageUrl){ image.src=dashboardProfile.profileImageUrl; image.hidden=false; fallback.hidden=true; } else { image.removeAttribute('src'); image.hidden=true; fallback.hidden=false; } });
+  dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||''};
 	  const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
 	  const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
   const nameInput=document.getElementById('dashboardProfileNameInput'); if(nameInput) nameInput.value=dashboardProfile.displayName;
@@ -2245,16 +2230,6 @@ function applyDashboardProfile(profile){
   const loginStatus=document.getElementById('dashboardLoginStatus'); if(loginStatus) loginStatus.textContent='Signed in with the protected administrator session. Profile email can be updated below.';
   const accessStatus=document.getElementById('accessSessionStatus'); if(accessStatus) accessStatus.textContent='Active protected administrator session. Use the dashboard password and Security settings to manage access.';
   const identity=document.getElementById('accessProfileIdentity'); if(identity) identity.textContent=`${dashboardProfile.displayName}${dashboardProfile.email?` · ${dashboardProfile.email}`:''}`;
-}
-function uploadDashboardProfileImage(input){
-  const file=input?.files?.[0]; if(!file) return;
-  const state=document.getElementById('dashboardProfileImageState');
-  if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1500*1024){ if(state) state.textContent='Use a PNG, JPEG, or WebP image smaller than 1.5 MB.'; showToast('Use a PNG, JPEG, or WebP image smaller than 1.5 MB.','error'); input.value=''; return; }
-  if(state) state.textContent='Saving profile picture…';
-  const reader=new FileReader();
-  reader.onerror=()=>{if(state)state.textContent='The selected image could not be read.';showToast('The selected image could not be read.','error');};
-  reader.onload=()=>{const imageUrl=typeof reader.result==='string'?reader.result:''; if(!imageUrl||!persistProfileImage(imageUrl)){if(state)state.textContent='Your browser could not save this picture. Try a smaller image.';showToast('Your browser could not save this picture. Try a smaller image.','error');return;} applyDashboardProfile({...dashboardProfile,profileImageUrl:imageUrl}); if(state)state.textContent='Profile picture saved and shown.'; showToast('Profile picture saved.','success'); input.value='';};
-  reader.readAsDataURL(file);
 }
 function saveDashboardProfile(){
   const displayName=document.getElementById('dashboardProfileNameInput')?.value.trim();
@@ -2307,11 +2282,6 @@ window.addEventListener('message',(event)=>{
   if(data.type==='91dab-dashboard-profile-result'){
     if(data.success){ applyDashboardProfile(data.profile); showToast('Profile saved','success'); }
     else showToast(data.message||'Profile could not be saved.','error');
-  }
-  if(data.type==='91dab-dashboard-profile-image-result'){
-    const state=document.getElementById('dashboardProfileImageState');
-    if(data.success){ applyDashboardProfile(data.profile); if(state) state.textContent='Profile picture saved.'; showToast('Profile picture saved','success'); }
-    else { if(state) state.textContent=data.message||'Profile picture could not be saved.'; showToast(data.message||'Profile picture could not be saved.','error'); }
   }
   if(data.type==='91dab-server-orders'){ applyServerOrders(data.orders); }
   if(data.type==='91dab-live-store-monitor'){ setLiveStoreMonitor(data.monitor); }

@@ -230,3 +230,4 @@
 - [x] Replace every remaining dashboard plain “91” placeholder with the supplied 91 DANTA logo.
 - [x] Synchronize a chosen profile picture across the sidebar avatar, Settings preview, and top-left dashboard brand image.
 - [x] Revert the recent profile-picture and profile-brand synchronization changes to restore the normal dashboard presentation.
+- [x] Remove the dashboard profile-picture feature and duplicate profile-image displays, retaining fixed logo branding only.

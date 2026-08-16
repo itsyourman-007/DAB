@@ -7,7 +7,6 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { registerCheckoutRoutes } from "../checkoutRoutes";
-import { registerDashboardProfileImageRoute } from "../dashboardProfileImage";
 import { createContext } from "./context";
 import { cleanupScheduledDemoOrders } from "../demoOrderCleanup";
 import { sendScheduledMonthlySubscriptionSummary } from "../subscriptionReminders";
@@ -48,9 +47,6 @@ async function startServer() {
   app.use("/api/clinic-quote", rateLimit({ name: "clinic-quote", windowMs: 10 * 60 * 1000, max: 20 }));
   app.use("/api/clinic-quote", requireTrustedMutationOrigin);
   registerCheckoutRoutes(app);
-  app.use("/api/dashboard-profile-image", rateLimit({ name: "dashboard-profile-image", windowMs: 10 * 60 * 1000, max: 12 }));
-  app.use("/api/dashboard-profile-image", requireTrustedMutationOrigin);
-  registerDashboardProfileImageRoute(app);
   app.post("/api/scheduled/demo-order-cleanup", cleanupScheduledDemoOrders);
   app.post("/api/scheduled/monthly-subscription-summary", sendScheduledMonthlySubscriptionSummary);
   app.use("/api/trpc/admin.login", rateLimit({ name: "dashboard-login", windowMs: 15 * 60 * 1000, max: 5 }));

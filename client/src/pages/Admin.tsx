@@ -9,12 +9,6 @@ import dashboardHtml from "../embedded/dashboard.html?raw";
 
 const dashboardLogoUrl = "/manus-storage/91-danta-dashboard-logo_d2a87fee.png";
 
-function isUploadableProfileImage(value: unknown): value is { type: string; size: number; arrayBuffer: () => Promise<ArrayBuffer> } {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as { type?: unknown; size?: unknown; arrayBuffer?: unknown };
-  return typeof candidate.type === "string" && typeof candidate.size === "number" && typeof candidate.arrayBuffer === "function";
-}
-
 export default function Admin() {
   const isAndroidDashboardShortcut = /91DABDashboard\/\d/i.test(navigator.userAgent);
   const [username, setUsername] = useState("");
@@ -296,33 +290,6 @@ export default function Admin() {
           onSuccess: (savedProfile) => respond({ type: "91dab-dashboard-profile-result", success: true, profile: savedProfile }),
           onError: (error) => respond({ type: "91dab-dashboard-profile-result", success: false, message: error.message }),
         });
-      }
-      if (event.data.type === "91dab-dashboard-profile-image-upload") {
-        const file = event.data.file;
-        if (!isUploadableProfileImage(file)) {
-          respond({ type: "91dab-dashboard-profile-image-result", success: false, message: "Choose a valid image file." });
-          return;
-        }
-        if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size > 2 * 1024 * 1024) {
-          respond({ type: "91dab-dashboard-profile-image-result", success: false, message: "Use a PNG, JPEG, or WebP image smaller than 2 MB." });
-          return;
-        }
-        void (async () => {
-          try {
-            const response = await fetch("/api/dashboard-profile-image", {
-              method: "POST",
-              credentials: "same-origin",
-              headers: { "Content-Type": file.type },
-              body: await file.arrayBuffer(),
-            });
-            const payload = await response.json().catch(() => ({})) as { profile?: unknown; error?: string };
-            if (!response.ok || !payload.profile) throw new Error(payload.error || "Profile picture could not be saved.");
-            await utils.admin.profile.invalidate();
-            respond({ type: "91dab-dashboard-profile-image-result", success: true, profile: payload.profile });
-          } catch (error) {
-            respond({ type: "91dab-dashboard-profile-image-result", success: false, message: error instanceof Error ? error.message : "Profile picture could not be saved." });
-          }
-        })();
       }
       if (event.data.type === "91dab-mark-paid") {
         markOrderPaid.mutate({ orderId: event.data.orderId }, {
