@@ -264,6 +264,11 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("Download Android APK");
   });
 
+  it("uses the committed 91 DANTA launcher image for dashboard branding without a broken-image fallback", () => {
+    expect(dashboardHtml).toContain("raw.githubusercontent.com/itsyourman-007/DAB/main/android-dashboard-app/app/src/main/res/drawable/ic_91dab_logo.png");
+    expect(dashboardHtml).toContain("onerror=\"this.style.display='none';\"");
+  });
+
   it("provides a durable administrator-only Customisation workflow for quote clients and includes recorded units and revenue in Home metrics", () => {
     expect(schemaSource).toContain('mysqlTable("merchantQuoteClientCustomizations"');
     expect(schemaSource).toContain('mysqlTable("merchantClinicQuoteLeads"');
