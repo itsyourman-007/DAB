@@ -227,3 +227,4 @@
 - [x] Repair the dashboard collapse control so the sidebar fully disappears and can be reliably restored.
 - [x] Replace the profile-picture save and display flow with a verified direct upload path that persists and renders after reload.
 - [x] Give dashboard profile-picture surfaces a white background and replace the top-left numeric badge with the supplied app logo.
+- [x] Replace every remaining dashboard plain “91” placeholder with the supplied 91 DANTA logo.

@@ -96,6 +96,7 @@ svg{display:block;}
 .user-row{display:flex;align-items:center;gap:.65rem;padding:.9rem 1.1rem;border-top:1px solid var(--border);}
 	.avatar{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-soft);font-size:.78rem;font-weight:700;flex:none;overflow:hidden;position:relative;}
 	.avatar img,.profile-photo-preview img{width:100%;height:100%;object-fit:cover;display:block;}
+	.avatar .profile-logo-fallback,.profile-photo-preview .profile-logo-fallback{object-fit:contain;padding:3px;}
 	.profile-photo-setting{display:flex;align-items:center;gap:1rem;margin:0 0 1.15rem;padding:.95rem;border:1px solid var(--border);border-radius:12px;background:var(--card-tint);}
 	.profile-photo-preview{width:52px;height:52px;border-radius:50%;background:#fff;border:1px solid var(--border);color:var(--text-soft);font-size:.9rem;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;}
 	.profile-photo-copy{min-width:0;flex:1;}.profile-photo-copy b{display:block;font-size:.86rem;}.profile-photo-copy p{margin:.2rem 0 .55rem;font-size:.75rem;color:var(--text-soft);}
@@ -615,7 +616,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <a href="#" onclick="event.preventDefault();navigate('settings');document.getElementById('profileDd').classList.remove('open');">Account settings</a>
         <a href="#" onclick="event.preventDefault();showToast('Sign out is not connected yet','info');document.getElementById('profileDd').classList.remove('open');">Log out</a>
       </div>
-      <div class="avatar" id="dashboardProfileAvatar"><img id="dashboardProfileAvatarImage" alt="" hidden><span id="dashboardProfileAvatarInitials">91</span></div>
+	      <div class="avatar" id="dashboardProfileAvatar"><img id="dashboardProfileAvatarImage" alt="" hidden><img class="profile-logo-fallback" id="dashboardProfileAvatarFallback" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA"></div>
       <div class="user-meta hide-collapsed">
         <div class="u-name" id="dashboardProfileName">91DAB Administrator</div>
         <div class="u-email" id="dashboardProfileEmail">Loading profile…</div>
@@ -1064,7 +1065,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
-          <div class="profile-photo-setting"><div class="profile-photo-preview"><img id="dashboardProfilePhotoPreview" alt="" hidden><span id="dashboardProfilePhotoInitials">91</span></div><div class="profile-photo-copy"><b>Profile picture</b><p>PNG, JPEG, or WebP, up to 2 MB. Only the protected administrator can change this image.</p><label class="profile-photo-upload">Choose picture<input id="dashboardProfileImageInput" type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadDashboardProfileImage(this)"></label><span class="profile-photo-state" id="dashboardProfileImageState">No profile picture selected.</span></div></div>
+	          <div class="profile-photo-setting"><div class="profile-photo-preview"><img id="dashboardProfilePhotoPreview" alt="" hidden><img class="profile-logo-fallback" id="dashboardProfilePhotoFallback" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA"></div><div class="profile-photo-copy"><b>Profile picture</b><p>PNG, JPEG, or WebP, up to 1.5 MB. Only the protected administrator can change this image.</p><label class="profile-photo-upload">Choose picture<input id="dashboardProfileImageInput" type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadDashboardProfileImage(this)"></label><span class="profile-photo-state" id="dashboardProfileImageState">No profile picture selected.</span></div></div>
           <div class="field"><label for="dashboardProfileNameInput">Name</label><input id="dashboardProfileNameInput" maxlength="160" autocomplete="name"></div>
           <div class="field"><label for="dashboardProfileEmailInput">Email</label><input id="dashboardProfileEmailInput" type="email" maxlength="320" autocomplete="email"></div>
           <button class="form-btn" onclick="saveDashboardProfile()">Save profile</button>
@@ -2236,8 +2237,7 @@ function persistProfileImage(imageUrl){ try{localStorage.setItem(PROFILE_IMAGE_S
 function applyDashboardProfile(profile){
   if(!profile) return;
   dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||'',profileImageUrl:profile.profileImageUrl||getStoredProfileImage()||null};
-  const profileInitials=initials(dashboardProfile.displayName)||'91';
-  ['dashboardProfileAvatar','dashboardProfilePhotoPreview'].forEach((imageId,index)=>{ const image=document.getElementById(imageId==='dashboardProfileAvatar'?'dashboardProfileAvatarImage':imageId); const initialsEl=document.getElementById(index===0?'dashboardProfileAvatarInitials':'dashboardProfilePhotoInitials'); if(!image||!initialsEl) return; if(dashboardProfile.profileImageUrl){ image.src=dashboardProfile.profileImageUrl; image.hidden=false; initialsEl.hidden=true; } else { image.removeAttribute('src'); image.hidden=true; initialsEl.hidden=false; initialsEl.textContent=profileInitials; } });
+	  ['dashboardProfileAvatar','dashboardProfilePhotoPreview'].forEach((imageId,index)=>{ const image=document.getElementById(imageId==='dashboardProfileAvatar'?'dashboardProfileAvatarImage':imageId); const fallback=document.getElementById(index===0?'dashboardProfileAvatarFallback':'dashboardProfilePhotoFallback'); if(!image||!fallback) return; if(dashboardProfile.profileImageUrl){ image.src=dashboardProfile.profileImageUrl; image.hidden=false; fallback.hidden=true; } else { image.removeAttribute('src'); image.hidden=true; fallback.hidden=false; } });
   const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
   const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
   const nameInput=document.getElementById('dashboardProfileNameInput'); if(nameInput) nameInput.value=dashboardProfile.displayName;
