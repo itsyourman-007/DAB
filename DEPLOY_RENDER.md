@@ -126,7 +126,7 @@ For a configuration-only change, use **Environment → Save, rebuild, and deploy
 | Delivery Tracking | Marking a paid test order Shipped then Delivered sends one email for each state. |
 | Settings | Activate the first-of-month subscription reminder and hourly demo-order cleanup only after the final published URL is working. |
 
-After the final HTTPS domain is available, send it to me to create the fixed Android dashboard shortcut that opens `/admin` directly.
+The dashboard’s **Connect app** screen provides the current fixed Android dashboard shortcut. If the public dashboard domain changes, rebuild the Android shortcut with the new `/admin` address, replace the GitHub release APK, and keep the QR target unchanged.
 
 ## References
 

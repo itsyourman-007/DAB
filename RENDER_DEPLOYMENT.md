@@ -15,7 +15,7 @@ The Render ZIP bundles the supplied DAB product and clinic images under `client/
 | Render field | Value |
 | --- | --- |
 | Language / Runtime | Node |
-| Build Command | `corepack enable && pnpm install --frozen-lockfile && pnpm build` |
+| Build Command | `pnpm install --frozen-lockfile --prod=false && pnpm build` |
 | Start Command | `pnpm start` |
 | Health Check Path | `/` |
 | Environment Variable | `NODE_ENV=production` |
@@ -75,9 +75,9 @@ The Support form sends its message only to `ADMIN_OTP_RECIPIENT_EMAIL`, using th
 
 ## Android dashboard APK
 
-The delivery includes `91dab-dashboard-debug.apk`, an installable signed debug APK, and the `android-dashboard-app/` source directory. On first launch, the app requests the final **HTTPS** Render or custom-domain address and opens `/admin`; it does not embed an administrator password, payment credential, database URL, JWT secret, or Resend API key.
+The dashboard’s **Connect app** screen now displays a QR code and direct download link for the installable Android shortcut APK. The APK is published in the GitHub release at `91dab-dashboard-shortcut-v1.0.0` and opens the configured HTTPS `/admin` dashboard address; it does not embed an administrator password, payment credential, database URL, JWT secret, or Resend API key.
 
-For a Play Store or long-term production release, replace the generated debug signing key with your own release keystore, increment the Android version code for updates, and retain the final HTTPS domain. A domain change requires updating the app’s configured URL.
+For a Play Store or long-term production release, replace the generated debug signing key with your own release keystore and increment the Android version code for updates. A dashboard-domain change requires rebuilding the shortcut with the new configured URL, then replacing the release APK so the Connect app QR remains current.
 
 ## URL structure after deployment
 
