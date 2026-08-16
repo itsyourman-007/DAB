@@ -493,9 +493,9 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 	<button class="sidebar-restore" id="sidebarRestoreBtn" type="button" title="Show sidebar" aria-label="Show sidebar" aria-controls="dashboardSidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg></button>
 
   <!-- ===================== SIDEBAR ===================== -->
-	<aside class="sidebar" id="dashboardSidebar">
-    <div class="brand-row">
-      <div class="brand-icon"><img src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA logo"></div>
+	  <aside class="sidebar" id="dashboardSidebar">
+	    <div class="brand-row">
+	      <div class="brand-icon"><img id="dashboardBrandImage" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA logo"></div>
       <div class="brand-text hide-collapsed">
         <div class="name">91DAB</div>
         <div class="sub">Merchant Console</div>
@@ -2238,8 +2238,10 @@ function applyDashboardProfile(profile){
   if(!profile) return;
   dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||'',profileImageUrl:profile.profileImageUrl||getStoredProfileImage()||null};
 	  ['dashboardProfileAvatar','dashboardProfilePhotoPreview'].forEach((imageId,index)=>{ const image=document.getElementById(imageId==='dashboardProfileAvatar'?'dashboardProfileAvatarImage':imageId); const fallback=document.getElementById(index===0?'dashboardProfileAvatarFallback':'dashboardProfilePhotoFallback'); if(!image||!fallback) return; if(dashboardProfile.profileImageUrl){ image.src=dashboardProfile.profileImageUrl; image.hidden=false; fallback.hidden=true; } else { image.removeAttribute('src'); image.hidden=true; fallback.hidden=false; } });
-  const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
-  const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
+	  const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
+	  const brandImage=document.getElementById('dashboardBrandImage'); if(brandImage) brandImage.src=dashboardProfile.profileImageUrl||'/manus-storage/91-danta-dashboard-logo_d2a87fee.png';
+	  window.parent?.postMessage({type:'91dab-dashboard-profile-brand-image',imageUrl:dashboardProfile.profileImageUrl||null},'*');
+	  const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
   const nameInput=document.getElementById('dashboardProfileNameInput'); if(nameInput) nameInput.value=dashboardProfile.displayName;
   const emailInput=document.getElementById('dashboardProfileEmailInput'); if(emailInput) emailInput.value=dashboardProfile.email;
   const loginStatus=document.getElementById('dashboardLoginStatus'); if(loginStatus) loginStatus.textContent='Signed in with the protected administrator session. Profile email can be updated below.';

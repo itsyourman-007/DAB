@@ -228,3 +228,4 @@
 - [x] Replace the profile-picture save and display flow with a verified direct upload path that persists and renders after reload.
 - [x] Give dashboard profile-picture surfaces a white background and replace the top-left numeric badge with the supplied app logo.
 - [x] Replace every remaining dashboard plain “91” placeholder with the supplied 91 DANTA logo.
+- [x] Synchronize a chosen profile picture across the sidebar avatar, Settings preview, and top-left dashboard brand image.

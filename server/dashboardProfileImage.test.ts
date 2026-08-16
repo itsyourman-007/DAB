@@ -37,9 +37,13 @@ describe("protected dashboard profile images", () => {
 	    expect(dashboardHtml).toContain("reader.readAsDataURL(file)");
 	    expect(dashboardHtml).toContain("Profile picture saved and shown.");
 	    expect(dashboardHtml).toContain('.avatar{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);');
-	    expect(adminSource).toContain('src={dashboardLogoUrl} alt="91 DANTA" className="h-9 w-9');
+	    expect(adminSource).toContain('const [topLeftProfileImage, setTopLeftProfileImage] = useState(dashboardLogoUrl)');
+	    expect(adminSource).toContain('type !== "91dab-dashboard-profile-brand-image"');
+	    expect(adminSource).toContain('src={topLeftProfileImage} alt="Dashboard profile" className="h-9 w-9');
 	    expect(dashboardHtml).toContain('id="dashboardProfileAvatarFallback" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png"');
 	    expect(dashboardHtml).toContain('id="dashboardProfilePhotoFallback" src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png"');
+	    expect(dashboardHtml).toContain('id="dashboardBrandImage"');
+	    expect(dashboardHtml).toContain("type:'91dab-dashboard-profile-brand-image'");
 	    expect(dashboardHtml).not.toContain('dashboardProfileAvatarInitials">91');
 	  });
 });

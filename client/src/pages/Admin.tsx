@@ -29,6 +29,7 @@ export default function Admin() {
   const [otp, setOtp] = useState("");
   const [otpRecipient, setOtpRecipient] = useState<string | null>(null);
   const [settingsError, setSettingsError] = useState<string | null>(null);
+	  const [topLeftProfileImage, setTopLeftProfileImage] = useState(dashboardLogoUrl);
   const status = trpc.admin.status.useQuery(undefined, { retry: false });
   const utils = trpc.useUtils();
   const teamMembers = trpc.admin.listTeamMembers.useQuery(undefined, { enabled: Boolean(status.data?.authenticated), retry: false });
@@ -166,6 +167,17 @@ export default function Admin() {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
     iframe?.contentWindow?.postMessage({ type: "91dab-dashboard-profile", profile: profile.data ?? null }, window.location.origin);
   }, [profile.data]);
+
+	  useEffect(() => {
+	    const syncTopLeftProfileImage = (event: MessageEvent) => {
+	      const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
+	      if (event.source !== iframe?.contentWindow || event.data?.type !== "91dab-dashboard-profile-brand-image") return;
+	      const imageUrl = typeof event.data.imageUrl === "string" && event.data.imageUrl.startsWith("data:image/") ? event.data.imageUrl : dashboardLogoUrl;
+	      setTopLeftProfileImage(imageUrl);
+	    };
+	    window.addEventListener("message", syncTopLeftProfileImage);
+	    return () => window.removeEventListener("message", syncTopLeftProfileImage);
+	  }, []);
 
   useEffect(() => {
     if (orders.data === undefined) return;
@@ -514,10 +526,10 @@ export default function Admin() {
     <div className="min-h-screen bg-slate-100">
       <header className="flex min-h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-4 sm:px-6">
 	        <div className="flex items-center gap-3">
-	          <img src={dashboardLogoUrl} alt="91 DANTA" className="h-9 w-9 rounded-xl border border-slate-200 bg-white object-cover p-0.5 shadow-sm" />
+	          <img src={topLeftProfileImage} alt="Dashboard profile" className="h-9 w-9 rounded-xl border border-slate-200 bg-white object-cover p-0.5 shadow-sm" />
           <span>
             <span className="block text-sm font-semibold tracking-tight text-slate-950">91DAB</span>
-            <img src={dashboardLogoUrl} alt="91 DANTA" className="mt-0.5 h-5 w-5 rounded-md object-cover shadow-sm" />
+	            <img src={topLeftProfileImage} alt="Dashboard profile" className="mt-0.5 h-5 w-5 rounded-md object-cover shadow-sm" />
           </span>
         </div>
         <div className="flex items-center gap-2">
