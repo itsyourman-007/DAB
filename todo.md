@@ -224,4 +224,5 @@
 - [x] Replace only the shop page Inside DAB content with a centered DAB at work comparison using the two supplied videos.
 - [x] Add responsive labels for aerosol spread without DAB, aerosol spread with DAB, and the 60% aerosol-spread reduction claim while preserving all other shop UI.
 - [x] Configure the comparison videos to loop and attempt audible playback when the section enters view, with an interaction fallback for browser sound rules.
-- [ ] Add regression coverage, validate the responsive shop section, and synchronize the focused update to GitHub.
+- [x] Add regression coverage, validate the responsive shop section, and synchronize the focused update to GitHub.
+- [x] Fix the shop DAB at work section so both videos render reliably, appear larger without outlined boxes, and attempt automatic audible looping playback when the section enters view, with no visible enable-audio button.
