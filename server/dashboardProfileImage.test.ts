@@ -36,5 +36,7 @@ describe("protected dashboard profile images", () => {
 	    expect(dashboardHtml).toContain("function persistProfileImage(imageUrl)");
 	    expect(dashboardHtml).toContain("reader.readAsDataURL(file)");
 	    expect(dashboardHtml).toContain("Profile picture saved and shown.");
+	    expect(dashboardHtml).toContain('.avatar{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--border);');
+	    expect(adminSource).toContain('src={dashboardLogoUrl} alt="91 DANTA" className="h-9 w-9');
 	  });
 });

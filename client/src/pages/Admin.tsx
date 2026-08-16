@@ -513,8 +513,8 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-slate-100">
       <header className="flex min-h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-violet-600 text-sm font-black text-white shadow-sm">91</span>
+	        <div className="flex items-center gap-3">
+	          <img src={dashboardLogoUrl} alt="91 DANTA" className="h-9 w-9 rounded-xl border border-slate-200 bg-white object-cover p-0.5 shadow-sm" />
           <span>
             <span className="block text-sm font-semibold tracking-tight text-slate-950">91DAB</span>
             <img src={dashboardLogoUrl} alt="91 DANTA" className="mt-0.5 h-5 w-5 rounded-md object-cover shadow-sm" />
