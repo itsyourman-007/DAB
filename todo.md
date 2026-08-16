@@ -200,3 +200,8 @@
 - [x] Diagnose and fix the user-facing monthly subscription selector so its quantity-based delivery text appears in the served shop page.
 - [x] Restore the dashboard Connect app QR code so it opens a valid downloadable Android dashboard shortcut APK.
 - [x] Replace the Android dashboard shortcut’s broken launcher image with the supplied 91 DANTA logo.
+- [ ] Smoke-test the supplied live Render service at dab-1-cizz.onrender.com, including public routes, protected dashboard entry, dashboard logo, and APK QR download availability.
+- [x] Restore the dashboard sidebar to fully collapse as before without changing unrelated navigation behavior.
+- [x] Repair the visible dashboard app QR code so it opens the valid Android APK download.
+- [x] Restore the dashboard sidebar to fully collapse as before without changing unrelated navigation behavior.
+- [x] Repair the visible dashboard app QR code so it opens the valid Android APK download.

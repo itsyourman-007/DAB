@@ -47,7 +47,7 @@ svg{display:block;}
 /* ---------------- app shell ---------------- */
 .app{display:flex;min-height:100vh;}
 .sidebar{width:var(--sidebar-w);flex:none;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;transition:width .2s var(--ease,ease);}
-.app.collapsed .sidebar{width:80px;}
+.app.collapsed .sidebar{width:0;border-right:0;overflow:hidden;}
 .app.collapsed .hide-collapsed{display:none !important;}
 .app.collapsed .side-search{display:none;}
 .app.collapsed .side-section-label{display:none;}
@@ -55,6 +55,9 @@ svg{display:block;}
 .app.collapsed .nav-item .n-text, .app.collapsed .nav-item .n-badge{display:none;}
 .app.collapsed .submenu{display:none !important;}
 .app.collapsed .user-row{justify-content:center;}
+.sidebar-restore{display:none;position:fixed;z-index:40;left:1rem;top:1rem;width:38px;height:38px;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text-soft);box-shadow:var(--shadow);}
+.sidebar-restore:hover{border-color:var(--accent);color:var(--accent);}
+.app.collapsed ~ .sidebar-restore{display:flex;}
 
 .brand-row{display:flex;align-items:center;gap:.65rem;padding:1.25rem 1.1rem 1rem;}
 .brand-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent-2),var(--accent));display:flex;align-items:center;justify-content:center;flex:none;}
@@ -2444,6 +2447,23 @@ renderTeams();
 renderCalendar();
 renderNotifications();
 setTimeout(()=>{ renderBars(); renderTopProducts(); refreshHomeStats(); },0);
+</script>
+<button class="sidebar-restore" id="sidebarRestoreBtn" type="button" title="Expand sidebar" aria-label="Expand sidebar">
+  <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+</button>
+<script>
+  (function(){
+    const qr=document.getElementById('dashboardApkQr');
+    if(qr) qr.src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANQAAADUAQAAAADMpTC1AAACBElEQVR42u2Yu43kMBBEHw/jP2Yw+Yc1GRQjqDOodRZYs4E7YCVDBo1W/+rDVX56zh9+fn7P/pmztdZmnc3hHNiLvdbaM/FobU2JJmib2tpMxHsBS94HDxD2PoHlUD1fX2lC3puS3bPHe3vOOu8PbLbswXl5+gc1tfo0b6p/qyzwO7SAOUP5tS3RxopY23YmP1rBPjPD3QZwLl5oaK2VgjfPsXgQBUlEgqEM5lebxDaJ1BoH61lBS2+otLn/MDcvkbSt6VNO5+I1UkBQ03gRe2xe0rQJVnKLOpmfLdaGVJr0LvwUnh3AA7LDYYcd3GN4ZlBoNNjkC2jG5rMRIw0qKZmM1wc7AU3ixbSxfah31e8XcwF7al72EbL68HrOFsiMvn4Bkn2uXFrZ+0jG9BJtLrakginNAztj/HBfUC6aNQ72Dzh5H7r5vMk+N+Mzll/TNlxi4lLgJP+F0PBFuq1mkB+gubbBFFrtID+kKqTkktPF0Ln8vBBdeBToLH5GSCDQS38to3o3bQh5RHauQBvE6zs1cs0K17FkyI+dRVhtj+7POoR1GPTT0WdGoUmufRisZ3vZ3ZKQSf57OlfTotiATup5WynR6xwuv0/ug4qPyE4SIIP3IcAhuyseFyZ7+n5C9lm+D5t+1jZk9H6ipY+U0KaTfvoii00C9ipg5vzD733rf3z2F3lpRdEn2VZUAAAAAElFTkSuQmCC";
+    const restore=document.getElementById('sidebarRestoreBtn');
+    restore?.addEventListener('click',function(){
+      document.getElementById('app').classList.remove('collapsed');
+      const collapseBtn=document.getElementById('collapseBtn');
+      collapseBtn.title='Collapse sidebar';
+      collapseBtn.setAttribute('aria-label','Collapse sidebar');
+      collapseBtn.setAttribute('aria-expanded','true');
+    });
+  })();
 </script>
 </body>
 </html>

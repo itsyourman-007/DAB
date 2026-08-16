@@ -259,9 +259,16 @@ describe("protected merchant dashboard enhancements", () => {
 
   it("provides a working Android dashboard APK QR and direct download link", () => {
     expect(dashboardHtml).toContain('id="dashboardApkQr"');
-    expect(dashboardHtml).toContain("91dab-dashboard-apk-qr.svg");
+    expect(dashboardHtml).toContain("data:image/png;base64,iVBORw0KGgo");
     expect(dashboardHtml).toContain("91dab-dashboard-shortcut.apk");
     expect(dashboardHtml).toContain("Download Android APK");
+  });
+
+  it("fully collapses the sidebar while retaining a dedicated control to restore it", () => {
+    expect(dashboardHtml).toContain(".app.collapsed .sidebar{width:0;border-right:0;overflow:hidden;}");
+    expect(dashboardHtml).toContain(".app.collapsed ~ .sidebar-restore{display:flex;}");
+    expect(dashboardHtml).toContain('id="sidebarRestoreBtn"');
+    expect(dashboardHtml).toContain("document.getElementById('app').classList.remove('collapsed')");
   });
 
   it("uses the committed 91 DANTA launcher image for dashboard branding without a broken-image fallback", () => {
