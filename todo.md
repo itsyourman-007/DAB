@@ -191,43 +191,10 @@
 - [x] Replace the Android URL setup flow with a fixed `/admin` website shortcut that presents only the existing dashboard login and uses no separate native dashboard implementation.
 - [x] Require a numeric UTR/reference ID in the shop payment interface, clearly mark the field with an asterisk, and prevent payment-reference submission until it is valid.
 - [x] Persist the exact UTR-submission timestamp and display it in the protected Payments and Transaction History views with regression coverage.
-- [x] Trigger the rocket dashboard notification when a buyer’s trusted checkout successfully reaches the payment QR stage, with regression coverage that prevents duplicate sounds on later polling updates.
-- [x] Rebuild and validate the Android dashboard shortcut release after adding the payment-stage rocket notification.
-- [x] Save the payment-stage rocket checkpoint and push this release to GitHub for Render auto-deploy.
-- [x] Replace only the buyer-facing UTR instruction with the requested “Mandatorily enter the payment UTR/reference ID after the payment *” wording, retaining numeric-only validation and full UTR CSV export.
-- [x] Replace the Connect app placeholder with a scannable QR code and direct signed-APK download action, using a stable public release destination.
-- [x] Verify the dashboard shortcut’s phone layout and document that live website updates appear in existing APK installs, while native-wrapper updates require a new APK install.
-- [x] Make the dashboard notification bell open live protected notifications, add an audible adjustable bell volume control in Settings, and cover the interaction with regression tests.
-- [x] Export UTR/reference IDs as Excel-safe text so complete numeric values up to 128 digits remain visible without scientific notation or precision loss.
-- [x] Repair the Connect app QR image so it renders reliably in the deployed dashboard while preserving the signed APK download destination.
-- [x] Show saved Calendar events in the Events sidebar view using the same dashboard event data, with no fabricated entries.
-- [x] Add delivery address and payment mode fields to Customisation records, persist them securely, and display them in the relevant protected dashboard views.
-- [x] Validate Customisation revenue as a correctly stored whole-INR amount and cover create/edit persistence with database-backed regression tests.
-- [x] Enable dashboard notification audio in the downloaded Android shortcut while preserving the user-selected sound/volume settings.
-- [x] Audit and refine the protected dashboard phone layout, then rebuild and validate the signed Android shortcut APK.
-- [ ] Add secure push notifications that can ring on the Android phone when a trusted dashboard alert arrives while the app is closed, subject to Firebase project configuration.
-- [x] Replace the plain Android-wrapper presentation with a branded 91DAB native launch and loading experience while retaining the secure fixed-dashboard WebView.
-- [x] Correct the Inventory & Products Scheduled DAB shipments formatting at phone and desktop widths without changing fulfillment data or actions.
-- [x] Tune the dashboard bell to a louder audible level while retaining the user’s volume control and avoiding unsafe automatic device-volume changes.
-- [x] Improve the 91DAB Android shortcut launcher icon and branded loading presentation, then rebuild and validate the signed APK.
-- [x] Make all weekly sales chart bars purple and retain accessible hover values without altering trusted revenue data.
-- [x] Reconcile weekly and monthly sales chart totals with the authoritative dashboard total revenue, including confirmed custom-client sales where applicable.
-- [x] Audit the dashboard for revenue/chart calculation or display irregularities and add regression coverage for the confirmed fixes.
-- [x] Use the supplied 91 DANTA logo exactly as provided for the Android launcher icon and branded app launch screen.
-- [x] Correct the spacing and hierarchy immediately above Scheduled DAB shipments in Inventory & Products at phone and desktop widths.
-- [x] Replace the Android application logo resource with the newly supplied smaller 91 DANTA artwork and reissue the signed APK.
-- [x] Further tighten the spacing and formatting immediately above Scheduled DAB shipments in Inventory & Products.
-- [x] Add a protected dashboard profile-picture setting backed by secure file storage.
-- [x] Replace the DAB Dashboard console brand mark with the supplied 91 DANTA logo.
-- [x] Fix the protected notification layout at phone widths.
-- [x] Make each new dashboard notification ring louder five times while preserving volume controls.
-- [x] Display the latest protected account sign-in time in the dashboard with phone-friendly formatting.
-- [x] Repair the protected profile-picture save flow so valid chosen images persist successfully.
-- [x] Replace the private merchant console header text with the supplied 91 DANTA logo.
-- [x] Repair the dashboard collapse control so the sidebar fully disappears and can be reliably restored.
-- [x] Replace the profile-picture save and display flow with a verified direct upload path that persists and renders after reload.
-- [x] Give dashboard profile-picture surfaces a white background and replace the top-left numeric badge with the supplied app logo.
-- [x] Replace every remaining dashboard plain “91” placeholder with the supplied 91 DANTA logo.
-- [x] Synchronize a chosen profile picture across the sidebar avatar, Settings preview, and top-left dashboard brand image.
-- [x] Revert the recent profile-picture and profile-brand synchronization changes to restore the normal dashboard presentation.
-- [x] Remove the dashboard profile-picture feature and duplicate profile-image displays, retaining fixed logo branding only.
+- [x] Add a protected custom profile option to choose, save, and replace a custom profile picture in dashboard Settings.
+- [x] Update monthly subscription selector so quantity determines the delivery duration (e.g. 2 months or 3 months) starting from the chosen start month, with preview and checkout schedule reflecting the exact duration.
+- [x] Replace broken image references in dashboard and storefront branding surfaces with the supplied Logo.png asset.
+- [x] Fix custom profile picture rendering and persistence in the merchant dashboard sidebar avatar and Settings preview.
+- [x] Make the monthly subscription delivery text and start-month dropdown refresh immediately when quantity changes.
+- [x] Show selected monthly and yearly delivery months with three-letter labels across dashboard order, subscription, payment, and delivery views.
+- [x] Diagnose and fix the user-facing monthly subscription selector so its quantity-based delivery text appears in the served shop page.

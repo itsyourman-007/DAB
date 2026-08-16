@@ -47,7 +47,7 @@ svg{display:block;}
 /* ---------------- app shell ---------------- */
 .app{display:flex;min-height:100vh;}
 .sidebar{width:var(--sidebar-w);flex:none;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;transition:width .2s var(--ease,ease);}
-.app.collapsed .sidebar{width:0;border-right-width:0;overflow:hidden;pointer-events:none;}
+.app.collapsed .sidebar{width:80px;}
 .app.collapsed .hide-collapsed{display:none !important;}
 .app.collapsed .side-search{display:none;}
 .app.collapsed .side-section-label{display:none;}
@@ -57,16 +57,13 @@ svg{display:block;}
 .app.collapsed .user-row{justify-content:center;}
 
 .brand-row{display:flex;align-items:center;gap:.65rem;padding:1.25rem 1.1rem 1rem;}
-	.brand-icon{width:38px;height:38px;border-radius:11px;background:#050505;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden;border:1px solid rgba(255,255,255,.12);}
-	.brand-icon img{width:100%;height:100%;object-fit:cover;}
+.brand-icon{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--accent-2),var(--accent));display:flex;align-items:center;justify-content:center;flex:none;}
+.brand-icon svg{width:20px;height:20px;color:#fff;}
 .brand-text{flex:1;min-width:0;}
 .brand-text .name{font-weight:700;font-size:1rem;letter-spacing:-.01em;}
 .brand-text .sub{font-size:.78rem;color:var(--text-faint);}
 .collapse-btn{width:30px;height:30px;border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-soft);flex:none;}
 .collapse-btn:hover{border-color:var(--accent);color:var(--accent);}
-.sidebar-restore{position:fixed;left:.85rem;top:.85rem;z-index:70;width:38px;height:38px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--accent-soft-text);box-shadow:0 8px 22px rgba(16,24,40,.12);display:none;align-items:center;justify-content:center;}
-.sidebar-restore:hover{border-color:var(--accent);background:var(--accent-soft);}.sidebar-restore svg{width:19px;height:19px;}
-.app.collapsed .sidebar-restore{display:flex;}
 
 .side-search{margin:0 1.1rem 1.1rem;position:relative;}
 .side-search input{width:100%;padding:.6rem .8rem .6rem 2.2rem;border:1px solid var(--border);border-radius:9px;background:var(--card-tint);font-size:.85rem;outline:none;}
@@ -94,6 +91,7 @@ svg{display:block;}
 .submenu li a.active{color:var(--accent-soft-text);font-weight:600;border-left:1.5px solid var(--accent);background:var(--accent-soft);}
 
 .user-row{display:flex;align-items:center;gap:.65rem;padding:.9rem 1.1rem;border-top:1px solid var(--border);}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#f6a55f,#e8746b);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem;font-weight:700;flex:none;overflow:hidden;}
 .user-meta{flex:1;min-width:0;}
 .user-meta .u-name{font-size:.85rem;font-weight:600;}
 .user-meta .u-email{font-size:.74rem;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -148,22 +146,10 @@ svg{display:block;}
 .grid-2{display:grid;grid-template-columns:1.65fr 1fr;gap:1.1rem;margin-bottom:1.1rem;align-items:start;}
 @media (max-width:1050px){.grid-2{grid-template-columns:1fr;}.stat-grid{grid-template-columns:repeat(2,1fr);}}
 
-	.panel-head{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.4rem .8rem;gap:1rem;flex-wrap:wrap;}
-	.panel-head h3{margin:0;font-size:1.08rem;font-weight:700;}
-	.panel-head p{margin:.2rem 0 0;font-size:.82rem;color:var(--text-soft);}
-		.inventory-shipment-region{margin-top:1.45rem;padding-top:1.15rem;border-top:1px solid var(--border);}
-		.inventory-section-divider{display:flex;align-items:center;justify-content:space-between;gap:.85rem;margin:0 0 .8rem;padding:0 .15rem;}
-		.inventory-section-divider b{font-size:.73rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--accent-soft-text);}
-		.inventory-section-divider span{font-size:.76rem;color:var(--text-faint);text-align:right;}
-		.inventory-shipment-intro{display:flex;align-items:flex-start;gap:.85rem;padding:1.1rem 1.25rem 1rem;border-bottom:1px solid var(--border-soft);background:linear-gradient(135deg,var(--card-tint),var(--card));}
-	.inventory-shipment-intro .shipment-icon{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;}
-	.inventory-shipment-intro .shipment-icon svg{width:17px;height:17px;}
-	.inventory-shipment-intro h3{margin:0;font-size:1.02rem;font-weight:700;}
-	.inventory-shipment-intro p{max-width:78ch;margin:.28rem 0 0;font-size:.81rem;line-height:1.55;color:var(--text-soft);}
-		.inventory-shipment-card{margin:0 0 1.15rem;overflow:hidden;}
-		.inventory-movement-card{margin-top:1.15rem;}
-		@media(max-width:620px){.inventory-shipment-region{margin-top:1.1rem;padding-top:1rem;}.inventory-section-divider{align-items:flex-start;flex-direction:column;gap:.22rem;margin-bottom:.65rem;padding:0 .05rem;}.inventory-section-divider span{text-align:left;font-size:.73rem;}.inventory-shipment-card{margin-bottom:.9rem;}.inventory-movement-card{margin-top:.9rem;}.inventory-shipment-intro{gap:.7rem;padding:1rem .95rem .9rem;}.inventory-shipment-intro .shipment-icon{width:31px;height:31px;border-radius:9px;}.inventory-shipment-intro p{font-size:.78rem;line-height:1.48;}.inventory-shipment-card .table-wrap{border-top:0;}}
-	.pill-toggle{display:flex;background:var(--border-soft);border-radius:8px;padding:3px;gap:2px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.4rem .8rem;gap:1rem;flex-wrap:wrap;}
+.panel-head h3{margin:0;font-size:1.08rem;font-weight:700;}
+.panel-head p{margin:.2rem 0 0;font-size:.82rem;color:var(--text-soft);}
+.pill-toggle{display:flex;background:var(--border-soft);border-radius:8px;padding:3px;gap:2px;}
 .pill-toggle button{padding:.4rem .85rem;font-size:.78rem;border-radius:6px;color:var(--text-faint);font-weight:600;}
 .pill-toggle button.active{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08);}
 
@@ -175,8 +161,8 @@ svg{display:block;}
 .bars.many .bar-day{font-size:.66rem;}
 .y-axis{position:absolute;left:0;top:0;bottom:26px;display:flex;flex-direction:column;justify-content:space-between;font-size:.72rem;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;}
-	.bar{width:60%;max-width:46px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#8b5cf6,#6d28d9);border:1px solid transparent;transition:height .5s cubic-bezier(.2,.8,.2,1),filter .2s;cursor:pointer;}
-	.bar.hi{background:linear-gradient(180deg,#a78bfa,#5b21b6);border-color:transparent;filter:brightness(1.08);}
+.bar{width:60%;max-width:46px;border-radius:8px 8px 3px 3px;background:var(--card);border:1px solid var(--border);transition:height .5s cubic-bezier(.2,.8,.2,1),background .2s;cursor:pointer;}
+.bar.hi{background:linear-gradient(180deg,var(--accent-2),var(--accent));border-color:transparent;}
 .bar-day{font-size:.76rem;color:var(--text-faint);margin-top:.7rem;}
 .bar-col.hi .bar-day{color:var(--text);font-weight:700;}
 .bar-tip{position:absolute;top:-52px;left:50%;transform:translateX(-50%);background:#111318;color:#fff;padding:.45rem .65rem;border-radius:8px;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;text-align:center;z-index:3;}
@@ -382,13 +368,6 @@ tbody tr:last-child td{border-bottom:none;}
 .field input:focus, .field textarea:focus{border-color:var(--accent);}
 .form-btn{padding:.7rem 1.3rem;background:var(--accent);color:#fff;border-radius:9px;font-weight:600;font-size:.85rem;}
 .form-btn:hover{background:var(--accent-2);}
-.app-download-panel{padding:1.6rem;display:grid;grid-template-columns:minmax(148px,188px) minmax(0,1fr);gap:1.5rem;align-items:center;text-align:left;}
-.app-download-qr{width:100%;max-width:188px;margin:0 auto;padding:.65rem;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);}
-.app-download-qr img{width:100%;height:auto;display:block;}
-.app-download-copy h3{margin:0 0 .45rem;font-size:1.1rem;}
-.app-download-copy p{margin:.45rem 0;color:var(--text-soft);font-size:.85rem;line-height:1.6;}
-.app-download-meta{margin-top:.75rem;padding:.7rem .8rem;border-radius:9px;background:var(--card-tint);font-size:.77rem;color:var(--text-soft);line-height:1.55;}
-@media(max-width:620px){.app-download-panel{grid-template-columns:1fr;text-align:center;padding:1.25rem;gap:1rem;}.app-download-qr{max-width:172px;}.app-download-copy .form-btn{display:block;width:100%;margin-top:.55rem;}.app-download-meta{text-align:left;}}
 
 	/* team roster */
 	.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;}
@@ -406,7 +385,6 @@ tbody tr:last-child td{border-bottom:none;}
 /* notif dropdown */
 .dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 32px rgba(16,24,40,.14);z-index:60;display:none;overflow:hidden;}
 .dropdown.open{display:block;}
-.notification-dropdown{width:min(340px,calc(100vw - 24px));}
 .dd-head{padding:.9rem 1.1rem;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;}
 .dd-head h4{margin:0;font-size:.9rem;}
 .dd-head button{font-size:.74rem;color:var(--accent);font-weight:600;}
@@ -433,47 +411,32 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 .mobile-toggle{display:none;}
 	@media (max-width:880px){
 	  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:80;transform:translateX(-100%);transition:transform .25s;}
-	  .app.collapsed .sidebar{width:var(--sidebar-w);border-right-width:1px;overflow:visible;pointer-events:auto;}
-	  .app.collapsed .sidebar-restore{display:none;}
 	  .app.mobile-open .sidebar{transform:translateX(0);}
 	  .mobile-toggle{display:flex;}
 	  .stat-grid{grid-template-columns:1fr 1fr;}
 	  .inbox-shell{grid-template-columns:1fr;height:auto;}
 	}
-		@media (max-width:700px){
-		  body{overflow-x:hidden;}
-		  .app,.main{width:100%;min-width:0;}
-		  .sidebar{width:min(82vw,300px);}
-		  .topbar{padding:.8rem .9rem;gap:.6rem;align-items:flex-start;}
-		  .crumb{font-size:.84rem;min-width:0;flex:1;}
-		  .top-actions{width:100%;flex-wrap:wrap;gap:.45rem;align-items:center;}
-		  .top-actions .icon-btn{width:40px;height:40px;}
-		  .date-btn,.range-select{font-size:.75rem;padding:.5rem .65rem;}
-		  .export-btn{padding:.55rem .75rem;font-size:.76rem;}
-		  .page-body{padding:1rem 1rem 2rem;}
-		  .stat-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.75rem;margin-bottom:.75rem;}
-		  .stat-card{padding:1rem;}
-		  .stat-num{font-size:clamp(1.2rem,7vw,1.55rem);overflow-wrap:anywhere;}
-		  .stat-top .lbl{font-size:.78rem;}
-		  .grid-2{gap:.75rem;margin-bottom:.75rem;}
-		  .panel-head{padding:1rem 1rem .7rem;gap:.65rem;}
-		  .chart-wrap{padding:.75rem 1rem 1rem;}
-		  .bars{height:190px;padding-left:2rem;}
-		  .table-wrap{padding:0 1rem 1rem;}
-		  .data-toolbar input,.data-toolbar select{min-width:0;flex-basis:100%;}
-		  .set-row{align-items:flex-start;}
-		  .set-row .action-btn{margin-left:0!important;}
-		  .notification-dropdown.phone-notification-overlay{position:fixed;top:var(--notification-top,108px);left:.75rem;right:.75rem;width:auto;max-height:calc(100dvh - var(--notification-top,108px) - .75rem);border-radius:14px;box-shadow:0 18px 42px rgba(16,24,40,.22);}
-		  .notification-dropdown.phone-notification-overlay .dd-list{max-height:calc(100dvh - var(--notification-top,108px) - 4.55rem);overscroll-behavior:contain;}
-		  .notification-dropdown.phone-notification-overlay .dd-item{align-items:flex-start;gap:.55rem;padding:.82rem .9rem;}
-		  .notification-dropdown.phone-notification-overlay .dd-item .dd-text{min-width:0;}
-		  .notification-dropdown.phone-notification-overlay .dd-time{padding-top:.12rem;}
-		  .field-row{display:grid;grid-template-columns:1fr;gap:0;}
-		  #screen-inventory-products .panel-head p{line-height:1.55;max-width:100%;}
-		  .shipment-plan{min-width:175px;}
-		  .toast-root{left:.75rem;right:.75rem;bottom:.75rem;}
-		  .toast{max-width:none;}
-		}
+	@media (max-width:700px){
+	  body{overflow-x:hidden;}
+	  .sidebar{width:min(82vw,300px);}
+	  .topbar{padding:.85rem 1rem;gap:.65rem;}
+	  .crumb{font-size:.86rem;}
+	  .top-actions{width:100%;flex-wrap:wrap;gap:.45rem;}
+	  .date-btn,.range-select{font-size:.75rem;padding:.5rem .65rem;}
+	  .export-btn{padding:.55rem .75rem;font-size:.76rem;}
+	  .page-body{padding:1rem 1rem 2rem;}
+	  .stat-grid{gap:.75rem;margin-bottom:.75rem;}
+	  .stat-card{padding:1rem;}
+	  .stat-num{font-size:1.55rem;}
+	  .stat-top .lbl{font-size:.78rem;}
+	  .grid-2{gap:.75rem;margin-bottom:.75rem;}
+	  .panel-head{padding:1rem 1rem .7rem;gap:.65rem;}
+	  .chart-wrap{padding:.75rem 1rem 1rem;}
+	  .bars{height:190px;padding-left:2rem;}
+	  .table-wrap{padding:0 1rem 1rem;}
+	  .toast-root{left:.75rem;right:.75rem;bottom:.75rem;}
+	  .toast{max-width:none;}
+	}
 </style>
 </head>
 <body>
@@ -481,12 +444,13 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
 <div class="toast-root" id="toastRoot"></div>
 
 <div class="app" id="app">
-	<button class="sidebar-restore" id="sidebarRestoreBtn" type="button" title="Show sidebar" aria-label="Show sidebar" aria-controls="dashboardSidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg></button>
 
   <!-- ===================== SIDEBAR ===================== -->
-	  <aside class="sidebar" id="dashboardSidebar">
-	    <div class="brand-row">
-	      <div class="brand-icon"><img src="/manus-storage/91-danta-dashboard-logo_d2a87fee.png" alt="91 DANTA logo"></div>
+  <aside class="sidebar">
+    <div class="brand-row">
+      <div class="brand-icon" style="background:transparent;padding:0;overflow:hidden;">
+        <img src="/manus-storage/Logo_b65c7ed5.png" alt="91 DANTA logo" style="width:100%;height:100%;object-fit:cover;display:block;">
+      </div>
       <div class="brand-text hide-collapsed">
         <div class="name">91DAB</div>
         <div class="sub">Merchant Console</div>
@@ -607,7 +571,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <a href="#" onclick="event.preventDefault();navigate('settings');document.getElementById('profileDd').classList.remove('open');">Account settings</a>
         <a href="#" onclick="event.preventDefault();showToast('Sign out is not connected yet','info');document.getElementById('profileDd').classList.remove('open');">Log out</a>
       </div>
-	      <div class="user-meta hide-collapsed">
+      <div class="avatar" id="dashboardProfileAvatar" style="background:#fff;"><span id="dashboardProfileAvatarInitials" style="display:none;">91</span><img id="dashboardProfileAvatarImgSrc" src="/manus-storage/Logo_b65c7ed5.png" alt="91 DANTA profile logo" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+      <div class="user-meta hide-collapsed">
         <div class="u-name" id="dashboardProfileName">91DAB Administrator</div>
         <div class="u-email" id="dashboardProfileEmail">Loading profile…</div>
       </div>
@@ -640,11 +605,11 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <svg class="icon" id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
         <div style="position:relative;">
-          <button class="icon-btn" id="notificationBellButton" type="button" title="Notifications" aria-label="Open live notifications" aria-expanded="false" aria-controls="notifDd" onclick="toggleNotifDd()">
+          <button class="icon-btn" title="Notifications" onclick="toggleNotifDd()">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="bell-dot" id="bellDot">0</span>
           </button>
-          <div class="dropdown notification-dropdown" id="notifDd" role="region" aria-label="Live notifications">
+          <div class="dropdown" id="notifDd">
             <div class="dd-head"><h4>Notifications</h4><button onclick="markAllRead()">Mark all read</button></div>
             <div class="dd-list" id="notifList"></div>
           </div>
@@ -799,8 +764,8 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
       <section class="screen" id="screen-inventory-products">
         <div class="panel-head" style="padding:0 0 1rem;"><div><h3>Inventory &amp; Products</h3><p>Authoritative DAB units are deducted only when a real shipment is recorded. Payment confirmation never reduces stock.</p></div><div style="display:flex;flex-wrap:wrap;gap:.55rem;"><button class="form-btn" data-admin-only style="background:var(--card-tint);color:var(--text);" onclick="openInventoryDialog()">Set current stock</button><button class="form-btn" data-admin-only onclick="openInventoryIncreaseDialog()">Add DAB units</button></div></div>
         <div class="payment-summary" id="inventoryProductSummary"></div>
-        <div class="inventory-shipment-region"><div class="inventory-section-divider"><b>Fulfillment queue</b><span>Record scheduled allocations below</span></div><div class="card table-card inventory-shipment-card"><div class="inventory-shipment-intro"><div class="shipment-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></svg></div><div><h3>Scheduled DAB shipments</h3><p>Record a shipment to deduct the exact DAB allocation once. Monthly subscriptions deduct 99 pieces per subscription unit; yearly monthly plans deduct 125 pieces per subscription unit each month; yearly all-at-once plans deduct 1,500 pieces per subscription unit.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Order</th><th>Buyer</th><th>Fulfillment</th><th>DAB units</th><th>Shipment</th><th>Action</th></tr></thead><tbody id="inventoryShipmentBody"></tbody></table></div></div></div>
-        <div class="card table-card inventory-movement-card"><div class="panel-head"><div><h3>Stock movement history</h3><p>Every shipment deduction is immutable and keyed to its order and delivery allocation.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Shipped</th><th>Order</th><th>Allocation</th><th>Period</th><th>DAB units</th></tr></thead><tbody id="inventoryAllocationBody"></tbody></table></div></div>
+        <div class="card table-card" style="margin-bottom:1rem;"><div class="panel-head"><div><h3>Scheduled DAB shipments</h3><p>Record a shipment to deduct the exact DAB allocation once. Monthly subscriptions deduct 99 pieces per subscription unit; yearly monthly plans deduct 125 pieces per subscription unit each month; yearly all-at-once plans deduct 1,500 pieces per subscription unit.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Order</th><th>Buyer</th><th>Fulfillment</th><th>DAB units</th><th>Shipment</th><th>Action</th></tr></thead><tbody id="inventoryShipmentBody"></tbody></table></div></div>
+        <div class="card table-card"><div class="panel-head"><div><h3>Stock movement history</h3><p>Every shipment deduction is immutable and keyed to its order and delivery allocation.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Shipped</th><th>Order</th><th>Allocation</th><th>Period</th><th>DAB units</th></tr></thead><tbody id="inventoryAllocationBody"></tbody></table></div></div>
       </section>
 
       <!-- ============ QUOTE CLIENT CUSTOMISATION ============ -->
@@ -815,14 +780,12 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
               <div class="field"><label for="customisationClientName">Client / clinic name</label><input id="customisationClientName" maxlength="160" required placeholder="Clinic or contact name"></div>
               <div class="field"><label for="customisationClientEmail">Client email <span style="font-weight:400;text-transform:none;">(optional)</span></label><input id="customisationClientEmail" type="email" maxlength="320" placeholder="clinic@example.com"></div>
               <div class="field"><label for="customisationClientPhone">Phone <span style="font-weight:400;text-transform:none;">(optional)</span></label><input id="customisationClientPhone" maxlength="64" placeholder="Mobile or clinic phone"></div>
-              <div class="field"><label for="customisationDeliveryAddress">Delivery address</label><textarea id="customisationDeliveryAddress" minlength="5" maxlength="1000" required placeholder="Complete clinic or delivery address"></textarea></div>
-              <div class="field"><label for="customisationPaymentMode">Mode of payment</label><select id="customisationPaymentMode" required><option value="upi">UPI</option><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="card">Card</option><option value="other">Other</option></select></div>
-              <div class="field-row"><div class="field"><label for="customisationUnits">DAB units purchased</label><input id="customisationUnits" type="number" min="1" max="10000000" step="1" required inputmode="numeric"></div><div class="field"><label for="customisationRevenue">Amount paid (₹, whole INR)</label><input id="customisationRevenue" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="10" required></div></div>
+              <div class="field-row"><div class="field"><label for="customisationUnits">DAB units purchased</label><input id="customisationUnits" type="number" min="1" max="10000000" step="1" required inputmode="numeric"></div><div class="field"><label for="customisationRevenue">Amount paid (₹)</label><input id="customisationRevenue" type="number" min="0" max="1000000000" step="1" required inputmode="numeric"></div></div>
               <div class="field"><label for="customisationNotes">Custom order notes <span style="font-weight:400;text-transform:none;">(optional)</span></label><textarea id="customisationNotes" maxlength="1000" placeholder="Delivery, configuration, or commercial notes"></textarea></div>
               <button class="form-btn" type="submit">Save custom sale</button>
             </form>
           </div>
-          <div class="card table-card"><div class="panel-head"><div><h3>Recorded custom clients</h3><p>Confirmed entries only. Shipped records are locked to protect inventory history.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Client</th><th>Delivery address</th><th>Payment</th><th>Units</th><th>Revenue</th><th>Shipment</th><th>Recorded</th><th>Action</th></tr></thead><tbody id="customisationClientsBody"></tbody></table></div></div>
+          <div class="card table-card"><div class="panel-head"><div><h3>Recorded custom clients</h3><p>Confirmed entries only. Shipped records are locked to protect inventory history.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Client</th><th>Units</th><th>Revenue</th><th>Shipment</th><th>Recorded</th><th>Action</th></tr></thead><tbody id="customisationClientsBody"></tbody></table></div></div>
         </div>
       </section>
 
@@ -919,26 +882,20 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="card" style="padding:2rem;text-align:center;"><h3 style="margin-bottom:.5rem;">No marketing data connected</h3><p class="hint" style="margin:0;">Traffic, subscribers, ad spend, and attribution will appear only after a real analytics integration is connected.</p></div>
       </section>
 
-      <!-- ============ MOBILE APP ============ -->
+      <!-- ============ MOBILE APP (stub analytics) ============ -->
       <section class="screen" id="screen-mobile">
-        <div class="card app-download-panel">
-          <a class="app-download-qr" href="https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-shortcut.apk" aria-label="Download the 91DAB Dashboard Android app">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0OSA0OSIgc2hhcGUtcmVuZGVyaW5nPSJjcmlzcEVkZ2VzIj48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMCAwaDQ5djQ5SDB6Ii8+PHBhdGggc3Ryb2tlPSIjMTExMzE4IiBkPSJNMiAyLjVoN20zIDBoMm0xIDBoMm00IDBoMW0zIDBoMW0xIDBoMW00IDBoMW0xIDBoMm0yIDBoMW0xIDBoN00yIDMuNWgxbTUgMGgxbTIgMGgxbTIgMGgybTEgMGgybTEgMGgxbTIgMGgxbTEgMGg0bTEgMGgxbTYgMGgxbTIgMGgxbTUgMGgxTTIgNC41aDFtMSAwaDNtMSAwaDFtMSAwaDFtMSAwaDRtMiAwaDRtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDRtMSAwaDJtMSAwaDFtMiAwaDFtMSAwaDNtMSAwaDFNMiA1LjVoMW0xIDBoM20xIDBoMW0xIDBoMW04IDBoMm0xIDBoNG01IDBoM20zIDBoMm0xIDBoMW0xIDBoM20xIDBoMU0yIDYuNWgxbTEgMGgzbTEgMGgxbTEgMGgybTEgMGgzbTEgMGgybTIgMGg2bTMgMGgzbTMgMGgzbTEgMGgxbTEgMGgzbTEgMGgxTTIgNy41aDFtNSAwaDFtMSAwaDRtMiAwaDFtMiAwaDFtMiAwaDFtMyAwaDFtMSAwaDFtMiAwaDFtMiAwaDFtNSAwaDFtNSAwaDFNMiA4LjVoN20xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoMW0xIDBoN00xMCA5LjVoMm0xIDBoMm0xIDBoMW00IDBoMm0zIDBoMW0xIDBoM20xIDBoM20zIDBoMU0yIDEwLjVoMW0xIDBoNW0zIDBoOG0yIDBoNm01IDBoMW0yIDBoMW0zIDBoNU0zIDExLjVoM20zIDBoM200IDBoMW0zIDBoMW0zIDBoMW0xIDBoMm0yIDBoNW0yIDBoMm0zIDBoMW0xIDBoM00yIDEyLjVoNG0xIDBoMm0xIDBoMW0xIDBoNW0xIDBoMm0xIDBoMW0xIDBoMm0xIDBoM20xIDBoMm0xIDBoNG0yIDBoM20yIDBoMk0zIDEzLjVoMW0yIDBoMW00IDBoMW0xIDBoMW0xIDBoMm02IDBoMW0xIDBoMW0xIDBoMm0xIDBoMm0yIDBoMW0zIDBoMW0yIDBoMm0xIDBoMU00IDE0LjVoMW0xIDBoNW0xIDBoMW0zIDBoMm0yIDBoMm0yIDBoMW0zIDBoMW0yIDBoMW0xIDBoMW01IDBoMW0zIDBoMW0yIDBoMU0yIDE1LjVoMW0xIDBoNG0xIDBoMm0xIDBoMm0xIDBoMW04IDBoMW0yIDBoMW0zIDBoNG0yIDBoM20yIDBoM20xIDBoMU01IDE2LjVoMm0xIDBoMm0yIDBoN20xIDBoNW0xIDBoMW0xIDBoMW0yIDBoMW0zIDBoMm00IDBoMW0yIDBoMU0yIDE3LjVoMm0xIDBoMW0zIDBoMW01IDBoMW0xIDBoNG0zIDBoMW0xIDBoMm0xIDBoM20yIDBoMW0zIDBoMW0yIDBoNG0xIDBoMU0yIDE4LjVoMW01IDBoM20zIDBoMW00IDBoM20xIDBoMW0yIDBoMW0xIDBoMm0zIDBoMW0xIDBoMW00IDBoMU0zIDE5LjVoMW0xIDBoMW0xIDBoMW0xIDBoMW0zIDBoMW0xIDBoMW0xIDBoMW00IDBoMW02IDBoMW0xIDBoM20xIDBoMW0xIDBoM20xIDBoMW0xIDBoMW0yIDBoMU0yIDIwLjVoMW0yIDBoNG0xIDBoMW0xIDBoNG0zIDBoMm0xIDBoMW0yIDBoNG00IDBoMW0xIDBoM20yIDBoNk0yIDIxLjVoMW0xIDBoMm0zIDBoMm0xIDBoM20yIDBoMm0xIDBoMm0zIDBoNG0xIDBoMW0xIDBoMW0xIDBoMm0xIDBoMW0yIDBoMm0xIDBoM00yIDIyLjVoMW0zIDBoNm0yIDBoMTNtMSAwaDFtMiAwaDFtMSAwaDFtMSAwaDJtMSAwaDVtMiAwaDJNNiAyMy41aDFtMyAwaDJtMiAwaDFtMyAwaDFtMyAwaDFtMyAwaDJtMiAwaDFtMSAwaDNtMiAwaDJtMyAwaDVNMiAyNC41aDFtMSAwaDNtMSAwaDFtMSAwaDFtMyAwaDJtNCAwaDFtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDFtNCAwaDRtMSAwaDFtMSAwaDFtMSAwaDFNMiAyNS41aDFtMSAwaDFtMSAwaDFtMyAwaDFtMiAwaDJtMiAwaDFtMSAwaDJtMSAwaDFtMyAwaDJtMSAwaDRtMSAwaDNtMSAwaDFtMyAwaDNNMyAyNi41aDhtMSAwaDRtMSAwaDFtMiAwaDFtMSAwaDVtMiAwaDFtMiAwaDJtMyAwaDdNMyAyNy41aDFtMyAwaDFtMyAwaDFtMyAwaDFtMiAwaDVtMSAwaDFtMSAwaDJtMyAwaDJtNCAwaDFtNSAwaDJtMSAwaDFNMiAyOC41aDFtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDJtMSAwaDJtMSAwaDRtMiAwaDFtMSAwaDFtMiAwaDJtMSAwaDFtMyAwaDFtMSAwaDJtMSAwaDFtMSAwaDFtMSAwaDFtMSAwaDFNMyAyOS41aDFtNSAwaDFtNyAwaDNtMiAwaDFtMSAwaDVtMSAwaDFtMSAwaDNtMSAwaDJtMiAwaDFtMyAwaDFNNCAzMC41aDFtMiAwaDNtMSAwaDNtMyAwaDNtMSAwaDFtMSAwaDFtMSAwaDJtNiAwaDFtMSAwaDFtNCAwaDFtMSAwaDFtMiAwaDFNMiAzMS41aDZtMyAwaDJtNiAwaDFtMiAwaDFtMSAwaDFtMiAwaDFtMiAwaDRtNCAwaDFtMSAwaDFtMyAwaDFtMSAwaDFNMyAzMi41aDFtMiAwaDFtMSAwaDFtMSAwaDFtMSAwaDRtMSAwaDFtMiAwaDJtMSAwaDFtNCAwaDJtMSAwaDFtMyAwaDJtNCAwaDFtMSAwaDNNMiAzMy41aDNtMiAwaDFtMSAwaDNtMiAwaDRtMiAwaDRtMSAwaDJtMyAwaDFtMSAwaDNtMSAwaDJtMiAwaDJtMSAwaDNNMyAzNC41aDJtMSAwaDRtMSAwaDFtMSAwaDVtMSAwaDVtMiAwaDJtMyAwaDFtMSAwaDFtOCAwaDJNMiAzNS41aDFtMSAwaDJtMSAwaDFtNSAwaDNtMSAwaDNtMSAwaDFtMSAwaDJtMSAwaDFtNCAwaDJtNCAwaDFtMiAwaDFtMiAwaDJtMSAwaDFNNiAzNi41aDFtMSAwaDJtNCAwaDdtMSAwaDJtMSAwaDFtMiAwaDFtNSAwaDFtMSAwaDNtNSAwaDFNMyAzNy41aDRtMiAwaDFtMiAwaDJtNiAwaDNtMyAwaDFtMiAwaDNtMSAwaDJtMiAwaDJtMSAwaDJtMSAwaDJtMSAwaDFNMiAzOC41aDFtMiAwaDJtMSAwaDFtMiAwaDFtMiAwaDFtMSAwaDFtMSAwaDFtMSAwaDhtMyAwaDFtMSAwaDFtMSAwaDFtMiAwaDVNMTAgMzkuNWgxbTIgMGgybTEgMGgybTMgMGgybTMgMGgybTEgMGgxbTEgMGgzbTEgMGgxbTEgMGgybTMgMGg1TTIgNDAuNWg3bTMgMGgxbTIgMGgxbTQgMGgzbTEgMGgxbTEgMGgzbTQgMGg2bTEgMGgxbTEgMGgxbTEgMGgxTTIgNDEuNWgxbTUgMGgxbTEgMGgybTIgMGgybTEgMGgybTEgMGgxbTEgMGgxbTMgMGgxbTIgMGgybTEgMGgxbTEgMGgxbTIgMGgybTMgMGg0TTIgNDIuNWgxbTEgMGgzbTEgMGgxbTEgMGgxbTEgMGgzbTEgMGgxbTEgMGgybTIgMGg3bTIgMGgxbTEgMGgxbTEgMGgxbTEgMGg3bTEgMGgyTTIgNDMuNWgxbTEgMGgzbTEgMGgxbTEgMGg0bTIgMGgxbTMgMGgybTEgMGgxbTMgMGgxbTIgMGg1bTQgMGg1bTEgMGgyTTIgNDQuNWgxbTEgMGgzbTEgMGgxbTEgMGgxbTEgMGgzbTEgMGg1bTEgMGgxbTIgMGgxbTEgMGgybTEgMGgybTMgMGg2bTIgMGgxbTEgMGgxTTIgNDUuNWgxbTUgMGgxbTUgMGgybTMgMGgxbTIgMGgybTMgMGg2bTEgMGgxbTQgMGgxbTIgMGgzTTIgNDYuNWg3bTEgMGgybTEgMGgybTQgMGgxbTEgMGgxbTEgMGg2bTMgMGgybTQgMGgxbTEgMGgybTIgMGgyIi8+PC9zdmc+Cg==" alt="Scan this QR code to download the 91DAB Dashboard Android app">
-          </a>
-          <div class="app-download-copy">
-            <h3>91DAB Dashboard app</h3>
-            <p>Scan the QR code with an Android phone camera to download the password-protected dashboard shortcut. The app opens the existing secure 91DAB dashboard login directly.</p>
-            <a class="form-btn" href="https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-shortcut.apk">Download dashboard APK</a>
-            <div class="app-download-meta"><strong>Updates:</strong> changes to the live website and dashboard appear automatically when the app opens after deployment. Install a newer APK only when the Android shortcut itself is updated.</div>
-          </div>
+        <div class="card" style="padding:2.4rem;text-align:center;">
+          <h3 style="margin-bottom:.5rem;">No mobile app connected yet</h3>
+          <p class="hint" style="margin-bottom:1.2rem;">Once you launch a mobile storefront, install analytics here to track app sessions and push-notification opt-ins.</p>
+          <button class="form-btn" onclick="showToast('Mobile analytics is not connected yet','info')">Connect app</button>
         </div>
       </section>
 
       <!-- ============ EVENTS ============ -->
       <section class="screen" id="screen-events">
         <div class="card">
-          <div class="panel-head"><div><h3>Calendar events</h3><p>Events saved from Calendar appear here automatically.</p></div><button class="form-btn" type="button" onclick="navigate('calendar')">Open Calendar</button></div>
-          <div class="prod-list" id="storeEventsList" style="padding:0 1.4rem 1.3rem;"></div>
+          <div class="panel-head"><div><h3>Store Events</h3><p>Sales, launches and scheduled campaigns</p></div></div>
+          <div class="prod-list" style="padding:0 1.4rem 1.3rem;"><div class="empty-state">No store events have been recorded yet.</div></div>
         </div>
       </section>
 
@@ -1050,11 +1007,23 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <div class="set-row"><div><div class="set-label">New order alerts</div><div class="set-sub">Get a live notification when a buyer checks out</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Payment confirmations</div><div class="set-sub">Notify when a UPI reference is submitted</div></div><button class="switch on" onclick="this.classList.toggle('on')"></button></div>
           <div class="set-row"><div><div class="set-label">Low stock warnings</div><div class="set-sub">Alert when any product drops below 50 units</div></div><button class="switch" onclick="this.classList.toggle('on')"></button></div>
-		  <div class="set-row"><div><div class="set-label">Notification bell sound</div><div class="set-sub">Muted by default. Turn on a louder five-ring bell for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification bell sound" onclick="toggleNotificationSound()"></button></div>
-		  <div class="set-row" style="align-items:flex-start;"><div style="flex:1;min-width:0;"><label class="set-label" for="notificationSoundVolume" style="display:block;margin-bottom:.3rem;">Bell volume <output id="notificationSoundVolumeValue">85%</output></label><input id="notificationSoundVolume" type="range" min="20" max="100" step="5" value="85" aria-label="Notification bell volume" oninput="setNotificationSoundVolume(this.value)"><div class="set-sub">Each new alert rings five times. Use Test bell to hear the selected volume.</div></div><button class="action-btn action-btn-customer" type="button" style="margin-left:1rem;" onclick="testNotificationBell()">Test bell</button></div>
+          <div class="set-row"><div><div class="set-label">Notification sound</div><div class="set-sub">Muted by default. Turn on a gentle chime for genuinely new buyer checkouts, UPI references, and trusted live messages.</div></div><button class="switch" id="notificationSoundSwitch" type="button" aria-pressed="false" aria-label="Enable notification sound" onclick="toggleNotificationSound()"></button></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:1rem;">Profile</h3>
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.15rem;padding-bottom:1.15rem;border-bottom:1px solid var(--border);">
+            <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;background:#fff;" id="settingsProfileAvatar"><span id="settingsProfileAvatarInitials" style="display:none;">91</span><img id="settingsProfileAvatarImgSrc" src="/manus-storage/Logo_b65c7ed5.png" alt="91 DANTA profile logo" style="width:100%;height:100%;object-fit:cover;display:block;"></div>
+            <div>
+              <b>Profile picture</b>
+              <p style="font-size:0.75rem;color:var(--text-soft);margin:0.2rem 0 0.5rem;">Choose, save, and change a custom profile image (PNG, JPEG, or WebP up to 1.5MB).</p>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <label class="form-btn" style="display:inline-flex;align-items:center;cursor:pointer;padding:0.35rem 0.75rem;font-size:0.78rem;">
+                  Choose picture <input type="file" accept="image/png,image/jpeg,image/webp" style="display:none;" onchange="uploadCustomProfilePicture(this)">
+                </label>
+                <button type="button" class="form-btn" style="background:var(--border);color:var(--text);padding:0.35rem 0.75rem;font-size:0.78rem;" onclick="removeCustomProfilePicture()">Remove</button>
+              </div>
+            </div>
+          </div>
           <div class="field"><label for="dashboardProfileNameInput">Name</label><input id="dashboardProfileNameInput" maxlength="160" autocomplete="name"></div>
           <div class="field"><label for="dashboardProfileEmailInput">Email</label><input id="dashboardProfileEmailInput" type="email" maxlength="320" autocomplete="email"></div>
           <button class="form-btn" onclick="saveDashboardProfile()">Save profile</button>
@@ -1074,7 +1043,6 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <div class="card" style="padding:1.6rem;max-width:640px;margin-bottom:1.1rem;">
           <h3 style="margin-bottom:.5rem;">Login &amp; access</h3>
           <p class="set-sub" id="dashboardLoginStatus">Checking protected administrator session…</p>
-		  <div class="set-row" style="margin-top:1rem;"><div><div class="set-label">Latest successful sign-in</div><div class="set-sub" id="dashboardLastSignIn">Checking protected sign-in history…</div></div><span class="badge paid" id="dashboardLastSignInRole">—</span></div>
         </div>
         <div class="card" data-admin-only style="padding:1.6rem;max-width:640px;">
           <h3 style="margin-bottom:.5rem;">Monthly subscription reminders</h3>
@@ -1094,7 +1062,6 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
           <h3 style="margin-bottom:.45rem;">Protected login status</h3>
           <p class="set-sub" id="accessSessionStatus">Checking the administrator session…</p>
           <div class="set-row" style="margin-top:1rem;"><div><div class="set-label">Signed-in profile</div><div class="set-sub" id="accessProfileIdentity">Loading protected profile…</div></div><span class="badge paid">Active</span></div>
-		  <div class="set-row"><div><div class="set-label">Latest successful sign-in</div><div class="set-sub" id="accessLastSignIn">Checking protected sign-in history…</div></div><span class="badge paid" id="accessLastSignInRole">—</span></div>
           <div class="set-row"><div><div class="set-label">Customer and payment data</div><div class="set-sub">Only server-created checkout records with a submitted UPI reference are eligible for dashboard review.</div></div><span class="badge paid">Protected</span></div>
           <div class="set-row"><div><div class="set-label">Automatic reminders</div><div class="set-sub" id="accessReminderStatus">Checking reminder status…</div></div><span class="badge processing" id="accessReminderBadge">Ready</span></div>
         </div>
@@ -1151,9 +1118,7 @@ let activeQuote = null;
 const paymentEmailStates = {};
 const fulfillmentEmailStates = {};
 const NOTIFICATION_SOUND_KEY = '91dab_notification_sound_enabled';
-const NOTIFICATION_SOUND_VOLUME_KEY = '91dab_notification_sound_volume';
 let notificationSoundEnabled = localStorage.getItem(NOTIFICATION_SOUND_KEY) === 'true';
-let notificationSoundVolume = Math.min(1,Math.max(.2,Number(localStorage.getItem(NOTIFICATION_SOUND_VOLUME_KEY)||'.85')));
 let notificationAudioContext = null;
 let serverOrdersInitialized = false;
 
@@ -1161,14 +1126,7 @@ function syncNotificationSoundControl(){
   const control=document.getElementById('notificationSoundSwitch'); if(!control||typeof control.setAttribute!=='function') return;
   control.classList.toggle('on',notificationSoundEnabled);
   control.setAttribute('aria-pressed',String(notificationSoundEnabled));
-  control.setAttribute('aria-label',notificationSoundEnabled?'Mute notification bell sound':'Enable notification bell sound');
-  const volumeInput=document.getElementById('notificationSoundVolume'); if(volumeInput) volumeInput.value=String(Math.round(notificationSoundVolume*100));
-  const volumeValue=document.getElementById('notificationSoundVolumeValue'); if(volumeValue) volumeValue.textContent=`${Math.round(notificationSoundVolume*100)}%`;
-}
-function setNotificationSoundVolume(value){
-  notificationSoundVolume=Math.min(1,Math.max(.2,Number(value)/100||.85));
-  try{localStorage.setItem(NOTIFICATION_SOUND_VOLUME_KEY,String(notificationSoundVolume));}catch(err){}
-  syncNotificationSoundControl();
+  control.setAttribute('aria-label',notificationSoundEnabled?'Mute notification sound':'Enable notification sound');
 }
 async function prepareNotificationAudio(){
   const AudioContextClass=window.AudioContext||window.webkitAudioContext;
@@ -1181,39 +1139,28 @@ async function toggleNotificationSound(){
   notificationSoundEnabled=!notificationSoundEnabled;
   try{localStorage.setItem(NOTIFICATION_SOUND_KEY,String(notificationSoundEnabled));}catch(err){}
   if(notificationSoundEnabled){
-    try{await prepareNotificationAudio(); showToast('Notification bell enabled. It rings only for new received updates.','success');}
+    try{await prepareNotificationAudio(); showToast('Notification sound enabled. It will chime only for new received updates.','success');}
     catch(err){notificationSoundEnabled=false; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'false');}catch(storageErr){} showToast('Your browser blocked notification sound. Try the switch again after interacting with this page.','info');}
-  } else { showToast('Notification bell muted.','info'); }
+  } else { showToast('Notification sound muted.','info'); }
   syncNotificationSoundControl();
-}
-async function enableNativeAppNotificationAudio(){
-  if(!notificationSoundEnabled){ notificationSoundEnabled=true; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'true');}catch(err){} }
-  try{ if(!localStorage.getItem(NOTIFICATION_SOUND_VOLUME_KEY)){ notificationSoundVolume=1; localStorage.setItem(NOTIFICATION_SOUND_VOLUME_KEY,'1'); } }catch(err){}
-  syncNotificationSoundControl();
-  try{ await prepareNotificationAudio(); }catch(err){}
 }
 function playNotificationChime(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
   const now=notificationAudioContext.currentTime;
-  [0,.36,.72,1.08,1.44].forEach((offset)=>{const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(.0001,now+offset); gain.gain.exponentialRampToValueAtTime(.17*notificationSoundVolume,now+offset+.012); gain.gain.exponentialRampToValueAtTime(.0001,now+offset+.29); gain.connect(notificationAudioContext.destination); [659.25,1318.51,1975.53].forEach((frequency)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+offset); oscillator.connect(gain); oscillator.start(now+offset); oscillator.stop(now+offset+.3);});});
+  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.055,now+.015); gain.gain.exponentialRampToValueAtTime(0.0001,now+.32); gain.connect(notificationAudioContext.destination);
+  [880,1320].forEach((frequency,index)=>{const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sine'; oscillator.frequency.setValueAtTime(frequency,now+index*.1); oscillator.connect(gain); oscillator.start(now+index*.1); oscillator.stop(now+index*.1+.15);});
   return true;
 }
 function playNewOrderRocketSound(){
   if(!notificationSoundEnabled||!notificationAudioContext||notificationAudioContext.state!=='running') return false;
   const now=notificationAudioContext.currentTime;
-  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(.075*notificationSoundVolume,now+.025); gain.gain.exponentialRampToValueAtTime(0.0001,now+.46); gain.connect(notificationAudioContext.destination);
+  const gain=notificationAudioContext.createGain(); gain.gain.setValueAtTime(0.0001,now); gain.gain.exponentialRampToValueAtTime(0.075,now+.025); gain.gain.exponentialRampToValueAtTime(0.0001,now+.46); gain.connect(notificationAudioContext.destination);
   const oscillator=notificationAudioContext.createOscillator(); oscillator.type='sawtooth'; oscillator.frequency.setValueAtTime(150,now); oscillator.frequency.exponentialRampToValueAtTime(980,now+.27); oscillator.frequency.exponentialRampToValueAtTime(340,now+.46); oscillator.connect(gain); oscillator.start(now); oscillator.stop(now+.48);
   return true;
 }
 function notifyReceivedUpdate(title,text,sound='chime'){
   notifications.unshift({title,text,time:'Just now',unread:true}); notifications=notifications.slice(0,20);
   renderNotifications(); sound==='rocket'?playNewOrderRocketSound():playNotificationChime();
-}
-async function testNotificationBell(){
-  if(!notificationSoundEnabled){ notificationSoundEnabled=true; try{localStorage.setItem(NOTIFICATION_SOUND_KEY,'true');}catch(err){} syncNotificationSoundControl(); }
-  const ready=await prepareNotificationAudio();
-  if(!ready){ showToast('Your browser blocked the bell. Try Test bell again after interacting with this page.','info'); return; }
-  playNotificationChime(); showToast(`Bell tested at ${Math.round(notificationSoundVolume*100)}% volume.`,'success');
 }
 
 function readShopStorage(key){
@@ -1305,7 +1252,7 @@ function applyServerOrders(records){
   hydrateShopData();
   syncDashboardViews();
   serverOrdersInitialized=true;
-  receivedAlerts.forEach(record=>{const reachedPaymentQr=record.paymentStatus==='pending';notifyReceivedUpdate(reachedPaymentQr?'Buyer reached payment QR':'UPI reference submitted',`${record.orderId} · ${record.buyerName||'Buyer'}`,reachedPaymentQr?'rocket':'chime');});
+  receivedAlerts.forEach(record=>{const isNewCheckout=record.paymentStatus==='pending';notifyReceivedUpdate(isNewCheckout?'New buyer checkout':'UPI reference submitted',`${record.orderId} · ${record.buyerName||'Buyer'}`,isNewCheckout?'rocket':'chime');});
 }
 function applyTrustedLiveMessage(message){
   if(!message?.id||!message?.name||!message?.text) return;
@@ -1340,15 +1287,18 @@ function openInventoryIncreaseDialog(){
 }
 function submitInventoryIncrease(event){ event.preventDefault();const button=event.currentTarget.querySelector('button[type="submit"]');button.disabled=true;button.textContent='Adding…';window.parent?.postMessage({type:'91dab-inventory-increase',inventory:{units:Number(document.getElementById('inventoryIncreaseUnits').value),password:document.getElementById('inventoryIncreasePassword').value}},'*'); }
 function periodKeyForDate(value){ const date=new Date(value); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
+function shortMonthLabel(periodKey){ const match=/^(\d{4})-(0[1-9]|1[0-2])$/.exec(String(periodKey||'')); if(!match) return '—'; return new Date(Number(match[1]),Number(match[2])-1,1).toLocaleDateString('en-IN',{month:'short'}); }
 function deliveryPeriods(order){
   const selectedStart=/^\d{4}-(0[1-9]|1[0-2])$/.test(order.deliveryStartMonth||'')?order.deliveryStartMonth:null;
-  if(selectedStart){ const [year,month]=selectedStart.split('-').map(Number); return Array.from({length:12},(_,index)=>periodKeyForDate(new Date(year,month-1+index,1))); }
+  const selectedLength=order.planKey==='monthly'?Math.max(1,Number(order.qty)||1):12;
+  if(selectedStart){ const [year,month]=selectedStart.split('-').map(Number); return Array.from({length:selectedLength},(_,index)=>periodKeyForDate(new Date(year,month-1+index,1))); }
   const start=new Date(order.start||order.created||Date.now());
   if(order.planKey==='monthly'){ const now=new Date(); const elapsed=Math.max(0,(now.getFullYear()-start.getFullYear())*12+(now.getMonth()-start.getMonth())); return Array.from({length:elapsed+1},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);}); }
   return Array.from({length:12},(_,index)=>{const date=new Date(start);date.setMonth(date.getMonth()+index);return periodKeyForDate(date);});
 }
+function deliveryMonthsText(order){ if(order.planKey!=='monthly'&&order.planKey!=='yearly') return ''; return deliveryPeriods(order).map(shortMonthLabel).join(', '); }
 function isDeliveryRecorded(orderId,periodKey){ return subscriptionDeliveries.some(record=>record.orderId===orderId&&record.periodKey===periodKey); }
-function deliveryCheckboxes(order){ const safeOrderId=String(order.id).replace(/'/g,''); if(order.planKey==='yearly'&&order.deliverySpan==='once') return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;margin-bottom:.45rem;">${deliveryPeriods(order).map((period,index)=>`<span style="font-size:.68rem;white-space:nowrap;color:${index===0?'var(--accent-soft-text)':'var(--text-faint)'};font-weight:${index===0?'700':'500'};">${period.slice(5)}${index===0?' · shipment':''}</span>`).join('')}</div><button class="action-btn action-btn-shipped" onclick="navigate('inventory-products')">Record all-at-once shipment</button>`; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${period}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${safeOrderId}','${period}',this.checked)">${period.slice(5)}</label>`;}).join('')}</div>`; }
+function deliveryCheckboxes(order){ const safeOrderId=String(order.id).replace(/'/g,''); if(order.planKey==='yearly'&&order.deliverySpan==='once') return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;margin-bottom:.45rem;">${deliveryPeriods(order).map((period,index)=>`<span style="font-size:.68rem;white-space:nowrap;color:${index===0?'var(--accent-soft-text)':'var(--text-faint)'};font-weight:${index===0?'700':'500'};">${shortMonthLabel(period)}${index===0?' · shipment':''}</span>`).join('')}</div><button class="action-btn action-btn-shipped" onclick="navigate('inventory-products')">Record all-at-once shipment</button>`; return `<div style="display:flex;flex-wrap:wrap;gap:.35rem;min-width:180px;">${deliveryPeriods(order).map(period=>{const shipped=isDeliveryRecorded(order.id,period);return `<label style="display:inline-flex;align-items:center;gap:.2rem;font-size:.68rem;white-space:nowrap;" title="${shortMonthLabel(period)}"><input type="checkbox" ${shipped?'checked disabled':''} onchange="setSubscriptionDelivery('${safeOrderId}','${period}',this.checked)">${shortMonthLabel(period)}</label>`;}).join('')}</div>`; }
 function setSubscriptionDelivery(orderId,periodKey,delivered){ if(!delivered){ showToast('Recorded shipments stay in history. Use a password-confirmed stock adjustment to correct inventory.','info'); return; } window.parent?.postMessage({type:'91dab-subscription-delivery-save',delivery:{orderId,periodKey,delivered:true}},'*'); }
 function allocationKeyForRow(order,periodKey){ if(order.planKey==='introductory') return `${order.id}:one-time`; if(order.planKey==='yearly'&&order.deliverySpan==='once') return `${order.id}:yearly-all-at-once`; return `${order.id}:${order.planKey==='monthly'?'monthly':'yearly-monthly'}:${periodKey}`; }
 function allocationUnitsForRow(order){ const quantity=Math.max(1,Number(order.qty)||1); if(order.planKey==='introductory') return quantity*12; if(order.planKey==='yearly'&&order.deliverySpan==='once') return quantity*1500; if(order.planKey==='monthly') return quantity*99; return quantity*125; }
@@ -1361,8 +1311,8 @@ function renderInventoryProducts(){
     if(order.planKey==='introductory'||(order.planKey==='yearly'&&order.deliverySpan==='once')) scheduled.push({order,periodKey:null});
     else if(order.planKey==='monthly'||order.planKey==='yearly') deliveryPeriods(order).forEach(periodKey=>scheduled.push({order,periodKey}));
   });
-  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const shipmentLabel=recurring?`${periodKey} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment'); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-btn action-btn-shipped" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-btn action-btn-shipped" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td class="shipment-plan"><div class="customer-name">${order.plan}</div><div class="secondary-cell" style="margin-top:.22rem;line-height:1.45;white-space:normal;">${shipmentLabel}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'<span class="secondary-cell">Awaiting shipment</span>'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
-  allocationBody.innerHTML=inventoryAllocations.map(allocation=>`<tr><td>${formatDate(new Date(allocation.shippedAt).getTime())}</td><td class="mono">${allocation.orderId}</td><td>${allocation.allocationKind}</td><td>${allocation.periodKey||'—'}</td><td class="mono">${Number(allocation.units||0).toLocaleString('en-IN')}</td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">No DAB stock has been deducted yet. Record a shipment to create the first allocation.</td></tr>`;
+  shipmentBody.innerHTML=scheduled.map(({order,periodKey})=>{const key=allocationKeyForRow(order,periodKey); const allocation=inventoryAllocations.find(item=>item.allocationKey===key); const unitsForShipment=allocationUnitsForRow(order); const recurring=Boolean(periodKey); const safeOrderId=String(order.id).replace(/'/g,''); const action=allocation?`<span class="badge paid">Shipped</span>`:recurring?`<button class="action-btn action-btn-shipped" onclick="setSubscriptionDelivery('${safeOrderId}','${periodKey}',true)">Record shipment</button>`:`<button class="action-btn action-btn-shipped" onclick="window.parent?.postMessage({type:'91dab-fulfillment-update',fulfillment:{orderId:'${safeOrderId}',status:'shipped'}},'*')">Ship ${unitsForShipment.toLocaleString('en-IN')} units</button>`; return `<tr><td class="mono">${order.id}</td><td><div class="customer-name">${order.customer}</div><div class="customer-email">${order.orderInfo?.email||'No buyer email'}</div></td><td>${order.plan}<div style="font-size:.7rem;color:var(--text-faint);">${recurring?`${shortMonthLabel(periodKey)} scheduled shipment`:(order.planKey==='yearly'?'All-at-once annual shipment':'One-time shipment')}</div></td><td class="mono">${unitsForShipment.toLocaleString('en-IN')}</td><td>${allocation?formatDate(new Date(allocation.shippedAt).getTime()):'Awaiting shipment'}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="6" class="empty-state">No paid DAB orders are ready for inventory fulfillment.</td></tr>`;
+  allocationBody.innerHTML=inventoryAllocations.map(allocation=>`<tr><td>${formatDate(new Date(allocation.shippedAt).getTime())}</td><td class="mono">${allocation.orderId}</td><td>${allocation.allocationKind}</td><td>${allocation.periodKey?shortMonthLabel(allocation.periodKey):'—'}</td><td class="mono">${Number(allocation.units||0).toLocaleString('en-IN')}</td></tr>`).join('')||`<tr><td colspan="5" class="empty-state">No DAB stock has been deducted yet. Record a shipment to create the first allocation.</td></tr>`;
 }
 function renderCustomisation(){
   const summary=document.getElementById('customisationSummary'); const select=document.getElementById('customisationQuoteClient'); const body=document.getElementById('customisationClientsBody');
@@ -1376,7 +1326,7 @@ function renderCustomisation(){
     select.innerHTML=`<option value="">Add a new client</option>${options}`;
     if(chosen) select.value=chosen;
   }
-  if(body) body.innerHTML=quoteClientCustomizations.map(item=>{const locked=item.fulfillmentStatus!=='not_shipped';const shipment=locked?fulfillmentBadge(item.fulfillmentStatus):'<span class="secondary-cell">Awaiting shipment</span>';const action=locked?'<span class="secondary-cell">Locked after shipment</span>':`<div class="table-action-group"><button class="action-btn action-btn-customer" onclick="openCustomisationEdit(${item.id})">Edit</button><button class="action-btn action-btn-secondary" onclick="openCustomisationDelete(${item.id})">Delete</button></div>`;return `<tr><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td class="secondary-cell" style="min-width:190px;white-space:normal;">${escapeText(item.deliveryAddress||'No delivery address recorded')}</td><td class="payment-method">${escapeText(customPaymentModeLabel(item.paymentMode))}</td><td class="mono">${Number(item.unitsPurchased||0).toLocaleString('en-IN')}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td>${shipment}</td><td>${formatDate(new Date(item.createdAt).getTime())}</td><td>${action}</td></tr>`;}).join('')||'<tr><td colspan="8" class="empty-state">No custom client sale has been recorded yet.</td></tr>';
+  if(body) body.innerHTML=quoteClientCustomizations.map(item=>{const locked=item.fulfillmentStatus!=='not_shipped';const shipment=locked?fulfillmentBadge(item.fulfillmentStatus):'<span class="secondary-cell">Awaiting shipment</span>';const action=locked?'<span class="secondary-cell">Locked after shipment</span>':`<div class="table-action-group"><button class="action-btn action-btn-customer" onclick="openCustomisationEdit(${item.id})">Edit</button><button class="action-btn action-btn-secondary" onclick="openCustomisationDelete(${item.id})">Delete</button></div>`;return `<tr><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td class="mono">${Number(item.unitsPurchased||0).toLocaleString('en-IN')}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td>${shipment}</td><td>${formatDate(new Date(item.createdAt).getTime())}</td><td>${action}</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty-state">No custom client sale has been recorded yet.</td></tr>';
 }
 function applySelectedQuoteClient(){
   const id=String(document.getElementById('customisationQuoteClient')?.value||'');
@@ -1387,18 +1337,16 @@ function applySelectedQuoteClient(){
 }
 function startNewCustomisationClient(){
   const select=document.getElementById('customisationQuoteClient'); if(select) select.value='';
-  ['customisationClientName','customisationClientEmail','customisationClientPhone','customisationDeliveryAddress'].forEach(id=>{const field=document.getElementById(id);if(field) field.value='';});
-  const paymentMode=document.getElementById('customisationPaymentMode'); if(paymentMode) paymentMode.value='upi';
+  ['customisationClientName','customisationClientEmail','customisationClientPhone'].forEach(id=>{const field=document.getElementById(id);if(field) field.value='';});
   document.getElementById('customisationClientName')?.focus();
 }
 function openCustomisationEdit(id){
   if(dashboardRole!=='admin') return; const item=quoteClientCustomizations.find(record=>record.id===id); if(!item) return;
   document.getElementById('teamModalTitle').textContent='Edit custom client sale';
-  document.getElementById('teamModalBody').innerHTML=`<p class="modal-note">Edits require the administrator password. Sales are locked after shipment to preserve inventory history.</p><form onsubmit="submitCustomisationEdit(event,${id})"><div class="field"><label>Client / clinic name</label><input id="customisationEditName" maxlength="160" required value="${escapeText(item.clientName)}"></div><div class="field"><label>Client email</label><input id="customisationEditEmail" type="email" maxlength="320" value="${escapeText(item.clientEmail||'')}"></div><div class="field"><label>Phone</label><input id="customisationEditPhone" maxlength="64" value="${escapeText(item.clientPhone||'')}"></div><div class="field"><label>Delivery address</label><textarea id="customisationEditDeliveryAddress" minlength="5" maxlength="1000" required>${escapeText(item.deliveryAddress||'')}</textarea></div><div class="field"><label>Mode of payment</label><select id="customisationEditPaymentMode" required>${['upi','bank_transfer','cash','card','other'].map(mode=>`<option value="${mode}"${item.paymentMode===mode?' selected':''}>${customPaymentModeLabel(mode)}</option>`).join('')}</select></div><div class="field-row"><div class="field"><label>DAB units</label><input id="customisationEditUnits" type="number" min="1" max="10000000" required value="${Number(item.unitsPurchased||0)}"></div><div class="field"><label>Amount paid (₹, whole INR)</label><input id="customisationEditRevenue" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="10" required value="${Number(item.revenueInr||0)}"></div></div><div class="field"><label>Notes</label><textarea id="customisationEditNotes" maxlength="1000">${escapeText(item.notes||'')}</textarea></div><div class="field"><label>Administrator password</label><input id="customisationEditPassword" type="password" required autocomplete="current-password"></div><div class="modal-action-row"><button type="button" class="form-btn" style="background:var(--card-tint);color:var(--text);" onclick="closeTeamModal()">Cancel</button><button class="form-btn" type="submit">Save changes</button></div></form>`;
+  document.getElementById('teamModalBody').innerHTML=`<p class="modal-note">Edits require the administrator password. Sales are locked after shipment to preserve inventory history.</p><form onsubmit="submitCustomisationEdit(event,${id})"><div class="field"><label>Client / clinic name</label><input id="customisationEditName" maxlength="160" required value="${escapeText(item.clientName)}"></div><div class="field"><label>Client email</label><input id="customisationEditEmail" type="email" maxlength="320" value="${escapeText(item.clientEmail||'')}"></div><div class="field"><label>Phone</label><input id="customisationEditPhone" maxlength="64" value="${escapeText(item.clientPhone||'')}"></div><div class="field-row"><div class="field"><label>DAB units</label><input id="customisationEditUnits" type="number" min="1" max="10000000" required value="${Number(item.unitsPurchased||0)}"></div><div class="field"><label>Amount paid (₹)</label><input id="customisationEditRevenue" type="number" min="0" max="1000000000" required value="${Number(item.revenueInr||0)}"></div></div><div class="field"><label>Notes</label><textarea id="customisationEditNotes" maxlength="1000">${escapeText(item.notes||'')}</textarea></div><div class="field"><label>Administrator password</label><input id="customisationEditPassword" type="password" required autocomplete="current-password"></div><div class="modal-action-row"><button type="button" class="form-btn" style="background:var(--card-tint);color:var(--text);" onclick="closeTeamModal()">Cancel</button><button class="form-btn" type="submit">Save changes</button></div></form>`;
   document.getElementById('teamModal').classList.add('open');
 }
-function customisationWholeInr(fieldId){ const raw=String(document.getElementById(fieldId)?.value||'').trim(); if(!/^(0|[1-9]\d{0,9})$/.test(raw)){ showToast('Amount paid must be a whole INR amount from ₹0 to ₹1,000,000,000.','error'); return null; } const amount=Number(raw); return Number.isSafeInteger(amount)&&amount<=1000000000?amount:null; }
-function submitCustomisationEdit(event,id){ event.preventDefault();const value=key=>String(document.getElementById(key)?.value||'').trim();const revenueInr=customisationWholeInr('customisationEditRevenue');if(revenueInr===null)return;const button=event.currentTarget.querySelector('button[type="submit"]');if(button){button.disabled=true;button.textContent='Saving…';}window.parent?.postMessage({type:'91dab-quote-client-customization-update',customization:{id,clientName:value('customisationEditName'),clientEmail:value('customisationEditEmail')||null,clientPhone:value('customisationEditPhone')||null,deliveryAddress:value('customisationEditDeliveryAddress'),paymentMode:value('customisationEditPaymentMode'),unitsPurchased:Number(value('customisationEditUnits')),revenueInr,notes:value('customisationEditNotes')||null,password:value('customisationEditPassword')}},'*'); }
+function submitCustomisationEdit(event,id){ event.preventDefault();const button=event.currentTarget.querySelector('button[type="submit"]');if(button){button.disabled=true;button.textContent='Saving…';}const value=key=>String(document.getElementById(key)?.value||'').trim();window.parent?.postMessage({type:'91dab-quote-client-customization-update',customization:{id,clientName:value('customisationEditName'),clientEmail:value('customisationEditEmail')||null,clientPhone:value('customisationEditPhone')||null,unitsPurchased:Number(value('customisationEditUnits')),revenueInr:Number(value('customisationEditRevenue')),notes:value('customisationEditNotes')||null,password:value('customisationEditPassword')}},'*'); }
 function openCustomisationDelete(id){
   if(dashboardRole!=='admin') return; const item=quoteClientCustomizations.find(record=>record.id===id); if(!item) return;
   document.getElementById('teamModalTitle').textContent='Delete custom client sale';
@@ -1409,10 +1357,9 @@ function submitCustomisationDelete(event,id){ event.preventDefault();const butto
 function saveQuoteClientCustomization(event){
   event.preventDefault();
   if(dashboardRole!=='admin') return;
-  const value=id=>String(document.getElementById(id)?.value||'').trim();
-  const revenueInr=customisationWholeInr('customisationRevenue'); if(revenueInr===null) return;
   const button=event.currentTarget.querySelector('button[type="submit"]'); if(button){button.disabled=true;button.textContent='Saving…';}
-  window.parent?.postMessage({type:'91dab-quote-client-customization-create',customization:{clientName:value('customisationClientName'),clientEmail:value('customisationClientEmail')||null,clientPhone:value('customisationClientPhone')||null,deliveryAddress:value('customisationDeliveryAddress'),paymentMode:value('customisationPaymentMode'),unitsPurchased:Number(value('customisationUnits')),revenueInr,notes:value('customisationNotes')||null}},'*');
+  const value=id=>String(document.getElementById(id)?.value||'').trim();
+  window.parent?.postMessage({type:'91dab-quote-client-customization-create',customization:{clientName:value('customisationClientName'),clientEmail:value('customisationClientEmail')||null,clientPhone:value('customisationClientPhone')||null,unitsPurchased:Number(value('customisationUnits')),revenueInr:Number(value('customisationRevenue')),notes:value('customisationNotes')||null}},'*');
 }
 function syncDashboardViews(){
   renderBars(); renderTopProducts(); renderOrders(document.getElementById('orderSearch')?.value || '');
@@ -1438,37 +1385,27 @@ let chartMode = 'weekly';
 function fmtMoney(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function fmtINR(n){ return '\u20B9' + Math.round(n).toLocaleString('en-IN'); }
 
-function confirmedRevenueRecords(){
-  const paidBuyerSales=orders.filter(order=>order.paymentStatus==='paid').map(order=>({amount:Number(order.amount)||0,createdAt:order.created,source:'buyer'}));
-  const confirmedCustomSales=quoteClientCustomizations.map(item=>({amount:Number(item.revenueInr)||0,createdAt:item.createdAt,source:'custom'}));
-  return [...paidBuyerSales,...confirmedCustomSales].filter(record=>Number.isFinite(record.amount)&&record.amount>=0&&record.createdAt&&!Number.isNaN(new Date(record.createdAt).getTime()));
-}
-function confirmedRevenueTotal(){ return confirmedRevenueRecords().reduce((sum,record)=>sum+record.amount,0); }
-
 function renderBars(){
   const wrap = document.getElementById('barsWrap');
-  const confirmedSales=confirmedRevenueRecords();
-  if(!confirmedSales.length){
+  const paidOrders = orders.filter(order=>order.paymentStatus==='paid');
+  if(!paidOrders.length){
     wrap.classList.remove('many');
     wrap.innerHTML = '<div class="empty-state" style="margin:auto;">No paid sales yet. Sales performance will appear after a payment is confirmed.</div>';
     return;
   }
+  const now = new Date();
   const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mondayOffset = (now.getDay()+6)%7;
   const data = chartMode === 'weekly'
-    ? WEEKDAY_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))
-    : MONTH_LABELS.map((label,index)=>({key:String(index),d:label,v:0}));
-  confirmedSales.forEach(record=>{
-    const date = new Date(record.createdAt);
-    if(Number.isNaN(date.getTime())) return;
-    const key = chartMode === 'weekly' ? String((date.getDay()+6)%7) : String(date.getMonth());
+    ? Array.from({length:7},(_,index)=>{const date=new Date(now);date.setHours(0,0,0,0);date.setDate(now.getDate()-mondayOffset+index);return {key:date.toDateString(),d:WEEKDAY_LABELS[index],v:0};})
+    : Array.from({length:12},(_,index)=>{const date=new Date(now.getFullYear(),index,1);return {key:`${date.getFullYear()}-${date.getMonth()}`,d:MONTH_LABELS[index],v:0};});
+  paidOrders.forEach(order=>{
+    const date = new Date(order.created);
+    const key = chartMode === 'weekly' ? date.toDateString() : `${date.getFullYear()}-${date.getMonth()}`;
     const bucket = data.find(item=>item.key===key);
-    if(bucket) bucket.v += record.amount;
+    if(bucket) bucket.v += Number(order.amount)||0;
   });
-  const periodRevenue=data.reduce((sum,item)=>sum+item.v,0);
-  const totalRevenue=confirmedRevenueTotal();
-  const subtitle=document.getElementById('salesSubtitle');
-  if(subtitle) subtitle.textContent=chartMode==='weekly' ? `Confirmed revenue by weekday: ${fmtINR(periodRevenue)} total` : `Confirmed revenue by month: ${fmtINR(periodRevenue)} total`;
   const highest = Math.max(...data.map(item=>item.v),1);
   const max = highest * 1.15;
   wrap.classList.toggle('many', data.length > 7);
@@ -1487,6 +1424,7 @@ function setChartMode(mode){
   document.getElementById('btnWeekly').classList.toggle('active', mode==='weekly');
   document.getElementById('btnMonthly').classList.toggle('active', mode==='monthly');
   document.getElementById('salesTitle').textContent = mode==='weekly' ? 'Weekly Sales' : 'Monthly Sales';
+  document.getElementById('salesSubtitle').textContent = mode==='weekly' ? 'Sales performance from Monday to Sunday' : 'Sales performance from January to December';
   renderBars();
 }
 
@@ -1524,7 +1462,7 @@ function renderOrders(filter){
     <tr onclick="openOrder('${o.id}')">
       <td class="mono">${o.id}</td>
       <td>${o.customer}</td>
-      <td>${o.plan}<div style="font-size:.72rem;color:var(--text-faint);">${o.unit}</div></td>
+      <td>${o.plan}<div style="font-size:.72rem;color:var(--text-faint);">${o.unit}${deliveryMonthsText(o)?` · ${deliveryMonthsText(o)}`:''}</div></td>
       <td class="mono">${fmtINR(o.amount)}</td>
       <td>${statusBadge(o.status)}</td>
     </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--text-faint);padding:1.5rem;">${orders.length?'No orders match your search.':'No qualifying buyer records yet. Orders appear after a UPI reference is submitted or payment is confirmed.'}</td></tr>`;
@@ -1598,7 +1536,7 @@ function renderEcommerce(){
     const matchesSearch=!search||[order.id,order.customer,order.plan,order.orderInfo?.email,order.utr].some(value=>String(value||'').toLowerCase().includes(search));
     return matchesFilter&&matchesSearch;
   });
-  body.innerHTML=visible.map(order=>{const safeOrderId=escapeText(order.id);const quantity=Math.max(1,Number(order.qty)||1);const action=order.paymentStatus==='utr_submitted'?`<button class="action-link" onclick="navigate('payments')">Review payment</button>`:order.paymentStatus==='paid'&&order.fulfillmentStatus!=='delivered'?`<button class="action-link" onclick="navigate('delivery-tracking')">Manage delivery</button>`:`<button class="action-link" onclick="navigate('transactions')">View transaction</button>`;return `<tr><td>${formatDate(order.created)}</td><td class="mono">${safeOrderId}</td><td><div class="customer-name">${escapeText(order.customer)}</div><div class="customer-email">${escapeText(order.orderInfo?.email||'No buyer email')}</div></td><td>${escapeText(order.plan)}<div style="font-size:.7rem;color:var(--text-faint);">${quantity.toLocaleString('en-IN')} unit${quantity===1?'':'s'}</div></td><td class="mono">${fmtINR(order.amount)}</td><td>${ecommercePaymentBadge(order)}</td><td class="mono">${escapeText(order.utr||'—')}</td><td>${ecommerceFulfillmentBadge(order)}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="9" class="empty-state">${orders.length?'No protected checkout records match this filter.':'No qualifying checkout records yet. Orders will appear here after the 91DAB shop creates a trusted checkout.'}</td></tr>`;
+  body.innerHTML=visible.map(order=>{const safeOrderId=escapeText(order.id);const quantity=Math.max(1,Number(order.qty)||1);const months=deliveryMonthsText(order);const action=order.paymentStatus==='utr_submitted'?`<button class="action-link" onclick="navigate('payments')">Review payment</button>`:order.paymentStatus==='paid'&&order.fulfillmentStatus!=='delivered'?`<button class="action-link" onclick="navigate('delivery-tracking')">Manage delivery</button>`:`<button class="action-link" onclick="navigate('transactions')">View transaction</button>`;return `<tr><td>${formatDate(order.created)}</td><td class="mono">${safeOrderId}</td><td><div class="customer-name">${escapeText(order.customer)}</div><div class="customer-email">${escapeText(order.orderInfo?.email||'No buyer email')}</div></td><td>${escapeText(order.plan)}<div style="font-size:.7rem;color:var(--text-faint);">${quantity.toLocaleString('en-IN')} unit${quantity===1?'':'s'}${months?` · ${months}`:''}</div></td><td class="mono">${fmtINR(order.amount)}</td><td>${ecommercePaymentBadge(order)}</td><td class="mono">${escapeText(order.utr||'—')}</td><td>${ecommerceFulfillmentBadge(order)}</td><td>${action}</td></tr>`;}).join('')||`<tr><td colspan="9" class="empty-state">${orders.length?'No protected checkout records match this filter.':'No qualifying checkout records yet. Orders will appear here after the 91DAB shop creates a trusted checkout.'}</td></tr>`;
 }
 
 function resendEmail(orderId, customer){
@@ -1686,7 +1624,7 @@ function renderSubscriptions(){
   const body=document.getElementById('subscriptionsBody'); if(!body) return;
   const filter=document.getElementById('subscriptionFilter')?.value||'all';
   const rows=subscriptionRows().filter(o=>filter==='all'||o.status===filter);
-  body.innerHTML=rows.map(o=>{const first=o.periods[0];const last=o.periods.at(-1);const yearlyTogether=o.planKey==='yearly'&&o.deliverySpan==='once';const selection=yearlyTogether?`Together in ${first}`:`Across 12 months`;return `<tr onclick="openCustomer('${encodeURIComponent((o.info.email||o.customer).toLowerCase())}')"><td><div class="customer-name">${o.info.name||o.customer}</div><div class="customer-email">${o.info.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${o.unit}</div></td><td class="secondary-cell">${selection}<div style="font-size:.7rem;color:var(--text-faint);">${yearlyTogether?'Yearly all-at-once':'Monthly shipment allocation'}</div></td><td class="secondary-cell">${first}</td><td class="secondary-cell">${first} → ${last}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus)}</td><td onclick="event.stopPropagation()">${o.paymentStatus==='paid'?deliveryCheckboxes(o):'<span class="secondary-cell">Awaiting payment</span>'}</td></tr>`;}).join('')||`<tr><td colspan="8" class="empty-state">No subscriptions match this status.</td></tr>`;
+  body.innerHTML=rows.map(o=>{const first=o.periods[0];const last=o.periods.at(-1);const yearlyTogether=o.planKey==='yearly'&&o.deliverySpan==='once';const months=deliveryMonthsText(o);const selection=yearlyTogether?`Together in ${shortMonthLabel(first)}`:`Months: ${months}`;return `<tr onclick="openCustomer('${encodeURIComponent((o.info.email||o.customer).toLowerCase())}')"><td><div class="customer-name">${o.info.name||o.customer}</div><div class="customer-email">${o.info.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${o.unit}</div></td><td class="secondary-cell">${selection}<div style="font-size:.7rem;color:var(--text-faint);">${yearlyTogether?'Yearly all-at-once':'Monthly shipment allocation'}</div></td><td class="secondary-cell">${shortMonthLabel(first)}</td><td class="secondary-cell">${shortMonthLabel(first)} → ${shortMonthLabel(last)}</td><td class="mono">${fmtINR(o.amount)}</td><td>${paymentBadge(o.paymentStatus)}</td><td onclick="event.stopPropagation()">${o.paymentStatus==='paid'?deliveryCheckboxes(o):'<span class="secondary-cell">Awaiting payment</span>'}</td></tr>`;}).join('')||`<tr><td colspan="8" class="empty-state">No subscriptions match this status.</td></tr>`;
 }
 function paymentEmailAction(o){
   if(dashboardRole!=='admin') return `<button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button>`;
@@ -1754,9 +1692,7 @@ function customSaleFulfillmentAction(item){
   if(isStatusActionPending('custom',item.id,next)) return `<button class="action-btn ${next==='shipped'?'action-btn-shipped':'action-btn-delivered'}" disabled aria-live="polite"><span class="action-spinner" aria-hidden="true"></span>Marking ${next}…</button>`;
   return `<button class="action-btn ${next==='shipped'?'action-btn-shipped':'action-btn-delivered'}" onclick="event.stopPropagation();requestCustomisationFulfillment(${item.id},'${next}')">${label}</button>`;
 }
-const CUSTOM_PAYMENT_MODE_LABELS={upi:'UPI',bank_transfer:'Bank transfer',cash:'Cash',card:'Card',other:'Other'};
-function customPaymentModeLabel(mode){ return CUSTOM_PAYMENT_MODE_LABELS[String(mode||'other')]||'Other'; }
-function customSaleMatches(item,search){ return !search||[`CUSTOM-${item.id}`,item.clientName,item.clientEmail,item.clientPhone,item.deliveryAddress,item.paymentMode,item.notes].filter(Boolean).join(' ').toLowerCase().includes(search); }
+function customSaleMatches(item,search){ return !search||[`CUSTOM-${item.id}`,item.clientName,item.clientEmail,item.clientPhone,item.notes].filter(Boolean).join(' ').toLowerCase().includes(search); }
 function customSalePlan(item){ return `Custom client sale<div style="font-size:.7rem;color:var(--text-faint);">${Number(item.unitsPurchased||0).toLocaleString('en-IN')} DAB units</div>`; }
 function renderDeliveryTracking(){
   const body=document.getElementById('deliveryTrackingBody'); if(!body) return;
@@ -1768,7 +1704,7 @@ function renderDeliveryTracking(){
   });
   const customRows=[...quoteClientCustomizations].sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()).filter(item=>customSaleMatches(item,search)&&(filter==='all'||(item.fulfillmentStatus||'not_shipped')===filter));
   const orderMarkup=rows.map(o=>`<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'No buyer email'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="mono">${fmtINR(o.amount)}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td class="secondary-cell">${o.shippedAt?formatDate(new Date(o.shippedAt).getTime()):'—'}</td><td class="secondary-cell">${o.deliveredAt?formatDate(new Date(o.deliveredAt).getTime()):'—'}</td><td><div class="table-action-group">${fulfillmentAction(o)} ${fulfillmentEmailAction(o)}</div></td></tr>`).join('');
-  const customMarkup=customRows.map(item=>`<tr><td class="mono">CUSTOM-${item.id}</td><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div><div class="secondary-cell" style="margin-top:.2rem;white-space:normal;">${escapeText(item.deliveryAddress||'No delivery address recorded')}</div></td><td>${customSalePlan(item)}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td>${fulfillmentBadge(item.fulfillmentStatus||'not_shipped')}</td><td class="secondary-cell">${item.shippedAt?formatDate(new Date(item.shippedAt).getTime()):'—'}</td><td class="secondary-cell">${item.deliveredAt?formatDate(new Date(item.deliveredAt).getTime()):'—'}</td><td><div class="table-action-group">${customSaleFulfillmentAction(item)}</div></td></tr>`).join('');
+  const customMarkup=customRows.map(item=>`<tr><td class="mono">CUSTOM-${item.id}</td><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td>${customSalePlan(item)}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td>${fulfillmentBadge(item.fulfillmentStatus||'not_shipped')}</td><td class="secondary-cell">${item.shippedAt?formatDate(new Date(item.shippedAt).getTime()):'—'}</td><td class="secondary-cell">${item.deliveredAt?formatDate(new Date(item.deliveredAt).getTime()):'—'}</td><td><div class="table-action-group">${customSaleFulfillmentAction(item)}</div></td></tr>`).join('');
   body.innerHTML=orderMarkup||customMarkup?`${orderMarkup}${customMarkup}`:`<tr><td colspan="8" class="empty-state">No paid orders or confirmed custom client sales are ready for delivery tracking.</td></tr>`;
   const summary=document.getElementById('deliveryTrackingSummary'); if(summary){
     const paid=orders.filter(o=>o.paymentStatus==='paid'); const tracked=[...paid,...quoteClientCustomizations]; const awaiting=tracked.filter(o=>(o.fulfillmentStatus||'not_shipped')==='not_shipped'); const shipped=tracked.filter(o=>o.fulfillmentStatus==='shipped'); const delivered=tracked.filter(o=>o.fulfillmentStatus==='delivered');
@@ -1780,8 +1716,8 @@ function renderPayments(){
   const search=(document.getElementById('paymentSearch')?.value||'').toLowerCase().trim(); const filter=document.getElementById('paymentStatusFilter')?.value||'all';
   const rows=[...orders].sort((a,b)=>(b.created||0)-(a.created||0)).filter(o=>{const s=o.paymentStatus||'pending'; const hay=[o.id,o.customer,o.plan,o.utr].join(' ').toLowerCase(); return (!search||hay.includes(search))&&(filter==='all'||s===filter);});
   const customRows=[...quoteClientCustomizations].sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()).filter(item=>customSaleMatches(item,search)&&(filter==='all'||filter==='paid'));
-  const orderMarkup=rows.map(o=>{const fullUtr=String(o.utr??'').trim()||'Not submitted';return `<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}</td><td class="mono">${fmtINR(o.amount)}</td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="utr-code" title="${escapeText(fullUtr)}">${escapeText(fullUtr)}</td><td class="secondary-cell">${formatDate(o.created)}</td><td class="secondary-cell">${formatDateTime(o.utrSubmittedAt)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${fulfillmentAction(o)} ${paymentEmailAction(o)}</div></td></tr>`;}).join('');
-  const customMarkup=customRows.map(item=>`<tr><td class="mono">CUSTOM-${item.id}</td><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td>${customSalePlan(item)}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td class="payment-method">${escapeText(customPaymentModeLabel(item.paymentMode))}</td><td class="utr-code" title="Administrator-recorded custom sale">—</td><td class="secondary-cell">${formatDate(new Date(item.createdAt).getTime())}</td><td class="secondary-cell">—</td><td>${paymentBadge('paid')}</td><td>${fulfillmentBadge(item.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${customSaleFulfillmentAction(item)}</div></td></tr>`).join('');
+  const orderMarkup=rows.map(o=>{const fullUtr=String(o.utr??'').trim()||'Not submitted';const months=deliveryMonthsText(o);return `<tr><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}${months?`<div style="font-size:.7rem;color:var(--text-faint);">${months}</div>`:''}</td><td class="mono">${fmtINR(o.amount)}</td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="utr-code" title="${escapeText(fullUtr)}">${escapeText(fullUtr)}</td><td class="secondary-cell">${formatDate(o.created)}</td><td class="secondary-cell">${formatDateTime(o.utrSubmittedAt)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${fulfillmentAction(o)} ${paymentEmailAction(o)}</div></td></tr>`;}).join('');
+  const customMarkup=customRows.map(item=>`<tr><td class="mono">CUSTOM-${item.id}</td><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td>${customSalePlan(item)}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td class="payment-method">Custom record</td><td class="utr-code" title="Administrator-recorded custom sale">—</td><td class="secondary-cell">${formatDate(new Date(item.createdAt).getTime())}</td><td class="secondary-cell">—</td><td>${paymentBadge('paid')}</td><td>${fulfillmentBadge(item.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${customSaleFulfillmentAction(item)}</div></td></tr>`).join('');
   body.innerHTML=orderMarkup||customMarkup?`${orderMarkup}${customMarkup}`:`<tr><td colspan="11" class="empty-state">No payments or confirmed custom client sales match these filters.</td></tr>`;
   renderPaymentSummary(); updateShopBadges();
 }
@@ -1794,8 +1730,8 @@ function renderTransactions(){
     return (!search||hay.includes(search)) && (filter==='all'||o.paymentStatus===filter);
   });
   const customRows=[...quoteClientCustomizations].sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()).filter(item=>customSaleMatches(item,search)&&(filter==='all'||filter==='paid'));
-  const orderMarkup=rows.map(o=>`<tr><td class="secondary-cell">${formatDate(o.created)}</td><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}</div></td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="mono">${fmtINR(o.amount)}</td><td class="secondary-cell">${formatDateTime(o.utrSubmittedAt)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${fulfillmentAction(o)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button></div></td></tr>`).join('');
-  const customMarkup=customRows.map(item=>`<tr><td class="secondary-cell">${formatDate(new Date(item.createdAt).getTime())}</td><td class="mono">CUSTOM-${item.id}</td><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td>${customSalePlan(item)}</td><td class="payment-method">${escapeText(customPaymentModeLabel(item.paymentMode))}</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td class="secondary-cell">—</td><td>${paymentBadge('paid')}</td><td>${fulfillmentBadge(item.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${customSaleFulfillmentAction(item)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();navigate('customisation')">Customisation</button></div></td></tr>`).join('');
+  const orderMarkup=rows.map(o=>{const months=deliveryMonthsText(o);return `<tr><td class="secondary-cell">${formatDate(o.created)}</td><td class="mono">${o.id}</td><td><div class="customer-name">${o.customer}</div><div class="customer-email">${o.orderInfo?.email||'—'}</div></td><td>${o.plan}<div style="font-size:.7rem;color:var(--text-faint);">${Number(o.qty)||1} pack${Number(o.qty)===1?'':'s'}${months?` · ${months}`:''}</div></td><td class="payment-method">${o.paymentMethod||'UPI'}</td><td class="mono">${fmtINR(o.amount)}</td><td class="secondary-cell">${formatDateTime(o.utrSubmittedAt)}</td><td>${paymentBadge(o.paymentStatus||'pending')}</td><td>${fulfillmentBadge(o.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${fulfillmentAction(o)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();openCustomer('${encodeURIComponent((o.orderInfo?.email||o.customer).toLowerCase())}')">Customer</button></div></td></tr>`;}).join('');
+  const customMarkup=customRows.map(item=>`<tr><td class="secondary-cell">${formatDate(new Date(item.createdAt).getTime())}</td><td class="mono">CUSTOM-${item.id}</td><td><div class="customer-name">${escapeText(item.clientName)}</div><div class="customer-email">${escapeText(item.clientEmail||item.clientPhone||'No contact recorded')}</div></td><td>${customSalePlan(item)}</td><td class="payment-method">Custom record</td><td class="mono">${fmtINR(Number(item.revenueInr||0))}</td><td class="secondary-cell">—</td><td>${paymentBadge('paid')}</td><td>${fulfillmentBadge(item.fulfillmentStatus||'not_shipped')}</td><td><div class="table-action-group">${customSaleFulfillmentAction(item)} <button class="action-btn action-btn-customer" onclick="event.stopPropagation();navigate('customisation')">Customisation</button></div></td></tr>`).join('');
   body.innerHTML=orderMarkup||customMarkup?`${orderMarkup}${customMarkup}`:`<tr><td colspan="10" class="empty-state">No recorded buyer transactions or custom client sales match these filters.</td></tr>`;
   const summary=document.getElementById('transactionSummary'); if(summary){
     const paid=orders.filter(o=>o.paymentStatus==='paid'); const submitted=orders.filter(o=>o.paymentStatus==='utr_submitted'); const customRevenue=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.revenueInr)||0),0);
@@ -1813,7 +1749,7 @@ function sendBuyerConfirmation(id){
   const o=orders.find(x=>x.id===id); if(!o) return;
   const info=o.orderInfo||{}; if(!info.email){showToast('No buyer email was captured for this order','error');return;}
   paymentEmailStates[id]='sending'; renderPayments();
-  window.parent?.postMessage({type:'91dab-payment-verified',order:{orderId:o.id,buyerName:info.name||o.customer,buyerEmail:info.email,plan:o.plan,amount:Number(o.amount)||0,paymentMethod:o.paymentMethod||'UPI',utr:o.utr||'',deliverySchedule:o.planKey==='monthly'?'Delivered on the 1st of every month':o.planKey==='yearly'?(o.deliverySpan==='once'?'Delivered all at once':'Delivered on the 1st of every month'):null,quantity:Number(o.quantity||o.qty||o.pieces||1),orderDate:o.created?new Date(o.created).toISOString():null,address:info.address||null,city:info.city||null,state:info.state||null,pincode:info.pincode||null,phone:info.phone||null}},'*');
+  window.parent?.postMessage({type:'91dab-payment-verified',order:{orderId:o.id,buyerName:info.name||o.customer,buyerEmail:info.email,plan:o.plan,amount:Number(o.amount)||0,paymentMethod:o.paymentMethod||'UPI',utr:o.utr||'',deliverySchedule:o.planKey==='monthly'||o.planKey==='yearly'?`Delivery months: ${deliveryMonthsText(o)}`:null,quantity:Number(o.quantity||o.qty||o.pieces||1),orderDate:o.created?new Date(o.created).toISOString():null,address:info.address||null,city:info.city||null,state:info.state||null,pincode:info.pincode||null,phone:info.phone||null}},'*');
 }
 function updatePaymentStatus(id,newStatus){
   const o=orders.find(x=>x.id===id); if(!o) return; o.paymentStatus=newStatus; o.status=dashboardStatusFromPayment(newStatus);
@@ -1842,10 +1778,9 @@ function updateShopBadges(){
   const d=document.getElementById('deliveryTrackingBadge'); if(d){const count=orders.filter(o=>o.paymentStatus==='paid'&&o.fulfillmentStatus!=='delivered').length+quoteClientCustomizations.filter(item=>item.fulfillmentStatus!=='delivered').length;d.textContent=count;d.style.display=count?'':'none';}
 }
 function csvCell(value){ return `"${String(value??'').replace(/"/g,'""')}"`; }
-function excelTextCsvCell(value){ return csvCell(`="${String(value??'')}"`); }
-function downloadCsv(filename,headers,rows){ const csv='\uFEFF'+[headers, ...rows].map((row,rowIndex)=>row.map((value,columnIndex)=>rowIndex>0&&headers[columnIndex]==='UPI UTR / reference (full)'?excelTextCsvCell(value):csvCell(value)).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
-const ORDER_CSV_HEADERS=['Order ID','Customer name','Customer email','Phone number','Delivery address','City','State','PIN code','Plan','Quantity','Amount INR','Payment method','UPI UTR / reference (full)','UTR submitted at','Payment status','Order date'];
-function orderCsvRows(){ return orders.map(o=>{ const info=o.orderInfo||{}; return [o.id,o.customer,info.email||'',info.phone||'',info.address||'',info.city||'',info.state||'',info.pincode||'',o.plan,Number(o.qty)||1,o.amount,o.paymentMethod||'UPI',String(o.utr??''),formatDateTime(o.utrSubmittedAt),o.paymentStatus||'pending',formatDate(o.created)]; }); }
+function downloadCsv(filename,headers,rows){ const csv=[headers, ...rows].map(row=>row.map(csvCell).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
+const ORDER_CSV_HEADERS=['Order ID','Customer name','Customer email','Phone number','Delivery address','City','State','PIN code','Plan','Quantity','Delivery months','Amount INR','Payment method','UPI UTR / reference (full)','UTR submitted at','Payment status','Order date'];
+function orderCsvRows(){ return orders.map(o=>{ const info=o.orderInfo||{}; return [o.id,o.customer,info.email||'',info.phone||'',info.address||'',info.city||'',info.state||'',info.pincode||'',o.plan,Number(o.qty)||1,deliveryMonthsText(o),o.amount,o.paymentMethod||'UPI',String(o.utr??''),formatDateTime(o.utrSubmittedAt),o.paymentStatus||'pending',formatDate(o.created)]; }); }
 function exportCustomersCSV(){ downloadCsv('91dab-customers.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete customer and order details exported to CSV','success'); }
 function exportPaymentsCSV(){ downloadCsv('91dab-payments.csv',ORDER_CSV_HEADERS,orderCsvRows()); showToast('Complete payment details exported to CSV','success'); }
 document.getElementById('customerModal')?.addEventListener('click',(e)=>{if(e.target.id==='customerModal') closeCustomerModal();});
@@ -1988,18 +1923,6 @@ function subscriptionReminderEvents(key){
   return orders.filter(order=>order.planKey==='monthly'&&order.paymentStatus==='paid'&&(!order.deliveryStartMonth||deliveryPeriods(order).includes(periodKey))).map(order=>({id:`subscription-${order.id}-${key}`,title:`Monthly delivery · ${order.customer}`,time:'09:00',type:'reminder',readOnly:true}));
 }
 function calendarEventsForDay(key){ return [...(calEvents[key]||[]),...subscriptionReminderEvents(key)].sort((a,b)=>String(a.time).localeCompare(String(b.time))); }
-function calendarEventRecords(){
-  return Object.entries(calEvents).flatMap(([key,events])=>Array.isArray(events)?events.map(event=>({key,...event})):[]).sort((a,b)=>`${a.key} ${a.time}`.localeCompare(`${b.key} ${b.time}`));
-}
-function formatCalendarEventDate(key){
-  const [year,month,day]=String(key).split('-').map(Number); if(!year||!month||!day) return key;
-  return new Date(year,month-1,day).toLocaleDateString('default',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-}
-function renderStoreEvents(){
-  const target=document.getElementById('storeEventsList'); if(!target) return;
-  const events=calendarEventRecords();
-  target.innerHTML=events.length?events.map(event=>`<div class="ev-item"><span class="ev-dot ${escapeText(event.type||'other')}"></span><span class="ev-text"><b>${escapeText(event.title||'Untitled event')}</b><small>${escapeText(formatCalendarEventDate(event.key))} · ${escapeText(event.time||'09:00')}</small></span></div>`).join(''):'<div class="empty-state">No Calendar events have been saved yet.</div>';
-}
 
 function renderCalendar(){
   const y = calView.year, m = calView.month;
@@ -2066,7 +1989,6 @@ function addEvent(){
   document.getElementById('evTitle').value = '';
   renderDayEvents();
   renderCalendar();
-  renderStoreEvents();
   showToast('Scheduled: ' + title, 'success');
 }
 function deleteEvent(id){
@@ -2075,33 +1997,23 @@ function deleteEvent(id){
   persistCalendarEvents();
   renderDayEvents();
   renderCalendar();
-  renderStoreEvents();
 }
 document.getElementById('dayModal').addEventListener('click', (e)=>{ if(e.target.id==='dayModal') closeDayModal(); });
 
 /* ---------- notifications ---------- */
 function renderNotifications(){
-  const list=document.getElementById('notifList'); const bellDot=document.getElementById('bellDot'); if(!list||!bellDot) return;
-  list.innerHTML = notifications.map(n=>`
+  document.getElementById('notifList').innerHTML = notifications.map(n=>`
     <div class="dd-item">
       <div class="act-ic" style="width:30px;height:30px;">${ICONS.cart}</div>
       <div class="dd-text"><b>${n.title}</b><span>${n.text}</span></div>
       <div class="dd-time">${n.time}</div>
     </div>`).join('') || '<div class="empty-state">No notifications yet.</div>';
   const unread = notifications.filter(n=>n.unread).length;
-  bellDot.style.display = unread ? '' : 'none';
-  bellDot.textContent = unread;
+  document.getElementById('bellDot').style.display = unread ? '' : 'none';
+  document.getElementById('bellDot').textContent = unread;
 }
 function toggleNotifDd(){
-  const dropdown=document.getElementById('notifDd'); const bell=document.getElementById('notificationBellButton'); if(!dropdown||!bell) return;
-  const opening=!dropdown.classList.contains('open'); dropdown.classList.toggle('open',opening); bell.setAttribute('aria-expanded',String(opening)); if(opening){ renderNotifications(); positionNotificationDropdown(); } else { dropdown.classList.remove('phone-notification-overlay'); dropdown.style.removeProperty('--notification-top'); }
-}
-function positionNotificationDropdown(){
-  const dropdown=document.getElementById('notifDd'); const bell=document.getElementById('notificationBellButton'); if(!dropdown||!bell) return;
-  const phone=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;
-  dropdown.classList.toggle('phone-notification-overlay',Boolean(phone));
-  if(phone){ const top=Math.min(Math.round(bell.getBoundingClientRect().bottom+10),Math.max(72,window.innerHeight-180)); dropdown.style.setProperty('--notification-top',`${top}px`); }
-  else dropdown.style.removeProperty('--notification-top');
+  document.getElementById('notifDd').classList.toggle('open');
 }
 function markAllRead(){
   notifications.forEach(n=>n.unread=false);
@@ -2109,12 +2021,10 @@ function markAllRead(){
 }
 document.addEventListener('click', (e)=>{
   const dd = document.getElementById('notifDd');
-  const bell=document.getElementById('notificationBellButton');
-  if(dd&&dd.classList.contains('open') && !e.target.closest('#notifDd') && !e.target.closest('#notificationBellButton')){ dd.classList.remove('open'); bell?.setAttribute('aria-expanded','false'); }
+  if(dd.classList.contains('open') && !e.target.closest('#notifDd') && !e.target.closest('[title="Notifications"]')) dd.classList.remove('open');
   const pd = document.getElementById('profileDd');
   if(pd.classList.contains('open') && !e.target.closest('#profileDd') && !e.target.closest('.more-btn')) pd.classList.remove('open');
 });
-window.addEventListener('resize',()=>{ const dd=document.getElementById('notifDd'); if(dd?.classList.contains('open')) positionNotificationDropdown(); });
 
 /* ============================================================
    TEAM MANAGEMENT + SUPPORT
@@ -2183,23 +2093,9 @@ function submitSupportRequest(event){
 let dashboardRole=null;
 let employeeAccounts=[];
 let loginAudits=[];
-function getLatestLoginAudit(){
-  return loginAudits.reduce((latest,audit)=>{
-    const auditTime=Date.parse(audit?.signedInAt||''); const latestTime=Date.parse(latest?.signedInAt||'');
-    return Number.isFinite(auditTime)&&(!Number.isFinite(latestTime)||auditTime>latestTime)?audit:latest;
-  },null);
-}
-function renderLatestLoginAudit(){
-  const latest=getLatestLoginAudit();
-  const timeText=latest?formatDate(latest.signedInAt):'No successful dashboard sign-ins have been recorded yet.';
-  const roleText=latest?(latest.role==='admin'?'Administrator':'Employee'):'—';
-  ['dashboardLastSignIn','accessLastSignIn'].forEach(id=>{const target=document.getElementById(id); if(target) target.textContent=timeText;});
-  ['dashboardLastSignInRole','accessLastSignInRole'].forEach(id=>{const target=document.getElementById(id); if(target) target.textContent=roleText;});
-}
 function renderLoginAudits(){
   const root=document.getElementById('loginAuditList'); if(!root) return;
   root.innerHTML=loginAudits.length?loginAudits.map(audit=>`<tr><td>${escapeText(audit.email||'—')}</td><td>${audit.role==='admin'?'Administrator':'Employee'}</td><td class="secondary-cell">${formatDate(audit.signedInAt)}</td></tr>`).join(''):'<tr><td colspan="3" class="empty-state">No successful dashboard sign-ins have been recorded yet.</td></tr>';
-	  renderLatestLoginAudit();
 }
 function employeeAccountCard(account){ return `<article class="card team-card"><div class="team-card-head"><div class="avatar">${escapeText(initials(account.name))}</div><div class="team-card-meta"><div class="m-name">${escapeText(account.name)}</div><div class="team-card-email">${escapeText(account.email)}</div><div class="team-card-email">Restricted read-only dashboard access</div></div></div><div class="team-card-actions"><span class="badge paid">Authorized</span><span><button class="action-link" onclick="openEmployeeAccountDialog('reset',${Number(account.id)})">Reset password</button> · <button class="action-link" onclick="openEmployeeAccountDialog('remove',${Number(account.id)})">Remove</button></span></div></article>`; }
 function renderEmployeeAccounts(){ const root=document.getElementById('employeeAccountsList'); if(root) root.innerHTML=employeeAccounts.length?employeeAccounts.map(employeeAccountCard).join(''):'<div class="empty-state">No employee accounts have been authorized yet.</div>'; }
@@ -2223,13 +2119,74 @@ let dashboardProfile={displayName:'91DAB Administrator',email:''};
 function applyDashboardProfile(profile){
   if(!profile) return;
   dashboardProfile={displayName:profile.displayName||'91DAB Administrator',email:profile.email||''};
-	  const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
-	  const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
+  const avatar=document.getElementById('dashboardProfileAvatar'); if(avatar){ const span=avatar.querySelector('span'); if(span) span.textContent=initials(dashboardProfile.displayName)||'91'; }
+  const name=document.getElementById('dashboardProfileName'); if(name) name.textContent=dashboardProfile.displayName;
+  const email=document.getElementById('dashboardProfileEmail'); if(email) email.textContent=dashboardProfile.email||'No email configured';
   const nameInput=document.getElementById('dashboardProfileNameInput'); if(nameInput) nameInput.value=dashboardProfile.displayName;
   const emailInput=document.getElementById('dashboardProfileEmailInput'); if(emailInput) emailInput.value=dashboardProfile.email;
   const loginStatus=document.getElementById('dashboardLoginStatus'); if(loginStatus) loginStatus.textContent='Signed in with the protected administrator session. Profile email can be updated below.';
   const accessStatus=document.getElementById('accessSessionStatus'); if(accessStatus) accessStatus.textContent='Active protected administrator session. Use the dashboard password and Security settings to manage access.';
   const identity=document.getElementById('accessProfileIdentity'); if(identity) identity.textContent=`${dashboardProfile.displayName}${dashboardProfile.email?` · ${dashboardProfile.email}`:''}`;
+  applyCustomProfilePicture();
+}
+const CUSTOM_PROFILE_IMAGE_KEY = '91dab_custom_profile_image';
+function getCustomProfilePicture() {
+  try {
+    const val = localStorage.getItem(CUSTOM_PROFILE_IMAGE_KEY);
+    return val && val.startsWith('data:image/') ? val : null;
+  } catch(_) { return null; }
+}
+function applyCustomProfilePicture() {
+  const dataUrl = getCustomProfilePicture();
+  const init = initials(dashboardProfile.displayName || '91DAB Administrator') || '91';
+  const pairs = [
+    { avatarId: 'dashboardProfileAvatar', imgId: 'dashboardProfileAvatarImgSrc', spanId: 'dashboardProfileAvatarInitials' },
+    { avatarId: 'settingsProfileAvatar', imgId: 'settingsProfileAvatarImgSrc', spanId: 'settingsProfileAvatarInitials' }
+  ];
+  pairs.forEach(({ avatarId, imgId, spanId }) => {
+    const el = document.getElementById(avatarId);
+    if (!el) return;
+    const span = document.getElementById(spanId) || el.querySelector('span');
+    const img = document.getElementById(imgId) || el.querySelector('img');
+    if (dataUrl) {
+      if (span) span.style.display = 'none';
+      if (img) { img.src = dataUrl; img.style.display = 'block'; img.removeAttribute('hidden'); }
+    } else {
+      if (span) { span.style.display = 'none'; span.textContent = init; }
+      if (img) { img.src = '/manus-storage/Logo_b65c7ed5.png'; img.style.display = 'block'; img.removeAttribute('hidden'); }
+    }
+  });
+}
+function uploadCustomProfilePicture(input) {
+  const file = input?.files?.[0];
+  if (!file) return;
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 1500 * 1024) {
+    showToast('Use a PNG, JPEG, or WebP image smaller than 1.5 MB.', 'error');
+    input.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onerror = () => showToast('The selected image could not be read.', 'error');
+  reader.onload = () => {
+    const res = typeof reader.result === 'string' ? reader.result : '';
+    if (!res) { showToast('Could not process image.', 'error'); return; }
+    try {
+      localStorage.setItem(CUSTOM_PROFILE_IMAGE_KEY, res);
+      applyCustomProfilePicture();
+      showToast('Custom profile picture saved successfully!', 'success');
+    } catch(_) {
+      showToast('Storage full or blocked. Try a smaller image.', 'error');
+    }
+    input.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+function removeCustomProfilePicture() {
+  try {
+    localStorage.removeItem(CUSTOM_PROFILE_IMAGE_KEY);
+    applyCustomProfilePicture();
+    showToast('Custom profile picture removed.', 'info');
+  } catch(_) {}
 }
 function saveDashboardProfile(){
   const displayName=document.getElementById('dashboardProfileNameInput')?.value.trim();
@@ -2276,9 +2233,8 @@ window.addEventListener('message',(event)=>{
     if(data.success){ employeeAccounts=Array.isArray(data.accounts)?data.accounts:employeeAccounts; renderEmployeeAccounts(); closeTeamModal(); showToast(data.action==='create'?'Employee access authorized':data.action==='reset'?'Employee password reset':'Employee access removed','success'); }
     else showToast(data.message||'The employee access change could not be completed.','error');
   }
-	if(data.type==='91dab-dashboard-role'){ applyDashboardRole(data.role); }
-	if(data.type==='91dab-native-app-audio'){ enableNativeAppNotificationAudio(); }
-	if(data.type==='91dab-dashboard-profile'){ applyDashboardProfile(data.profile); }
+  if(data.type==='91dab-dashboard-role'){ applyDashboardRole(data.role); }
+  if(data.type==='91dab-dashboard-profile'){ applyDashboardProfile(data.profile); }
   if(data.type==='91dab-dashboard-profile-result'){
     if(data.success){ applyDashboardProfile(data.profile); showToast('Profile saved','success'); }
     else showToast(data.message||'Profile could not be saved.','error');
@@ -2374,7 +2330,6 @@ function navigate(screen){
   if(screen==='inventory-products') renderInventoryProducts();
   if(screen==='customisation') renderCustomisation();
   if(screen==='calendar') requestAnimationFrame(renderCalendar);
-  if(screen==='events') renderStoreEvents();
   document.getElementById('app').classList.remove('mobile-open');
 }
 document.querySelectorAll('.nav-item[data-screen]').forEach(btn=>{
@@ -2388,16 +2343,10 @@ document.getElementById('analyticsToggle').addEventListener('click', function(){
   document.getElementById('analyticsSub').classList.toggle('collapsed-menu');
 });
 document.getElementById('collapseBtn').addEventListener('click', function(){
-  const app=document.getElementById('app');
-  if(window.matchMedia&&window.matchMedia('(max-width:880px)').matches){ app.classList.remove('mobile-open'); return; }
-  const collapsed=app.classList.toggle('collapsed');
+  const collapsed=document.getElementById('app').classList.toggle('collapsed');
   this.title=collapsed?'Expand sidebar':'Collapse sidebar';
   this.setAttribute('aria-label',collapsed?'Expand sidebar':'Collapse sidebar');
   this.setAttribute('aria-expanded',String(!collapsed));
-});
-document.getElementById('sidebarRestoreBtn').addEventListener('click', function(){
-  const app=document.getElementById('app'); app.classList.remove('collapsed');
-  const collapseBtn=document.getElementById('collapseBtn'); if(collapseBtn){ collapseBtn.title='Collapse sidebar'; collapseBtn.setAttribute('aria-label','Collapse sidebar'); collapseBtn.setAttribute('aria-expanded','true'); collapseBtn.focus(); }
 });
 
 /* ============================================================
@@ -2454,7 +2403,7 @@ function refreshHomeStats(){
   const customers=new Set([...paidCustomerKeys,...customCustomerKeys]).size;
   const commercialEntries=orders.length+quoteClientCustomizations.length;
   const confirmedSales=paid.length+quoteClientCustomizations.length;
-  const revenue=confirmedRevenueTotal();
+  const revenue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0)+customRevenue;
   const revenueEl=document.getElementById('statRevenue'); if(revenueEl) revenueEl.textContent=fmtINR(revenue);
   const usersEl=document.getElementById('statUsers'); if(usersEl) usersEl.textContent=customers.toLocaleString('en-IN');
   const customUnitsEl=document.getElementById('statCustomUnits'); if(customUnitsEl) customUnitsEl.textContent=customUnits.toLocaleString('en-IN');

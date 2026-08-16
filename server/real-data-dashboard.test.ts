@@ -174,12 +174,9 @@ describe("real-data-only dashboard integration", () => {
     expect(landingHtml).toContain('href="/shop" target="_top"');
   });
 
-	  it("keeps the dashboard sidebar recoverable and routes shop branding and story links to the landing page", () => {
-	    expect(dashboardHtml).toContain('id="collapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar"');
-	    expect(dashboardHtml).toContain('id="sidebarRestoreBtn"');
-	    expect(dashboardHtml).toContain('.app.collapsed .sidebar{width:0;border-right-width:0;overflow:hidden;pointer-events:none;}');
-	    expect(dashboardHtml).toContain("document.getElementById('sidebarRestoreBtn').addEventListener('click'");
-	    expect(dashboardHtml).toContain("this.title=collapsed?'Expand sidebar':'Collapse sidebar'");
+  it("keeps the dashboard sidebar recoverable and routes shop branding and story links to the landing page", () => {
+    expect(dashboardHtml).toContain('id="collapseBtn" title="Collapse sidebar" aria-label="Collapse sidebar"');
+    expect(dashboardHtml).toContain("this.title=collapsed?'Expand sidebar':'Collapse sidebar'");
     expect(dashboardHtml).toContain('.app.mobile-open .sidebar{transform:translateX(0);}');
     expect(dashboardHtml).toContain('.sidebar{width:min(82vw,300px);}');
     expect(shopHtml).toContain('class="brand" href="/" target="_top"');

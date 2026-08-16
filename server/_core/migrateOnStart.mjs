@@ -37,8 +37,6 @@ const ADDITIVE_TABLES = {
     \`clientName\` varchar(160) NOT NULL,
     \`clientEmail\` varchar(320),
     \`clientPhone\` varchar(64),
-    \`deliveryAddress\` varchar(1000),
-    \`paymentMode\` varchar(32) NOT NULL DEFAULT 'other',
     \`unitsPurchased\` int NOT NULL,
     \`revenueInr\` int NOT NULL,
     \`notes\` varchar(1000),
@@ -67,9 +65,6 @@ const ADDITIVE_COLUMNS = {
   "merchantQuoteClientCustomizations.fulfillmentStatus": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `fulfillmentStatus` varchar(32) NOT NULL DEFAULT 'not_shipped'",
   "merchantQuoteClientCustomizations.shippedAt": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `shippedAt` timestamp",
   "merchantQuoteClientCustomizations.deliveredAt": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `deliveredAt` timestamp",
-  "merchantQuoteClientCustomizations.deliveryAddress": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `deliveryAddress` varchar(1000)",
-  "merchantQuoteClientCustomizations.paymentMode": "ALTER TABLE `merchantQuoteClientCustomizations` ADD COLUMN `paymentMode` varchar(32) NOT NULL DEFAULT 'other'",
-  "merchantDashboardProfiles.profileImageUrl": "ALTER TABLE `merchantDashboardProfiles` ADD COLUMN `profileImageUrl` varchar(1024)",
 };
 
 const REQUIRED_TABLES = [...BASE_TABLES, ...Object.keys(ADDITIVE_TABLES)];
@@ -93,8 +88,7 @@ async function getMissingSchema() {
     const missingColumns = [];
     const requiredColumns = {
       merchantOrders: ["deliveryStartMonth", "utrSubmittedAt"],
-      merchantDashboardProfiles: ["profileImageUrl"],
-      merchantQuoteClientCustomizations: ["fulfillmentStatus", "shippedAt", "deliveredAt", "deliveryAddress", "paymentMode"],
+      merchantQuoteClientCustomizations: ["fulfillmentStatus", "shippedAt", "deliveredAt"],
     };
     for (const [table, columnsRequired] of Object.entries(requiredColumns)) {
       if (!available.has(table)) continue;

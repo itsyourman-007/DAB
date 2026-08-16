@@ -958,10 +958,14 @@ function upsertShopOrder(record){
     if(!el) return;
     if(currentPlanKey === 'monthly' || currentPlanKey === 'yearly'){
       const months=selectableStartMonths();
+      const qty = productQty;
+      const isMonthlyPlan = currentPlanKey === 'monthly';
+      const dropdownsHtml = `<select id="deliveryStartMonthSelect" onchange="onDeliveryStartMonthChange()">${months.map(period=>`<option value="${period}" ${deliveryStartMonth===period?'selected':''}>${monthLabel(period)}</option>`).join('')}</select>`;
+
       el.innerHTML = `
         <div class="delivery-block">
-          <span class="d-label">First delivery month</span>
-          <select id="deliveryStartMonthSelect" onchange="onDeliveryStartMonthChange()">${months.map(period=>`<option value="${period}" ${deliveryStartMonth===period?'selected':''}>${monthLabel(period)}</option>`).join('')}</select>
+          <span class="d-label">${isMonthlyPlan ? `Your ${qty}-month delivery starts from` : 'First delivery month'}</span>
+          ${dropdownsHtml}
           ${currentPlanKey === 'yearly' ? `<span class="d-label" style="margin-top:.75rem;display:block;">Yearly delivery preference</span><select id="deliverySpanSelect" onchange="onDeliverySpanChange()"><option value="monthly" ${deliverySpan === 'monthly' ? 'selected' : ''}>Across 12 monthly deliveries</option><option value="once" ${deliverySpan === 'once' ? 'selected' : ''}>Together in one delivery</option></select>` : ''}
           <div class="delivery-note" id="deliverySpanNote"></div>
           <div id="deliveryYearPreview" style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem;"></div>
@@ -989,10 +993,15 @@ function upsertShopOrder(record){
     const preview = document.getElementById('deliveryYearPreview');
     if(!note) return;
     const isTogether=currentPlanKey==='yearly'&&deliverySpan==='once';
-    note.textContent = isTogether
-      ? `Your full yearly order ships together in ${monthLabel(deliveryStartMonth)}.`
-      : `Your 12-month delivery schedule starts in ${monthLabel(deliveryStartMonth)}.`;
-    if(preview) preview.innerHTML = subscriptionMonths().map((period,index)=>`<span style="font-size:.7rem;padding:.24rem .42rem;border-radius:999px;background:${isTogether&&index===0?'var(--ink)':'var(--cream)'};color:${isTogether&&index===0?'#fff':'var(--ink)'};border:1px solid var(--line);">${monthLabel(period)}${isTogether&&index===0?' · ships together':''}</span>`).join('');
+    if(currentPlanKey==='monthly'){
+      note.textContent = `Your ${productQty}-month delivery starts from ${monthLabel(deliveryStartMonth)}.`;
+    } else {
+      note.textContent = isTogether
+        ? `Your full yearly order ships together in ${monthLabel(deliveryStartMonth)}.`
+        : `Your 12-month delivery schedule starts in ${monthLabel(deliveryStartMonth)}.`;
+    }
+    const previewMonths = currentPlanKey==='monthly' ? Array.from({length:productQty},(_,index)=>nextMonthKey(deliveryStartMonth,index)) : subscriptionMonths();
+    if(preview) preview.innerHTML = previewMonths.map((period,index)=>`<span style="font-size:.7rem;padding:.24rem .42rem;border-radius:999px;background:${isTogether&&index===0?'var(--ink)':'var(--cream)'};color:${isTogether&&index===0?'#fff':'var(--ink)'};border:1px solid var(--line);">${monthLabel(period)}${isTogether&&index===0?' · ships together':''}</span>`).join('');
   }
 
   function renderProductScreen(){
@@ -1070,7 +1079,7 @@ function upsertShopOrder(record){
 
   function changeProductQty(delta){
     productQty = Math.max(1, Math.min(50, productQty + delta));
-    document.getElementById('productQtyLabel').textContent = productQty;
+    renderProductScreen();
   }
 
   function updateCartBadge(){
@@ -1085,7 +1094,6 @@ function upsertShopOrder(record){
   }
 
   function addToCart(){
-    // Switching plans replaces the cart rather than mixing plans/pricing together.
     if(cart.qty > 0 && cart.planKey !== currentPlanKey){
       cart.qty = 0;
     }
@@ -1093,6 +1101,11 @@ function upsertShopOrder(record){
     cart.qty += productQty;
     cart.deliverySpan = currentPlanKey === 'introductory' ? null : deliverySpan;
     cart.deliveryStartMonth = currentPlanKey === 'introductory' ? null : deliveryStartMonth;
+    if(currentPlanKey === 'monthly' && productQty > 1){
+      cart.startMonths = Array.isArray(cart.startMonths) ? [...cart.startMonths] : Array.from({length: productQty}, () => deliveryStartMonth);
+    } else {
+      cart.startMonths = null;
+    }
     updateCartBadge();
     showToast('Added ' + productQty + ' ' + (productQty === 1 ? currentPlan().unitSingular : currentPlan().unitLabel.toLowerCase()) + ' to cart');
   }
@@ -1102,6 +1115,11 @@ function upsertShopOrder(record){
     cart.qty = productQty;
     cart.deliverySpan = currentPlanKey === 'introductory' ? null : deliverySpan;
     cart.deliveryStartMonth = currentPlanKey === 'introductory' ? null : deliveryStartMonth;
+    if(currentPlanKey === 'monthly' && productQty > 1){
+      cart.startMonths = Array.isArray(cart.startMonths) ? [...cart.startMonths] : Array.from({length: productQty}, () => deliveryStartMonth);
+    } else {
+      cart.startMonths = null;
+    }
     updateCartBadge();
     showScreen('checkout');
   }
@@ -1216,6 +1234,7 @@ function upsertShopOrder(record){
           total: cartTotal(),
           deliverySpan: cart.deliverySpan,
           deliveryStartMonth: cart.deliveryStartMonth || null,
+          startMonths: cart.startMonths || null,
           orderInfo
         })
       });
@@ -1256,12 +1275,12 @@ function upsertShopOrder(record){
       <div class="qr-wrap"><img class="qr-img" src="${data.qrDataUrl}" alt="UPI payment QR code"></div>
       <div class="countdown" id="countdownLabel">Expires in 5:00</div>
       <div class="status-pill" id="statusPill">Waiting for payment…</div>
-      <label class="utr-label" for="utrInput">Mandatorily enter the payment UTR/reference ID after the payment <span class="required-mark" aria-hidden="true">*</span></label>
+      <label class="utr-label" for="utrInput">UPI UTR / reference ID <span class="required-mark" aria-hidden="true">*</span></label>
       <div class="utr-row">
-        <input type="text" id="utrInput" inputmode="numeric" pattern="[0-9]{6,128}" maxlength="128" autocomplete="off" aria-describedby="utrHelp" aria-required="true" required>
+        <input type="text" id="utrInput" inputmode="numeric" pattern="[0-9]{6,128}" maxlength="128" autocomplete="off" aria-describedby="utrHelp" aria-required="true" placeholder="Enter numbers only" required>
         <button onclick="submitUtr()">Submit</button>
       </div>
-      <div class="utr-help" id="utrHelp" aria-live="polite"></div>
+      <div class="utr-help" id="utrHelp"><span class="required-mark" aria-hidden="true">*</span> Required — enter the 6–128 digit reference from your UPI app's payment receipt.</div>
       <div class="lock-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="1"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
         Scan with any UPI app · pays directly into 91DAB's account
@@ -1273,7 +1292,7 @@ function upsertShopOrder(record){
       if(this.value!==digitsOnly) this.value=digitsOnly;
       utrInput.classList.remove('field-error');
       const help = document.getElementById('utrHelp');
-      if(help){ help.textContent = ''; help.classList.remove('field-error'); }
+      if(help){ help.innerHTML = '<span class="required-mark" aria-hidden="true">*</span> Required — enter the 6–128 digit reference from your UPI app\'s payment receipt.'; help.classList.remove('field-error'); }
     });
   }
 
@@ -1328,12 +1347,12 @@ function upsertShopOrder(record){
     const val = input ? input.value.trim() : '';
     if(!/^\d{6,128}$/.test(val)){
       if(input) input.classList.add('field-error');
-      if(help){ help.textContent = !val ? 'Please enter the payment UTR/reference ID.' : 'Enter only 6–128 digits from your UTR/reference ID.'; help.classList.add('field-error'); }
+      if(help){ help.textContent = !val ? 'Please enter your required UPI reference number.' : 'Enter only 6–128 digits from your UPI reference number.'; help.classList.add('field-error'); }
       if(input) input.focus();
       return;
     }
     if(input) input.classList.remove('field-error');
-    if(help){ help.textContent = ''; help.classList.remove('field-error'); }
+    if(help){ help.innerHTML = '<span class="required-mark" aria-hidden="true">*</span> Required — enter the 6–128 digit reference from your UPI app\'s payment receipt.'; help.classList.remove('field-error'); }
     if(!currentOrder) return;
     try{
       const res = await fetch(`/api/orders/${currentOrder.orderId}/utr`, {

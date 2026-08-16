@@ -18,8 +18,6 @@ describe("Render deployment configuration", () => {
     expect(bootstrap).toContain("Applying additive schema updates");
     expect(bootstrap).toContain("merchantInventoryShipmentAllocations");
     expect(bootstrap).toContain("merchantQuoteClientCustomizations");
-    expect(bootstrap).toContain("merchantQuoteClientCustomizations.deliveryAddress");
-    expect(bootstrap).toContain("merchantQuoteClientCustomizations.paymentMode");
     expect(bootstrap).toContain("merchantClinicQuoteLeads");
     expect(bootstrap).toContain("merchantOrders.deliveryStartMonth");
     expect(bootstrap).toContain("Database schema is incomplete");

@@ -19,9 +19,6 @@ describe("protected merchant dashboard enhancements", () => {
     });
     expect(dashboardHtml).toContain("function orderCsvRows()");
     expect(dashboardHtml).toContain("String(o.utr??'')");
-    expect(dashboardHtml).toContain("function excelTextCsvCell(value)");
-    expect(dashboardHtml).toContain("'UPI UTR / reference (full)'?excelTextCsvCell(value):csvCell(value)");
-    expect(dashboardHtml).toContain("'\\uFEFF'+[headers, ...rows]");
     expect(dashboardHtml).toContain("downloadCsv('91dab-orders.csv',ORDER_CSV_HEADERS,orderCsvRows())");
   });
 
@@ -38,10 +35,9 @@ describe("protected merchant dashboard enhancements", () => {
     expect(checkoutSource).toContain("regex(/^\\d{6,128}$/)");
     expect(checkoutSource).toContain('utrSubmittedAt: updated.utrSubmittedAt');
     expect(dbSource).toContain('utrSubmittedAt: new Date()');
-    expect(shopHtml).toContain('Mandatorily enter the payment UTR/reference ID after the payment <span class="required-mark" aria-hidden="true">*</span>');
+    expect(shopHtml).toContain('UPI UTR / reference ID <span class="required-mark" aria-hidden="true">*</span>');
     expect(shopHtml).toContain('inputmode="numeric"');
     expect(shopHtml).toContain('pattern="[0-9]{6,128}"');
-    expect(shopHtml).not.toContain('placeholder="Enter numbers only"');
     expect(shopHtml).toContain("const digitsOnly=this.value.replace(/\\D/g,'');");
     expect(shopHtml).toContain("if(!/^\\d{6,128}$/.test(val))");
     expect(dashboardHtml).toContain("utrSubmittedAt: raw.utrSubmittedAt || null");
@@ -64,24 +60,6 @@ describe("protected merchant dashboard enhancements", () => {
     expect(adminSource).toContain('orders.isError ? "offline" : orders.data !== undefined ? "online" : "connecting"');
   });
 
-  it("provides a responsive Connect app QR and direct signed APK download with accurate update guidance", () => {
-    expect(dashboardHtml).toContain('class="card app-download-panel"');
-    expect(dashboardHtml).toContain('src="data:image/svg+xml;base64,');
-    expect(dashboardHtml).toContain('https://github.com/itsyourman-007/DAB/releases/download/91dab-dashboard-shortcut-v1.0.0/91dab-dashboard-shortcut.apk');
-    expect(dashboardHtml).toContain('Download dashboard APK');
-    expect(dashboardHtml).toContain('changes to the live website and dashboard appear automatically when the app opens after deployment');
-    expect(dashboardHtml).toContain('@media(max-width:620px){.app-download-panel{grid-template-columns:1fr;text-align:center;');
-  });
-
-  it("shows saved Calendar events in the Events view without inventing event records", () => {
-    expect(dashboardHtml).toContain('id="storeEventsList"');
-    expect(dashboardHtml).toContain('function calendarEventRecords()');
-    expect(dashboardHtml).toContain('Object.entries(calEvents)');
-    expect(dashboardHtml).toContain('function renderStoreEvents()');
-    expect(dashboardHtml).toContain("if(screen==='events') renderStoreEvents();");
-    expect(dashboardHtml).toContain('No Calendar events have been saved yet.');
-  });
-
   it("keeps persistent team and member creation, editing, and removal password-confirmed with selectable teams and salary fields", () => {
     expect(routerSource).toContain("updateTeamMember: publicProcedure");
     expect(routerSource).toContain("createTeam: publicProcedure");
@@ -100,20 +78,15 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("removeTeamPassword");
   });
 
-	  it("replaces the hardcoded profile with a protected editable administrator profile", () => {
+  it("replaces the hardcoded profile with a protected editable administrator profile", () => {
     expect(dashboardHtml).not.toContain("sarah@91dab.com");
     expect(dashboardHtml).not.toContain("Sarah Johnson");
     expect(dashboardHtml).toContain("saveDashboardProfile()");
     expect(routerSource).toContain("updateProfile: publicProcedure");
     expect(adminSource).toContain("91dab-dashboard-profile-save");
     expect(dashboardHtml).toContain('data-screen="access"');
-	    expect(dashboardHtml).toContain('id="screen-access"');
-	    expect(dashboardHtml).toContain('id="dashboardProfileImageInput"');
-	    expect(dashboardHtml).toContain("function uploadDashboardProfileImage(input)");
-	    expect(dashboardHtml).toContain("91dab-dashboard-profile-image-upload");
-	    expect(adminSource).toContain('event.data.type === "91dab-dashboard-profile-image-upload"');
-	    expect(routerSource).toContain('profileImageUrl: null');
-	  });
+    expect(dashboardHtml).toContain('id="screen-access"');
+  });
 
   it("keeps Security Settings behind a password re-confirmation gate and leaves the administrator email blank at /admin", () => {
     expect(routerSource).toContain("verifySecuritySettingsPassword: publicProcedure");
@@ -135,18 +108,16 @@ describe("protected merchant dashboard enhancements", () => {
 
   it("uses Monday-to-Sunday and January-to-December ordering with sales amounts shown only on a black chart tooltip", () => {
     expect(dashboardHtml).toContain("const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']");
-    expect(dashboardHtml).toContain("WEEKDAY_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
+    expect(dashboardHtml).toContain("date.setDate(now.getDate()-mondayOffset+index)");
     expect(dashboardHtml).toContain("const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']");
-    expect(dashboardHtml).toContain("MONTH_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
-    expect(dashboardHtml).toContain("String((date.getDay()+6)%7)");
-    expect(dashboardHtml).toContain("String(date.getMonth())");
+    expect(dashboardHtml).toContain("new Date(now.getFullYear(),index,1)");
     expect(dashboardHtml).toContain("const first = (new Date(y,m,1).getDay()+6)%7");
     expect(dashboardHtml).toContain("['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach");
     expect(dashboardHtml).toContain("background:#111318;color:#fff");
     expect(dashboardHtml).toContain(".bar-col:hover .bar-tip, .bar-col:focus-within .bar-tip{opacity:1;}");
     expect(dashboardHtml).not.toContain(".bar-col.hi .bar-tip{opacity:1;}");
-    expect(dashboardHtml).toContain("Confirmed revenue by weekday");
-    expect(dashboardHtml).toContain("Confirmed revenue by month");
+    expect(dashboardHtml).toContain("Sales performance from Monday to Sunday");
+    expect(dashboardHtml).toContain("Sales performance from January to December");
   });
 
   it("persists server-created UPI orders and marks only submitted trusted records paid through protected admin operations", () => {
@@ -237,7 +208,7 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("Active restricted employee session");
   });
 
-	  it("tracks inventory from administrator-entered quantities and shipment-driven subscription allocations", () => {
+  it("tracks inventory from administrator-entered quantities and shipment-driven subscription allocations", () => {
     expect(schemaSource).toContain('mysqlTable("merchantInventory"');
     expect(schemaSource).toContain('mysqlTable("merchantInventoryShipmentAllocations"');
     expect(schemaSource).toContain('mysqlTable("subscriptionDeliveryRecords"');
@@ -253,15 +224,8 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("Inventory &amp; Products");
     expect(dashboardHtml).toContain("id=\"screen-inventory-products\"");
     expect(dashboardHtml).toContain("function renderInventoryProducts()");
-	    expect(dashboardHtml).toContain("91dab-subscription-delivery-save");
-	    expect(dashboardHtml).toContain('class="inventory-shipment-region"');
-	    expect(dashboardHtml).toContain('Fulfillment queue');
-	    expect(dashboardHtml).toContain('Record scheduled allocations below');
-	    expect(dashboardHtml).toContain('class="card table-card inventory-shipment-card"');
-	    expect(dashboardHtml).toContain('class="card table-card inventory-movement-card"');
-	    expect(dashboardHtml).toContain('.inventory-shipment-region{margin-top:1.45rem;padding-top:1.15rem;border-top:1px solid var(--border);}');
-	    expect(dashboardHtml).toContain('@media(max-width:620px){.inventory-shipment-region{margin-top:1.1rem;padding-top:1rem;}');
-	  });
+    expect(dashboardHtml).toContain("91dab-subscription-delivery-save");
+  });
 
   it("records buyer-selected monthly and yearly delivery schedules and displays their full twelve-month horizon", () => {
     expect(schemaSource).toContain('deliveryStartMonth: varchar("deliveryStartMonth", { length: 7 })');
@@ -276,6 +240,21 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("const selectedStart=/^\\d{4}-(0[1-9]|1[0-2])$/.test(order.deliveryStartMonth||'')");
     expect(dbSource).toContain("function isScheduledSubscriptionPeriod");
     expect(dbSource).toContain("outside the buyer-selected 12-month delivery schedule");
+  });
+
+  it("shows selected recurring delivery months as compact Jan, Feb, Mar labels throughout dashboard records", () => {
+    expect(dashboardHtml).toContain("function shortMonthLabel(periodKey)");
+    expect(dashboardHtml).toContain("function deliveryMonthsText(order)");
+    expect(dashboardHtml).toContain("Months: ${months}");
+    expect(dashboardHtml).toContain("Delivery months: ${deliveryMonthsText(o)}");
+    expect(dashboardHtml).toContain("'Delivery months'");
+  });
+
+  it("updates the monthly delivery duration and selected-month preview as soon as quantity changes", () => {
+    expect(shopHtml).toContain("Your ${qty}-month delivery starts from");
+    expect(shopHtml).toContain("Your ${productQty}-month delivery starts from ${monthLabel(deliveryStartMonth)}.");
+    expect(shopHtml).toContain("const previewMonths = currentPlanKey==='monthly'");
+    expect(shopHtml).toContain("renderProductScreen();");
   });
 
   it("provides a durable administrator-only Customisation workflow for quote clients and includes recorded units and revenue in Home metrics", () => {
@@ -298,31 +277,6 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("customRevenue=quoteClientCustomizations.reduce");
     expect(dashboardHtml).toContain("customUnits=quoteClientCustomizations.reduce");
     expect(dashboardHtml).toContain("Custom client sale saved and Home metrics updated");
-    expect(schemaSource).toContain('deliveryAddress: varchar("deliveryAddress", { length: 1000 })');
-    expect(schemaSource).toContain('paymentMode: varchar("paymentMode", { length: 32 })');
-    expect(routerSource).toContain('deliveryAddress: z.string().trim().min(5).max(1000)');
-    expect(routerSource).toContain('paymentMode: z.enum(["upi", "bank_transfer", "cash", "card", "other"])');
-    expect(routerSource).toContain('revenueInr: z.number().finite().int().min(0).max(1_000_000_000)');
-    expect(dashboardHtml).toContain('id="customisationDeliveryAddress"');
-    expect(dashboardHtml).toContain('id="customisationPaymentMode"');
-    expect(dashboardHtml).toContain('function customisationWholeInr(fieldId)');
-    expect(dashboardHtml).toContain("function customPaymentModeLabel(mode)");
-  });
-
-  it("uses one authoritative confirmed-revenue dataset for purple weekly and monthly sales bars and the headline revenue metric", () => {
-    expect(dashboardHtml).toContain("function confirmedRevenueRecords()");
-    expect(dashboardHtml).toContain("const confirmedCustomSales=quoteClientCustomizations.map");
-    expect(dashboardHtml).toContain("function confirmedRevenueTotal()");
-    expect(dashboardHtml).toContain("const confirmedSales=confirmedRevenueRecords()");
-    expect(dashboardHtml).toContain("const periodRevenue=data.reduce");
-    expect(dashboardHtml).toContain("const totalRevenue=confirmedRevenueTotal()");
-    expect(dashboardHtml).toContain("WEEKDAY_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
-    expect(dashboardHtml).toContain("MONTH_LABELS.map((label,index)=>({key:String(index),d:label,v:0}))");
-    expect(dashboardHtml).toContain("String((date.getDay()+6)%7)");
-    expect(dashboardHtml).toContain("String(date.getMonth())");
-    expect(dashboardHtml).toContain("const revenue=confirmedRevenueTotal()");
-    expect(dashboardHtml).toContain("background:linear-gradient(180deg,#8b5cf6,#6d28d9)");
-    expect(dashboardHtml).toContain("function fmtINR(n){ return '\\u20B9'");
   });
 
   it("tracks paid-order fulfillment through the server and exposes shipment controls to authorized dashboard sessions", () => {
@@ -361,7 +315,7 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("function customSaleFulfillmentAction(item)");
     expect(dashboardHtml).toContain("function customSaleMatches(item,search)");
     expect(dashboardHtml).toContain("CUSTOM-${item.id}");
-    expect(dashboardHtml).toContain("customPaymentModeLabel(item.paymentMode)");
+    expect(dashboardHtml).toContain("Custom record");
     expect(dashboardHtml).toContain("customSalePlan(item)");
     expect(dashboardHtml).toContain("quoteClientCustomizations.filter(item=>item.fulfillmentStatus!=='delivered')");
     expect(dashboardHtml).toContain("if(data.type==='91dab-quote-client-customizations'){ quoteClientCustomizations=Array.isArray(data.customizations)?data.customizations:[]; syncDashboardViews(); }");
@@ -373,13 +327,9 @@ describe("protected merchant dashboard enhancements", () => {
     expect(routerSource).toContain("await db.recordMerchantDashboardLogin({ email, role })");
     expect(routerSource).toContain("loginAudits: publicProcedure");
     expect(routerSource).toContain("listMerchantDashboardLoginAudits");
-	    expect(dashboardHtml).toContain("Successful login activity");
-	    expect(dashboardHtml).toContain("renderLoginAudits()");
-	    expect(dashboardHtml).toContain('id="dashboardLastSignIn"');
-	    expect(dashboardHtml).toContain('id="accessLastSignIn"');
-	    expect(dashboardHtml).toContain("function getLatestLoginAudit()");
-	    expect(dashboardHtml).toContain("function renderLatestLoginAudit()");
-	    expect(dashboardHtml).toContain("91dab-login-audits");
+    expect(dashboardHtml).toContain("Successful login activity");
+    expect(dashboardHtml).toContain("renderLoginAudits()");
+    expect(dashboardHtml).toContain("91dab-login-audits");
     expect(adminSource).toContain('type: "91dab-login-audits"');
   });
 

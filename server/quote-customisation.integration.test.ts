@@ -53,19 +53,17 @@ describeWithDatabase("durable quote-client customisation records", () => {
       clientName: "Quote Client Test",
       clientEmail: email,
       clientPhone: "9000000000",
-      deliveryAddress: "12 Clinic Lane, Bengaluru, Karnataka 560001",
-      paymentMode: "upi",
       unitsPurchased: 5000,
       revenueInr: 125000,
       notes: "Confirmed custom clinic order.",
     });
-    expect(saved).toMatchObject({ clientEmail: email, deliveryAddress: "12 Clinic Lane, Bengaluru, Karnataka 560001", paymentMode: "upi", unitsPurchased: 5000, revenueInr: 125000 });
+    expect(saved).toMatchObject({ clientEmail: email, unitsPurchased: 5000, revenueInr: 125000 });
 
     const customisations = await listMerchantQuoteClientCustomizations();
     expect(customisations.some((item) => item.id === saved.id && item.clientEmail === email)).toBe(true);
 
-    const edited = await updateMerchantQuoteClientCustomization({ ...saved, deliveryAddress: "45 Updated Clinic Road, Bengaluru, Karnataka 560002", paymentMode: "bank_transfer", clientName: "Edited Quote Client", unitsPurchased: 4500, revenueInr: 130000 });
-    expect(edited).toMatchObject({ id: saved.id, clientName: "Edited Quote Client", deliveryAddress: "45 Updated Clinic Road, Bengaluru, Karnataka 560002", paymentMode: "bank_transfer", unitsPurchased: 4500, revenueInr: 130000 });
+    const edited = await updateMerchantQuoteClientCustomization({ ...saved, clientName: "Edited Quote Client", unitsPurchased: 4500, revenueInr: 130000 });
+    expect(edited).toMatchObject({ id: saved.id, clientName: "Edited Quote Client", unitsPurchased: 4500, revenueInr: 130000 });
 
     await deleteMerchantQuoteClientCustomization(saved.id);
     expect((await listMerchantQuoteClientCustomizations()).some((item) => item.id === saved.id)).toBe(false);
@@ -73,7 +71,7 @@ describeWithDatabase("durable quote-client customisation records", () => {
 
   it("deducts configured stock when a custom sale ships and locks the sale after shipment", async () => {
     await setMerchantInventoryUnits(1000);
-    const saved = await createMerchantQuoteClientCustomization({ clientName: "Shipment Quote Client", clientEmail: email, clientPhone: null, deliveryAddress: "1 Shipment Street, Bengaluru, Karnataka 560003", paymentMode: "cash", unitsPurchased: 125, revenueInr: 5000, notes: null });
+    const saved = await createMerchantQuoteClientCustomization({ clientName: "Shipment Quote Client", clientEmail: email, clientPhone: null, unitsPurchased: 125, revenueInr: 5000, notes: null });
     shippedCustomizationId = saved.id;
 
     const shipped = await updateMerchantQuoteClientCustomizationFulfillment({ id: saved.id, status: "shipped" });
@@ -82,7 +80,7 @@ describeWithDatabase("durable quote-client customisation records", () => {
 
     const delivered = await updateMerchantQuoteClientCustomizationFulfillment({ id: saved.id, status: "delivered" });
     expect(delivered.fulfillmentStatus).toBe("delivered");
-    await expect(updateMerchantQuoteClientCustomization({ ...saved, deliveryAddress: "1 Shipment Street, Bengaluru, Karnataka 560003", paymentMode: "cash", clientName: "Changed after shipment" })).rejects.toThrow("cannot be edited");
+    await expect(updateMerchantQuoteClientCustomization({ ...saved, clientName: "Changed after shipment" })).rejects.toThrow("cannot be edited");
     await expect(deleteMerchantQuoteClientCustomization(saved.id)).rejects.toThrow("cannot be deleted");
   });
 });

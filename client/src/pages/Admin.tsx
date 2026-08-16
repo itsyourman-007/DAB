@@ -7,10 +7,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import dashboardHtml from "../embedded/dashboard.html?raw";
 
-const dashboardLogoUrl = "/manus-storage/91-danta-dashboard-logo_d2a87fee.png";
-
 export default function Admin() {
-  const isAndroidDashboardShortcut = /91DABDashboard\/\d/i.test(navigator.userAgent);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -479,24 +476,24 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <header className="flex min-h-16 items-center justify-between gap-3 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-4 sm:px-6">
-	        <div className="flex items-center gap-3">
-	          <img src={dashboardLogoUrl} alt="91 DANTA" className="h-9 w-9 rounded-xl border border-slate-200 bg-white object-cover p-0.5 shadow-sm" />
+      <header className="flex min-h-16 items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:px-6">
+        <div className="flex items-center gap-3">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-violet-600 text-sm font-black text-white shadow-sm">91</span>
           <span>
             <span className="block text-sm font-semibold tracking-tight text-slate-950">91DAB</span>
-	            <img src={dashboardLogoUrl} alt="91 DANTA" className="mt-0.5 h-5 w-5 rounded-md object-cover shadow-sm" />
+            <span className="block text-xs text-slate-500">Private merchant console</span>
           </span>
         </div>
         <div className="flex items-center gap-2">
           {status.data?.role === "admin" ? (
-            <Button variant="outline" size="sm" className="px-2 sm:px-3" aria-label="Security settings" onClick={openSecurityGate}>
-              <ShieldCheck className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Security settings</span>
+            <Button variant="outline" size="sm" onClick={openSecurityGate}>
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Security settings
             </Button>
           ) : null}
-          <Button variant="outline" size="sm" className="px-2 sm:px-3" aria-label="Sign out" onClick={() => logout.mutate()} disabled={logout.isPending}>
-            <LogOut className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Sign out</span>
+          <Button variant="outline" size="sm" onClick={() => logout.mutate()} disabled={logout.isPending}>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
           </Button>
         </div>
       </header>
@@ -508,7 +505,6 @@ export default function Admin() {
             try {
               const embeddedWindow = event.currentTarget.contentWindow as unknown as { eval?: (script: string) => void } | null;
               embeddedWindow?.eval?.("hydrateShopData(); syncDashboardViews(); refreshHomeStats();");
-              if (isAndroidDashboardShortcut) event.currentTarget.contentWindow?.postMessage({ type: "91dab-native-app-audio" }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-team-members", members: teamMembers.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-teams", teams: teams.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-dashboard-profile", profile: profile.data ?? null }, window.location.origin);

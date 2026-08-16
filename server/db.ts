@@ -294,14 +294,10 @@ export async function getMerchantDashboardProfile(): Promise<MerchantDashboardPr
   return result[0];
 }
 
-export async function saveMerchantDashboardProfile(input: { displayName: string; email: string; profileImageUrl?: string | null }) {
+export async function saveMerchantDashboardProfile(input: { displayName: string; email: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is required for dashboard profile settings");
-  const values = { id: 1, displayName: input.displayName, email: input.email, profileImageUrl: input.profileImageUrl ?? null };
-  const update = input.profileImageUrl === undefined
-    ? { displayName: input.displayName, email: input.email }
-    : { displayName: input.displayName, email: input.email, profileImageUrl: input.profileImageUrl };
-  await db.insert(merchantDashboardProfiles).values(values).onDuplicateKeyUpdate({ set: update });
+  await db.insert(merchantDashboardProfiles).values({ id: 1, ...input }).onDuplicateKeyUpdate({ set: input });
   return getMerchantDashboardProfile();
 }
 
@@ -616,8 +612,6 @@ export type MerchantQuoteClientCustomizationInput = {
   clientName: string;
   clientEmail: string | null;
   clientPhone: string | null;
-  deliveryAddress: string;
-  paymentMode: "upi" | "bank_transfer" | "cash" | "card" | "other";
   unitsPurchased: number;
   revenueInr: number;
   notes: string | null;
@@ -649,8 +643,6 @@ export async function updateMerchantQuoteClientCustomization(input: MerchantQuot
     clientName: input.clientName,
     clientEmail: input.clientEmail,
     clientPhone: input.clientPhone,
-    deliveryAddress: input.deliveryAddress,
-    paymentMode: input.paymentMode,
     unitsPurchased: input.unitsPurchased,
     revenueInr: input.revenueInr,
     notes: input.notes,
