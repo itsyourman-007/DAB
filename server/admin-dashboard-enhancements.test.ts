@@ -110,7 +110,7 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("const WEEKDAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']");
     expect(dashboardHtml).toContain("date.setDate(now.getDate()-mondayOffset+index)");
     expect(dashboardHtml).toContain("const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']");
-    expect(dashboardHtml).toContain("new Date(now.getFullYear(),index,1)");
+    expect(dashboardHtml).toContain("Array.from({length:12},(_,index)=>({key:index,d:MONTH_LABELS[index],v:0}))");
     expect(dashboardHtml).toContain("const first = (new Date(y,m,1).getDay()+6)%7");
     expect(dashboardHtml).toContain("['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach");
     expect(dashboardHtml).toContain("background:#111318;color:#fff");
@@ -118,6 +118,11 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).not.toContain(".bar-col.hi .bar-tip{opacity:1;}");
     expect(dashboardHtml).toContain("Sales performance from Monday to Sunday");
     expect(dashboardHtml).toContain("Sales performance from January to December");
+    expect(dashboardHtml).toContain("background:var(--accent-2);border:1px solid var(--accent)");
+    expect(dashboardHtml).toContain("function revenueEntries()");
+    expect(dashboardHtml).toContain("const revenue=revenueEntries().reduce((sum,entry)=>sum+entry.amount,0)");
+    expect(dashboardHtml).toContain("chartMode==='weekly'?'Week':'Jan–Dec'");
+    expect(dashboardHtml).toContain('id="salesPeriodTotal"');
   });
 
   it("persists server-created UPI orders and marks only submitted trusted records paid through protected admin operations", () => {

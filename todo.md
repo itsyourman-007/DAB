@@ -218,3 +218,6 @@
 - [x] Center the dashboard notification panel on phone screens without changing unrelated layouts.
 - [x] Verify five-ring notification sound and live-store updates remain linked in the QR-downloaded dashboard shortcut.
 - [x] Save and synchronize the focused mobile notification fix to GitHub.
+- [x] Make every Overview daily and monthly sales bar purple without changing unrelated UI.
+- [x] Reconcile weekly and monthly chart totals with the dashboard revenue metric and add regression coverage.
+- [ ] Save and synchronize the focused Overview chart update to GitHub.

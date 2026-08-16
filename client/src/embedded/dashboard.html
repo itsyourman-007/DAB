@@ -164,10 +164,11 @@ svg{display:block;}
 .bars.many .bar-day{font-size:.66rem;}
 .y-axis{position:absolute;left:0;top:0;bottom:26px;display:flex;flex-direction:column;justify-content:space-between;font-size:.72rem;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;}
 .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;}
-.bar{width:60%;max-width:46px;border-radius:8px 8px 3px 3px;background:var(--card);border:1px solid var(--border);transition:height .5s cubic-bezier(.2,.8,.2,1),background .2s;cursor:pointer;}
+.bar{width:60%;max-width:46px;border-radius:8px 8px 3px 3px;background:var(--accent-2);border:1px solid var(--accent);transition:height .5s cubic-bezier(.2,.8,.2,1),background .2s;cursor:pointer;}
 .bar.hi{background:linear-gradient(180deg,var(--accent-2),var(--accent));border-color:transparent;}
 .bar-day{font-size:.76rem;color:var(--text-faint);margin-top:.7rem;}
 .bar-col.hi .bar-day{color:var(--text);font-weight:700;}
+.sales-period-total{margin:.35rem 0 0;font-size:.74rem;color:var(--accent-soft-text);font-family:'IBM Plex Mono',monospace;font-weight:700;}
 .bar-tip{position:absolute;top:-52px;left:50%;transform:translateX(-50%);background:#111318;color:#fff;padding:.45rem .65rem;border-radius:8px;font-size:.72rem;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;text-align:center;z-index:3;}
 .bar-tip .t-amt{font-weight:700;font-family:'IBM Plex Mono',monospace;}
 .bar-col:hover .bar-tip, .bar-col:focus-within .bar-tip{opacity:1;}
@@ -670,6 +671,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
               <div>
                 <h3 id="salesTitle">Weekly Sales</h3>
                 <p id="salesSubtitle">Sales performance from Monday to Sunday</p>
+                <p class="sales-period-total" id="salesPeriodTotal">Chart total: ₹0</p>
               </div>
               <div class="pill-toggle">
                 <button class="active" id="btnWeekly" onclick="setChartMode('weekly')">Weekly</button>
@@ -1399,12 +1401,19 @@ let chartMode = 'weekly';
 function fmtMoney(n){ return '$' + Math.round(n).toLocaleString('en-US'); }
 function fmtINR(n){ return '\u20B9' + Math.round(n).toLocaleString('en-IN'); }
 
+function revenueEntries(){
+  return [
+    ...orders.filter(order=>order.paymentStatus==='paid').map(order=>({created:order.created,amount:Number(order.amount)||0})),
+    ...quoteClientCustomizations.map(item=>({created:item.createdAt,amount:Number(item.revenueInr)||0}))
+  ].filter(entry=>Number.isFinite(new Date(entry.created).getTime())&&entry.amount>0);
+}
 function renderBars(){
   const wrap = document.getElementById('barsWrap');
-  const paidOrders = orders.filter(order=>order.paymentStatus==='paid');
-  if(!paidOrders.length){
+  const salesEntries = revenueEntries();
+  if(!salesEntries.length){
     wrap.classList.remove('many');
-    wrap.innerHTML = '<div class="empty-state" style="margin:auto;">No paid sales yet. Sales performance will appear after a payment is confirmed.</div>';
+    const total=document.getElementById('salesPeriodTotal'); if(total) total.textContent='Chart total: ₹0';
+    wrap.innerHTML = '<div class="empty-state" style="margin:auto;">No confirmed sales yet. Sales performance will appear after a payment is confirmed.</div>';
     return;
   }
   const now = new Date();
@@ -1413,13 +1422,15 @@ function renderBars(){
   const mondayOffset = (now.getDay()+6)%7;
   const data = chartMode === 'weekly'
     ? Array.from({length:7},(_,index)=>{const date=new Date(now);date.setHours(0,0,0,0);date.setDate(now.getDate()-mondayOffset+index);return {key:date.toDateString(),d:WEEKDAY_LABELS[index],v:0};})
-    : Array.from({length:12},(_,index)=>{const date=new Date(now.getFullYear(),index,1);return {key:`${date.getFullYear()}-${date.getMonth()}`,d:MONTH_LABELS[index],v:0};});
-  paidOrders.forEach(order=>{
-    const date = new Date(order.created);
-    const key = chartMode === 'weekly' ? date.toDateString() : `${date.getFullYear()}-${date.getMonth()}`;
+    : Array.from({length:12},(_,index)=>({key:index,d:MONTH_LABELS[index],v:0}));
+  salesEntries.forEach(entry=>{
+    const date = new Date(entry.created);
+    const key = chartMode === 'weekly' ? date.toDateString() : date.getMonth();
     const bucket = data.find(item=>item.key===key);
-    if(bucket) bucket.v += Number(order.amount)||0;
+    if(bucket) bucket.v += entry.amount;
   });
+  const periodTotal = data.reduce((sum,item)=>sum+item.v,0);
+  const total=document.getElementById('salesPeriodTotal'); if(total) total.textContent=`${chartMode==='weekly'?'Week':'Jan–Dec'} total: ${fmtINR(periodTotal)}`;
   const highest = Math.max(...data.map(item=>item.v),1);
   const max = highest * 1.15;
   wrap.classList.toggle('many', data.length > 7);
@@ -2417,7 +2428,7 @@ function refreshHomeStats(){
   const customers=new Set([...paidCustomerKeys,...customCustomerKeys]).size;
   const commercialEntries=orders.length+quoteClientCustomizations.length;
   const confirmedSales=paid.length+quoteClientCustomizations.length;
-  const revenue=paid.reduce((sum,o)=>sum+(Number(o.amount)||0),0)+customRevenue;
+  const revenue=revenueEntries().reduce((sum,entry)=>sum+entry.amount,0);
   const revenueEl=document.getElementById('statRevenue'); if(revenueEl) revenueEl.textContent=fmtINR(revenue);
   const usersEl=document.getElementById('statUsers'); if(usersEl) usersEl.textContent=customers.toLocaleString('en-IN');
   const customUnitsEl=document.getElementById('statCustomUnits'); if(customUnitsEl) customUnitsEl.textContent=customUnits.toLocaleString('en-IN');
