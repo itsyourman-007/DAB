@@ -264,6 +264,11 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("Download Android APK");
   });
 
+  it("accepts embedded dashboard actions only from the same-origin dashboard iframe without dynamic evaluation", () => {
+    expect(adminSource).toContain("event.origin !== window.location.origin || event.source !== iframe?.contentWindow");
+    expect(adminSource).not.toContain("embeddedWindow?.eval");
+  });
+
   it("fully collapses the sidebar while retaining a dedicated control to restore it", () => {
     expect(dashboardHtml).toContain(".app.collapsed .sidebar{width:0;border-right:0;overflow:hidden;}");
     expect(dashboardHtml).toContain(".app.collapsed ~ .sidebar-restore{display:flex;}");

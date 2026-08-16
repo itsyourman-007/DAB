@@ -118,7 +118,7 @@ export default function Admin() {
   useEffect(() => {
     const handleVerifiedPayment = (event: MessageEvent) => {
       const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
-      if (event.source !== iframe?.contentWindow || event.data?.type !== "91dab-payment-verified") return;
+      if (event.origin !== window.location.origin || event.source !== iframe?.contentWindow || event.data?.type !== "91dab-payment-verified") return;
       toast.loading("Verifying payment and sending the buyer confirmation email…", { id: "buyer-confirmation-email" });
       paymentConfirmation.mutate(event.data.order, {
         onSuccess: ({ sent, duplicate }) => {
@@ -226,7 +226,7 @@ export default function Admin() {
   useEffect(() => {
     const handleEmbeddedDashboardAction = (event: MessageEvent) => {
       const iframe = document.querySelector<HTMLIFrameElement>('iframe[title="91DAB merchant dashboard"]');
-      if (event.source !== iframe?.contentWindow || !event.data?.type) return;
+      if (event.origin !== window.location.origin || event.source !== iframe?.contentWindow || !event.data?.type) return;
       const respond = (payload: Record<string, unknown>) => iframe?.contentWindow?.postMessage(payload, window.location.origin);
       if (event.data.type === "91dab-team-add") {
         createTeamMember.mutate(event.data.member, {
@@ -503,8 +503,6 @@ export default function Admin() {
           srcDoc={dashboardHtml}
           onLoad={(event) => {
             try {
-              const embeddedWindow = event.currentTarget.contentWindow as unknown as { eval?: (script: string) => void } | null;
-              embeddedWindow?.eval?.("hydrateShopData(); syncDashboardViews(); refreshHomeStats();");
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-team-members", members: teamMembers.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-teams", teams: teams.data ?? [] }, window.location.origin);
               event.currentTarget.contentWindow?.postMessage({ type: "91dab-dashboard-profile", profile: profile.data ?? null }, window.location.origin);

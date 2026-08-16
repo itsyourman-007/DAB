@@ -207,3 +207,4 @@
 - [x] Repair the visible dashboard app QR code so it opens the valid Android APK download.
 - [x] Format mobile notification layout properly for mobile screens.
 - [x] Ensure the bottom-left profile picture on mobile matches the dashboard logo.
+- [x] Perform a final source, route, asset, payment-flow, and security review; fix verified findings and run the full release validation.
