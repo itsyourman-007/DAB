@@ -245,8 +245,8 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain("const selectedStart=/^\\d{4}-(0[1-9]|1[0-2])$/.test(order.deliveryStartMonth||'')");
     expect(dbSource).toContain("function isScheduledSubscriptionPeriod");
     expect(dbSource).toContain("outside the buyer-selected 12-month delivery schedule");
-    expect(dbSource).toContain('if (order.planKey === "monthly") return { allocationKey: `${order.orderId}:monthly:${periodKey}`, allocationKind: "monthly", periodKey, units: 99 }');
-    expect(dashboardHtml).toContain("if(order.planKey==='monthly') return 99");
+    expect(dbSource).toContain('if (order.planKey === "monthly") return { allocationKey: `${order.orderId}:monthly:${periodKey}`, allocationKind: "monthly", periodKey, units: 100 }');
+    expect(dashboardHtml).toContain("if(order.planKey==='monthly') return 100");
   });
 
   it("shows selected recurring delivery months as compact Jan, Feb, Mar labels throughout dashboard records", () => {

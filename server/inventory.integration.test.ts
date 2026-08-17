@@ -90,25 +90,25 @@ describeWithDatabase("shipment-driven DAB inventory", () => {
 
     const monthlyFirst = await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-08" });
     const monthlyDuplicate = await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-08" });
-    expect(monthlyFirst).toMatchObject({ applied: true, reason: "deducted", allocation: { units: 99, periodKey: "2026-08" } });
-    expect(monthlyDuplicate).toMatchObject({ applied: false, reason: "already-shipped", allocation: { units: 99, periodKey: "2026-08" } });
+    expect(monthlyFirst).toMatchObject({ applied: true, reason: "deducted", allocation: { units: 100, periodKey: "2026-08" } });
+    expect(monthlyDuplicate).toMatchObject({ applied: false, reason: "already-shipped", allocation: { units: 100, periodKey: "2026-08" } });
     await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-09" });
     await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-10" });
     await recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2026-11" });
-    expect((await getMerchantInventory()).availableUnits).toBe(4_568);
+    expect((await getMerchantInventory()).availableUnits).toBe(4_564);
 
     await recordSubscriptionShipment({ orderId: orderIds.yearlyMonthly, periodKey: "2026-08" });
-    expect((await getMerchantInventory()).availableUnits).toBe(4_443);
+    expect((await getMerchantInventory()).availableUnits).toBe(4_439);
 
     await expect(recordSubscriptionShipment({ orderId: orderIds.monthly, periodKey: "2027-08" })).rejects.toThrow("outside the buyer-selected 12-month delivery schedule");
-    expect((await getMerchantInventory()).availableUnits).toBe(4_443);
+    expect((await getMerchantInventory()).availableUnits).toBe(4_439);
 
     await updateMerchantOrderFulfillment({ orderId: orderIds.yearlyOnce, status: "shipped" });
-    expect((await getMerchantInventory()).availableUnits).toBe(2_943);
+    expect((await getMerchantInventory()).availableUnits).toBe(2_939);
 
     const allocations = await listMerchantInventoryShipmentAllocations();
     const orderAllocations = allocations.filter((allocation) => Object.values(orderIds).includes(allocation.orderId));
     expect(orderAllocations).toHaveLength(7);
-    expect(orderAllocations.filter((allocation) => allocation.orderId === orderIds.monthly).map((allocation) => allocation.units)).toEqual([99, 99, 99, 99]);
+    expect(orderAllocations.filter((allocation) => allocation.orderId === orderIds.monthly).map((allocation) => allocation.units)).toEqual([100, 100, 100, 100]);
   }, 60_000);
 });

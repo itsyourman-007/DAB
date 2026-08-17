@@ -228,3 +228,7 @@
 - [x] Fix the shop DAB at work section so both videos render reliably, appear larger without outlined boxes, and attempt automatic audible looping playback when the section enters view, with no visible enable-audio button.
 - [x] Simplify DAB at work to two large side-by-side continuously playing videos only, with no visible controls, audio button, outlines, or black video panels.
 - [x] Verify and synchronize the focused two-video-only correction to GitHub.
+- [x] Inspect the existing payment-success, shipment, delivery, and subscription billing email logic for the 91DAB deployment.
+- [x] Provide exact Resend domain-verification and Render environment setup steps for automated buyer emails.
+- [x] Change monthly subscription allocation from 99 to 100 DAB pieces in the shop, scheduling, inventory deductions, dashboard, buyer emails, and CSV exports.
+- [x] Add regression coverage and synchronize the focused monthly 100-piece update to GitHub.
