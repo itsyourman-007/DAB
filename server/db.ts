@@ -189,10 +189,10 @@ export async function releasePaymentConfirmationEmail(orderId: string) {
   await db.delete(paymentConfirmationEmails).where(eq(paymentConfirmationEmails.orderId, orderId));
 }
 
-export async function reserveFulfillmentNotificationEmail(input: { orderId: string; status: "shipped" | "delivered"; recipient: string }) {
+export async function reserveFulfillmentNotificationEmail(input: { orderId: string; status: "shipped" | "delivered"; recipient: string; notificationSuffix?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is required for fulfillment email delivery");
-  const notificationKey = `${input.orderId}:${input.status}`;
+  const notificationKey = `${input.orderId}:${input.status}${input.notificationSuffix ? `:${input.notificationSuffix}` : ""}`;
   try {
     await db.insert(fulfillmentNotificationEmails).values({
       notificationKey,
@@ -208,16 +208,18 @@ export async function reserveFulfillmentNotificationEmail(input: { orderId: stri
   }
 }
 
-export async function markFulfillmentNotificationEmailSent(input: { orderId: string; status: "shipped" | "delivered" }) {
+export async function markFulfillmentNotificationEmailSent(input: { orderId: string; status: "shipped" | "delivered"; notificationSuffix?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is required for fulfillment email delivery");
-  await db.update(fulfillmentNotificationEmails).set({ deliveryStatus: "sent", sentAt: new Date() }).where(eq(fulfillmentNotificationEmails.notificationKey, `${input.orderId}:${input.status}`));
+  const notificationKey = `${input.orderId}:${input.status}${input.notificationSuffix ? `:${input.notificationSuffix}` : ""}`;
+  await db.update(fulfillmentNotificationEmails).set({ deliveryStatus: "sent", sentAt: new Date() }).where(eq(fulfillmentNotificationEmails.notificationKey, notificationKey));
 }
 
-export async function releaseFulfillmentNotificationEmail(input: { orderId: string; status: "shipped" | "delivered" }) {
+export async function releaseFulfillmentNotificationEmail(input: { orderId: string; status: "shipped" | "delivered"; notificationSuffix?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database is required for fulfillment email delivery");
-  await db.delete(fulfillmentNotificationEmails).where(eq(fulfillmentNotificationEmails.notificationKey, `${input.orderId}:${input.status}`));
+  const notificationKey = `${input.orderId}:${input.status}${input.notificationSuffix ? `:${input.notificationSuffix}` : ""}`;
+  await db.delete(fulfillmentNotificationEmails).where(eq(fulfillmentNotificationEmails.notificationKey, notificationKey));
 }
 
 export async function listMerchantTeamMembers(): Promise<MerchantTeamMember[]> {

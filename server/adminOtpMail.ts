@@ -131,6 +131,8 @@ export async function sendBuyerPaymentConfirmation(input: {
   paymentMethod: string;
   utr?: string;
   deliverySchedule?: string | null;
+  dabAllocation?: string | null;
+  deliveryProgress?: string | null;
   quantity?: number | null;
   orderDate?: string | null;
   address?: string | null;
@@ -153,6 +155,8 @@ export async function sendBuyerPaymentConfirmation(input: {
     input.paymentMethod ? ["Payment method", input.paymentMethod] : null,
     input.utr ? ["UPI reference", input.utr] : null,
     input.deliverySchedule ? ["Delivery schedule", input.deliverySchedule] : null,
+    input.dabAllocation ? ["DAB allocation", input.dabAllocation] : null,
+    input.deliveryProgress ? ["Delivery progress", input.deliveryProgress] : null,
   ].filter((row): row is [string, string] => Boolean(row)).map(([label, value]) => `
     <tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">${escapeHtml(label)}</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;">${escapeHtml(value)}</td></tr>`).join("");
   const html = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:0 auto;color:#0F2325;">
@@ -189,6 +193,8 @@ export async function sendBuyerPaymentConfirmation(input: {
         `Payment method: ${input.paymentMethod}`,
         input.utr ? `UPI reference: ${input.utr}` : "",
         input.deliverySchedule ? `Delivery schedule: ${input.deliverySchedule}` : "",
+        input.dabAllocation ? `DAB allocation: ${input.dabAllocation}` : "",
+        input.deliveryProgress ? `Delivery progress: ${input.deliveryProgress}` : "",
         input.address ? `Delivery address: ${[input.address, input.city, input.state, input.pincode].filter(Boolean).join(", ")}` : "",
         "",
         "Thank you for choosing DAB.",
@@ -206,6 +212,9 @@ export async function sendBuyerFulfillmentConfirmation(input: {
   amount: number;
   quantity: number;
   status: "shipped" | "delivered";
+  deliverySchedule?: string | null;
+  dabAllocation?: string | null;
+  deliveryProgress?: string | null;
   address?: string | null;
   city?: string | null;
   state?: string | null;
@@ -227,6 +236,9 @@ export async function sendBuyerFulfillmentConfirmation(input: {
       <tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">Order ID</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;font-family:monospace;">${escapeHtml(input.orderId)}</td></tr>
       <tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">Order</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;">${escapeHtml(input.plan)} × ${input.quantity} pack${input.quantity === 1 ? "" : "s"}</td></tr>
       <tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">Status</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;font-weight:bold;color:#146B70;">${title}</td></tr>
+      ${input.deliverySchedule ? `<tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">Delivery schedule</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;">${escapeHtml(input.deliverySchedule)}</td></tr>` : ""}
+      ${input.dabAllocation ? `<tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">DAB allocation</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;">${escapeHtml(input.dabAllocation)}</td></tr>` : ""}
+      ${input.deliveryProgress ? `<tr><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;">Delivery progress</td><td style="padding:8px 0;border-bottom:1px solid #DCE6E7;text-align:right;">${escapeHtml(input.deliveryProgress)}</td></tr>` : ""}
       <tr><td style="padding:8px 0;">Amount paid</td><td style="padding:8px 0;text-align:right;">${inr(input.amount)}</td></tr>
     </table>
     ${destination ? `<p style="margin-bottom:4px;"><strong>Delivery address</strong></p><p style="margin-top:0;color:#3A5254;">${destination}</p>` : ""}
@@ -240,7 +252,7 @@ export async function sendBuyerFulfillmentConfirmation(input: {
       to: [input.email.trim().toLowerCase()],
       subject: `91DAB order ${input.status} — ${input.orderId}`,
       html,
-      text: [`Hello ${input.name},`, "", message, `Order: ${input.orderId}`, `Plan: ${input.plan}`, `Quantity: ${input.quantity}`, `Amount paid: ${inr(input.amount)}`, `Status: ${title}`, "", "Thank you for choosing DAB."].join("\n"),
+      text: [`Hello ${input.name},`, "", message, `Order: ${input.orderId}`, `Plan: ${input.plan}`, `Quantity: ${input.quantity}`, input.deliverySchedule ? `Delivery schedule: ${input.deliverySchedule}` : "", input.dabAllocation ? `DAB allocation: ${input.dabAllocation}` : "", input.deliveryProgress ? `Delivery progress: ${input.deliveryProgress}` : "", `Amount paid: ${inr(input.amount)}`, `Status: ${title}`, "", "Thank you for choosing DAB."].filter(Boolean).join("\n"),
     }),
   });
   if (!response.ok) throw new Error(`Unable to send buyer ${input.status} confirmation email`);

@@ -235,3 +235,7 @@
 - [x] Diagnose and repair buyer shipment and delivery email dispatch while preserving working payment-confirmation emails.
 - [x] Add regression coverage for payment, shipment, and delivery buyer-email events, then synchronize the focused repair to GitHub.
 - [x] Preserve plans, inventory, layout, dashboard controls, payment confirmation, and all unrelated behavior during the fulfillment-email-only repair.
+- [x] Update buyer email delivery schedules to show buyer-selected monthly and yearly months instead of generic first-of-month wording.
+- [x] Show 100 monthly DAB pieces, 1,500 yearly all-at-once pieces, and 125-per-month / 1,500 cumulative yearly progress in buyer email content.
+- [x] Add regression coverage and synchronize the focused subscription-email update to GitHub without unrelated changes.
+- [x] Preserve shop UI, pricing, plan rules, inventory deductions, dashboard layout, and payment flow while changing only subscription email content.

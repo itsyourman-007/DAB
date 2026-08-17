@@ -19,6 +19,45 @@ import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 
+type SubscriptionEmailOrder = {
+  planKey: string;
+  deliverySpan: string | null;
+  deliveryStartMonth: string | null;
+  quantity: number;
+};
+
+function formatDeliveryMonth(periodKey: string) {
+  const [year, month] = periodKey.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
+export function subscriptionEmailDetails(order: SubscriptionEmailOrder, periodKey?: string) {
+  if (order.planKey !== "monthly" && order.planKey !== "yearly") return {};
+  const selectedSchedule = db.subscriptionScheduleMonths(order);
+  if (order.planKey === "monthly") {
+    const selectedMonths = selectedSchedule?.slice(0, Math.max(1, Number(order.quantity || 1))) ?? (order.deliveryStartMonth ? [order.deliveryStartMonth] : []);
+    return {
+      deliverySchedule: selectedMonths.length ? `Selected delivery month${selectedMonths.length === 1 ? "" : "s"}: ${selectedMonths.map(formatDeliveryMonth).join(", ")}` : "Buyer-selected monthly delivery schedule",
+      dabAllocation: "100 DAB pieces per selected month",
+    };
+  }
+  if (order.deliverySpan === "once") {
+    return {
+      deliverySchedule: order.deliveryStartMonth ? `One yearly delivery in ${formatDeliveryMonth(order.deliveryStartMonth)}` : "One yearly delivery in the buyer-selected month",
+      dabAllocation: "1,500 DAB pieces together",
+    };
+  }
+  const selectedMonths = selectedSchedule ?? (order.deliveryStartMonth ? [order.deliveryStartMonth] : []);
+  const shipmentNumber = periodKey ? selectedMonths.indexOf(periodKey) + 1 : 0;
+  return {
+    deliverySchedule: periodKey && shipmentNumber > 0
+      ? `Selected delivery month: ${formatDeliveryMonth(periodKey)} (${shipmentNumber} of 12)`
+      : `Selected delivery months: ${selectedMonths.map(formatDeliveryMonth).join(", ")}`,
+    dabAllocation: "125 DAB pieces each month (1,500 total)",
+    deliveryProgress: shipmentNumber > 0 ? `${shipmentNumber * 125}/1,500 DAB pieces` : "0/1,500 DAB pieces across 12 monthly deliveries",
+  };
+}
+
 async function deliverBuyerFulfillmentEmail(order: {
   orderId: string;
   buyerName: string;
@@ -30,11 +69,15 @@ async function deliverBuyerFulfillmentEmail(order: {
   city: string | null;
   state: string | null;
   pincode: string | null;
-}, status: "shipped" | "delivered") {
+  planKey: string;
+  deliverySpan: string | null;
+  deliveryStartMonth: string | null;
+}, status: "shipped" | "delivered", periodKey?: string) {
   if (!order.buyerEmail) return "not-requested" as const;
   const recipient = order.buyerEmail.trim().toLowerCase();
-  const reserved = await db.reserveFulfillmentNotificationEmail({ orderId: order.orderId, status, recipient });
+  const reserved = await db.reserveFulfillmentNotificationEmail({ orderId: order.orderId, status, recipient, notificationSuffix: periodKey });
   if (!reserved) return "already-sent" as const;
+  const subscriptionDetails = subscriptionEmailDetails(order, periodKey);
   try {
     await sendBuyerFulfillmentConfirmation({
       email: recipient,
@@ -44,15 +87,18 @@ async function deliverBuyerFulfillmentEmail(order: {
       amount: order.amount,
       quantity: order.quantity,
       status,
+      deliverySchedule: subscriptionDetails.deliverySchedule,
+      dabAllocation: subscriptionDetails.dabAllocation,
+      deliveryProgress: subscriptionDetails.deliveryProgress,
       address: order.address,
       city: order.city,
       state: order.state,
       pincode: order.pincode,
     });
-    await db.markFulfillmentNotificationEmailSent({ orderId: order.orderId, status });
+    await db.markFulfillmentNotificationEmailSent({ orderId: order.orderId, status, notificationSuffix: periodKey });
     return "sent" as const;
   } catch {
-    await db.releaseFulfillmentNotificationEmail({ orderId: order.orderId, status });
+    await db.releaseFulfillmentNotificationEmail({ orderId: order.orderId, status, notificationSuffix: periodKey });
     console.error("[Fulfillment email] Buyer notification failed", { orderId: order.orderId, status });
     return "failed" as const;
   }
@@ -352,7 +398,8 @@ export const appRouter = router({
         }
         if (!input.delivered) throw new TRPCError({ code: "BAD_REQUEST", message: "A recorded shipment cannot be unchecked. Use a password-confirmed stock adjustment to correct inventory." });
         const shipment = await db.recordSubscriptionShipment(input);
-        return { deliveries: await db.listSubscriptionDeliveryRecords(), inventory: shipment.inventory, shipment };
+        const email = await deliverBuyerFulfillmentEmail(order, "shipped", input.periodKey);
+        return { deliveries: await db.listSubscriptionDeliveryRecords(), inventory: shipment.inventory, shipment, email };
       }),
     markOrderPaid: publicProcedure
       .input(z.object({ orderId: z.string().trim().min(4).max(128) }))
@@ -375,6 +422,7 @@ export const appRouter = router({
         if (!reserved) return { order, email: "already-sent" as const };
         try {
           const { sendBuyerPaymentConfirmation } = await import("./adminOtpMail");
+          const subscriptionDetails = subscriptionEmailDetails(order);
           await sendBuyerPaymentConfirmation({
             email: order.buyerEmail,
             name: order.buyerName,
@@ -383,7 +431,9 @@ export const appRouter = router({
             amount: order.amount,
             paymentMethod: order.paymentMethod,
             utr: order.utr ?? undefined,
-            deliverySchedule: order.planKey === "monthly" ? "Delivered on the 1st of every month" : order.planKey === "yearly" && order.deliverySpan !== "once" ? "Delivered on the 1st of every month" : null,
+            deliverySchedule: subscriptionDetails.deliverySchedule ?? null,
+            dabAllocation: subscriptionDetails.dabAllocation ?? null,
+            deliveryProgress: subscriptionDetails.deliveryProgress ?? null,
             quantity: order.quantity,
             orderDate: order.createdAt.toISOString(),
             address: order.address,
