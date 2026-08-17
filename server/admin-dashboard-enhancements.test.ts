@@ -327,6 +327,8 @@ describe("protected merchant dashboard enhancements", () => {
     expect(dashboardHtml).toContain('id="deliveryTrackingBody"');
     expect(dashboardHtml).toContain("function renderDeliveryTracking()");
     expect(dashboardHtml).toContain("Buyer email sent.");
+    expect(dashboardHtml).toContain(">Send buyer email</button>");
+    expect(dashboardHtml).toContain("91dab-fulfillment-email-retry");
     expect(schemaSource).toContain('mysqlTable("fulfillmentNotificationEmails"');
     expect(routerSource).toContain("sendBuyerFulfillmentConfirmation");
     expect(routerSource).toContain("reserveFulfillmentNotificationEmail");

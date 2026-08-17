@@ -232,3 +232,6 @@
 - [x] Provide exact Resend domain-verification and Render environment setup steps for automated buyer emails.
 - [x] Change monthly subscription allocation from 99 to 100 DAB pieces in the shop, scheduling, inventory deductions, dashboard, buyer emails, and CSV exports.
 - [x] Add regression coverage and synchronize the focused monthly 100-piece update to GitHub.
+- [x] Diagnose and repair buyer shipment and delivery email dispatch while preserving working payment-confirmation emails.
+- [x] Add regression coverage for payment, shipment, and delivery buyer-email events, then synchronize the focused repair to GitHub.
+- [x] Preserve plans, inventory, layout, dashboard controls, payment confirmation, and all unrelated behavior during the fulfillment-email-only repair.

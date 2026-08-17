@@ -1707,7 +1707,7 @@ function fulfillmentEmailAction(o){
   if(state==='already-sent') return '<span class="email-result sent">Buyer email already sent</span>';
   if(state==='not-requested') return '<span class="email-result">No buyer email</span>';
   if(state==='failed') return `<button class="action-link" onclick="event.stopPropagation();retryFulfillmentEmail('${String(o.id).replace(/'/g,'\\\'')}','${status}')">Retry buyer email</button>`;
-  return '';
+  return `<button class="action-link" onclick="event.stopPropagation();retryFulfillmentEmail('${String(o.id).replace(/'/g,'\\\'')}','${status}')">Send buyer email</button>`;
 }
 function retryFulfillmentEmail(orderId,status){ window.parent?.postMessage({type:'91dab-fulfillment-email-retry',fulfillment:{orderId,status}},'*'); }
 function customSaleFulfillmentAction(item){
