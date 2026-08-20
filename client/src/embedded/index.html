@@ -34,9 +34,14 @@
   .label.on-dark{color:#cfc9ba;}
   .section-title{font-size:clamp(2rem,3.8vw,3rem);line-height:1.14;font-weight:500;}
   .lede{color:var(--ink-soft);font-size:1.02rem;margin-top:1rem;max-width:56ch;}
+  .text-roll{display:inline-block;overflow:hidden;line-height:1.08;vertical-align:baseline;white-space:nowrap;}
+  .text-roll-char{display:inline-block;position:relative;transition:transform .28s cubic-bezier(.77,0,.175,1);will-change:transform;}
+  .text-roll-char::after{content:attr(data-roll);position:absolute;top:100%;left:0;white-space:pre;}
+  .text-roll:hover .text-roll-char,.text-roll:focus-visible .text-roll-char{transform:translateY(-100%);}
+  .count-flow{font-variant-numeric:tabular-nums;}
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease);}
   .reveal.in-view{opacity:1;transform:translateY(0);}
-  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}.text-roll-char{transition:none;}.text-roll:hover .text-roll-char,.text-roll:focus-visible .text-roll-char{transform:none;}}
   .btn{display:inline-flex;align-items:center;gap:.6rem;padding:.95rem 1.9rem;font-family:'Inter',sans-serif;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;border:1px solid var(--ink);white-space:nowrap;transition:all .3s var(--ease);}
   .btn.solid{background:var(--ink);color:var(--cream);}
   .btn.solid:hover{background:transparent;color:var(--ink);}
@@ -247,7 +252,7 @@
     <div class="hero-inner">
       <div class="reveal">
         <p class="label">Dear Dentist!</p>
-        <h1 class="hero-title">DAB for <em>Aerosol Hygiene</em></h1>
+        <h1 class="hero-title">DAB for <em><span class="text-roll" data-text-roll tabindex="0">Aerosol Hygiene</span></em></h1>
         <div class="ticker">
           <div class="ticker-track">
             <span>DAB for Aerosol Hygiene</span><span>DAB for Aerosol Hygiene</span>
@@ -338,7 +343,7 @@
             <p>Dr Karthiyayini Priya will be representing the company at the IISc, Bengaluru and with the mentoring and expertise from IISc want to improve our product DAB. As per the beta testing of the primary product DAB, we are working on sterilizable model DAB 2.0</p>
           </div>
           <div class="stat-band">
-            <div class="stat-num"><span>247</span> / 4,000</div>
+            <div class="stat-num"><span class="count-flow" data-count-flow data-count-to="247">247</span> / <span class="count-flow" data-count-flow data-count-to="4000">4,000</span></div>
             <div class="stat-label">Companies incubated in NSRCEL's Women's Start Up Program, batch WSP 4, out of 4,000 applications received — 2023</div>
           </div>
         </div>
@@ -563,6 +568,53 @@
     revealEls.forEach(el => io.observe(el));
   } else {
     revealEls.forEach(el => el.classList.add('in-view'));
+  }
+
+  const prepareTextRoll = (el) => {
+    const text = el.textContent || '';
+    el.setAttribute('aria-label', text);
+    el.textContent = '';
+    [...text].forEach((character, index) => {
+      const glyph = document.createElement('span');
+      const displayCharacter = character === ' ' ? '\u00A0' : character;
+      glyph.className = 'text-roll-char';
+      glyph.dataset.roll = displayCharacter;
+      glyph.textContent = displayCharacter;
+      glyph.style.transitionDelay = `${Math.abs(index - (text.length - 1) / 2) * 24}ms`;
+      el.appendChild(glyph);
+    });
+  };
+  document.querySelectorAll('[data-text-roll]').forEach(prepareTextRoll);
+
+  const renderCountFlow = (el, value) => {
+    const prefix = el.dataset.countPrefix || '';
+    const suffix = el.dataset.countSuffix || '';
+    el.textContent = `${prefix}${Math.round(value).toLocaleString('en-IN')}${suffix}`;
+  };
+  const animateCountFlow = (el) => {
+    const target = Number(el.dataset.countTo || 0);
+    if (reduceMotion || !Number.isFinite(target)) { renderCountFlow(el, target || 0); return; }
+    const startedAt = performance.now();
+    const duration = 300;
+    const frame = (now) => {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      renderCountFlow(el, target * (1 - Math.pow(1 - progress, 3)));
+      if (progress < 1) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  };
+  const countFlows = document.querySelectorAll('[data-count-flow]');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        animateCountFlow(entry.target);
+        countObserver.unobserve(entry.target);
+      });
+    }, { threshold: .5 });
+    countFlows.forEach((el) => countObserver.observe(el));
+  } else {
+    countFlows.forEach(animateCountFlow);
   }
 
   const cookieBar = document.getElementById('cookieBar');

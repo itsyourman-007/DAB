@@ -239,3 +239,8 @@
 - [x] Show 100 monthly DAB pieces, 1,500 yearly all-at-once pieces, and 125-per-month / 1,500 cumulative yearly progress in buyer email content.
 - [x] Add regression coverage and synchronize the focused subscription-email update to GitHub without unrelated changes.
 - [x] Preserve shop UI, pricing, plan rules, inventory deductions, dashboard layout, and payment flow while changing only subscription email content.
+- [x] Create and validate a reusable skill for the focused full-stack maintenance workflow used in this project.
+- [x] Deliver the reusable maintenance skill package for installation.
+- [x] Integrate the supplied text-roll animation across appropriate landing-page, shop, and merchant-dashboard headings without changing navigation or workflows.
+- [x] Integrate the supplied in-view numeric animation across relevant landing-page, shop, and merchant-dashboard metrics without fabricating business data.
+- [ ] Add animation regression coverage, validate desktop/mobile rendering, run the full suite and production build, then checkpoint and synchronize the scoped update to GitHub.
