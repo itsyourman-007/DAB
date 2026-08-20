@@ -247,4 +247,4 @@
 - [x] Integrate the supplied sticky-card scroll animation into suitable non-transactional landing, shop, and protected dashboard sections without changing checkout, data, navigation, or access flows.
 - [x] Add regression coverage, validate desktop/mobile behavior, save a checkpoint, and synchronize the sticky-card update to GitHub.
 - [x] Restore the landing page Our Three Verticals cards to their prior static responsive grid without changing the sticky-card animations in shop or dashboard.
-- [ ] Validate the landing-only restoration, checkpoint it, and synchronize the scoped change to GitHub.
+- [x] Validate the landing-only restoration, checkpoint it, and synchronize the scoped change to GitHub.
