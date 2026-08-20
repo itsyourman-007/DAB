@@ -245,4 +245,4 @@
 - [x] Integrate the supplied in-view numeric animation across relevant landing-page, shop, and merchant-dashboard metrics without fabricating business data.
 - [x] Add animation regression coverage, validate desktop/mobile rendering, run the full suite and production build, then checkpoint and synchronize the scoped update to GitHub.
 - [x] Integrate the supplied sticky-card scroll animation into suitable non-transactional landing, shop, and protected dashboard sections without changing checkout, data, navigation, or access flows.
-- [ ] Add regression coverage, validate desktop/mobile behavior, save a checkpoint, and synchronize the sticky-card update to GitHub.
+- [x] Add regression coverage, validate desktop/mobile behavior, save a checkpoint, and synchronize the sticky-card update to GitHub.
