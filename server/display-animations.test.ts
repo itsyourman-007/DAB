@@ -38,4 +38,20 @@ describe("display animation integration", () => {
     expect(shop).not.toContain("@number-flow/react");
     expect(dashboard).not.toContain("@number-flow/react");
   });
+
+  it("adds the supplied sticky-card scroll pattern only to visual card collections", () => {
+    expect(landing).toContain('class="vertical-grid sticky-stack reveal" data-sticky-stack');
+    expect(shop).toContain('class="how-grid sticky-stack" data-sticky-stack');
+    expect(dashboard).toContain('class="stat-grid sticky-stack" data-sticky-stack');
+
+    for (const source of [landing, shop, dashboard]) {
+      expect(source).toContain("setupStickyCardStack");
+      expect(source).toContain("--stack-scale");
+      expect(source).toContain("prefers-reduced-motion:no-preference");
+    }
+
+    expect(landing).not.toContain('data-sticky-stack id="');
+    expect(shop).toContain("setupStickyCardStack('.how-card',861);");
+    expect(dashboard).toContain("setupStickyCardStack('.stat-card',1051);");
+  });
 });

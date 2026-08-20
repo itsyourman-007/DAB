@@ -151,8 +151,12 @@ svg{display:block;}
 .stat-delta b{color:var(--success);font-weight:700;}
 .stat-delta.down b{color:var(--danger);}
 
-/* content grid */
-.grid-2{display:grid;grid-template-columns:1.65fr 1fr;gap:1.1rem;margin-bottom:1.1rem;align-items:start;}
+	/* content grid */
+	@media (min-width:1051px) and (prefers-reduced-motion:no-preference){
+	  .stat-grid.sticky-stack{display:block;padding-bottom:22vh;}
+	  .stat-grid.sticky-stack .stat-card{position:sticky;top:calc(5.5rem + var(--stack-offset,0px));z-index:var(--stack-index,1);margin-bottom:.9rem;box-shadow:0 24px 42px -32px rgba(14,16,28,.52);transform:scale(var(--stack-scale,1));transform-origin:top center;will-change:transform;}
+	}
+	.grid-2{display:grid;grid-template-columns:1.65fr 1fr;gap:1.1rem;margin-bottom:1.1rem;align-items:start;}
 @media (max-width:1050px){.grid-2{grid-template-columns:1fr;}.stat-grid{grid-template-columns:repeat(2,1fr);}}
 
 .panel-head{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.4rem .8rem;gap:1rem;flex-wrap:wrap;}
@@ -640,7 +644,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
       <!-- ============ HOME ============ -->
       <section class="screen active" id="screen-home">
         <div id="lowStockAlert" style="display:none;margin-bottom:1rem;"></div>
-        <div class="stat-grid">
+        <div class="stat-grid sticky-stack" data-sticky-stack>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Total Revenue</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -2460,6 +2464,40 @@ function animateDashboardMetric(id,value,options){
   };
   el._metricRaf=requestAnimationFrame(frame);
 }
+function setupStickyCardStack(cardSelector,desktopMin){
+  if(!document.querySelectorAll||typeof window==='undefined')return;
+  const stacks=Array.from(document.querySelectorAll('[data-sticky-stack]'));
+  const reduceMotion=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const updateStack=()=>{
+    const enabled=!reduceMotion&&window.innerWidth>=desktopMin;
+    stacks.forEach(stack=>{
+      const cards=Array.from(stack.querySelectorAll(cardSelector));
+      cards.forEach((card,index)=>{
+        if(!enabled||typeof stack.getBoundingClientRect!=='function'){
+          card.style.removeProperty('--stack-scale'); card.style.removeProperty('--stack-index'); card.style.removeProperty('--stack-offset'); return;
+        }
+        const rect=stack.getBoundingClientRect(); const viewport=window.innerHeight||800;
+        const travel=Math.max((stack.offsetHeight||rect.height)-viewport*.62,1);
+        const progress=Math.min(Math.max((-rect.top+viewport*.18)/travel,0),1);
+        const start=index/cards.length;
+        const local=Math.min(Math.max((progress-start)/Math.max(1-start,.01),0),1);
+        const eased=local*local*(3-2*local);
+        const target=Math.max(.84,1-(cards.length-index-1)*.07);
+        card.style.setProperty('--stack-scale',String(1-(1-target)*eased));
+        card.style.setProperty('--stack-index',String(index+1));
+        card.style.setProperty('--stack-offset',`${index*20}px`);
+      });
+    });
+  };
+  let ticking=false;
+  const requestUpdate=()=>{
+    if(ticking)return;
+    if(typeof requestAnimationFrame!=='function'){updateStack();return;}
+    ticking=true; requestAnimationFrame(()=>{ticking=false;updateStack();});
+  };
+  window.addEventListener('scroll',requestUpdate,{passive:true});
+  window.addEventListener('resize',requestUpdate); requestUpdate();
+}
 function refreshHomeStats(){
   const paid=orders.filter(o=>o.paymentStatus==='paid');
   const customRevenue=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.revenueInr)||0),0);
@@ -2483,6 +2521,7 @@ function refreshHomeStats(){
    INIT
    ============================================================ */
 document.querySelectorAll('[data-text-roll]').forEach(prepareTextRoll);
+setupStickyCardStack('.stat-card',1051);
 hydrateShopData();
 renderBars();
 renderTopProducts();

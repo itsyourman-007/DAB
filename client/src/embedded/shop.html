@@ -287,6 +287,10 @@
   .how-card p{font-size:.85rem;color:var(--ink-soft);}
   @media (max-width:860px){.how-grid{grid-template-columns:1fr 1fr;}}
   @media (max-width:520px){.how-grid{grid-template-columns:1fr;}}
+  @media (min-width:861px) and (prefers-reduced-motion:no-preference){
+    .how-grid.sticky-stack{display:block;padding-bottom:24vh;}
+    .how-grid.sticky-stack .how-card{position:sticky;top:calc(5rem + var(--stack-offset,0px));z-index:var(--stack-index,1);margin-bottom:1rem;border:1px solid var(--line);border-top:2px solid var(--gold);box-shadow:0 24px 42px -32px rgba(20,15,5,.45);transform:scale(var(--stack-scale,1));transform-origin:top center;will-change:transform;}
+  }
 
   /* ---------- DAB at work ---------- */
   .layers{padding:clamp(3rem,6vw,4.2rem) 0;background:var(--cream-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
@@ -473,7 +477,7 @@
           <h2>How DAB works</h2>
           <p>A straightforward four-stage routine that fits into any existing chairside workflow — no extra training required.</p>
         </div>
-        <div class="how-grid">
+        <div class="how-grid sticky-stack" data-sticky-stack>
           <div class="how-card">
             <div class="num">01 — Mount</div>
             <h3>Fit before the procedure</h3>
@@ -1470,7 +1474,42 @@ function upsertShopOrder(record){
       counts.forEach(el=>observer.observe(el));
     }else counts.forEach(animateCountFlow);
   }
+  function setupStickyCardStack(cardSelector,desktopMin){
+    if(!document.querySelectorAll||typeof window==='undefined')return;
+    const stacks=Array.from(document.querySelectorAll('[data-sticky-stack]'));
+    const reduceMotion=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const updateStack=()=>{
+      const enabled=!reduceMotion&&window.innerWidth>=desktopMin;
+      stacks.forEach(stack=>{
+        const cards=Array.from(stack.querySelectorAll(cardSelector));
+        cards.forEach((card,index)=>{
+          if(!enabled||typeof stack.getBoundingClientRect!=='function'){
+            card.style.removeProperty('--stack-scale'); card.style.removeProperty('--stack-index'); card.style.removeProperty('--stack-offset'); return;
+          }
+          const rect=stack.getBoundingClientRect(); const viewport=window.innerHeight||800;
+          const travel=Math.max((stack.offsetHeight||rect.height)-viewport*.62,1);
+          const progress=Math.min(Math.max((-rect.top+viewport*.18)/travel,0),1);
+          const start=index/cards.length;
+          const local=Math.min(Math.max((progress-start)/Math.max(1-start,.01),0),1);
+          const eased=local*local*(3-2*local);
+          const target=Math.max(.84,1-(cards.length-index-1)*.07);
+          card.style.setProperty('--stack-scale',String(1-(1-target)*eased));
+          card.style.setProperty('--stack-index',String(index+1));
+          card.style.setProperty('--stack-offset',`${index*20}px`);
+        });
+      });
+    };
+    let ticking=false;
+    const requestUpdate=()=>{
+      if(ticking)return;
+      if(typeof requestAnimationFrame!=='function'){updateStack();return;}
+      ticking=true; requestAnimationFrame(()=>{ticking=false;updateStack();});
+    };
+    window.addEventListener('scroll',requestUpdate,{passive:true});
+    window.addEventListener('resize',requestUpdate); requestUpdate();
+  }
   setupDisplayAnimations();
+  setupStickyCardStack('.how-card',861);
   setupDabWorkVideos();
 </script>
 </body>
