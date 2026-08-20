@@ -243,4 +243,4 @@
 - [x] Deliver the reusable maintenance skill package for installation.
 - [x] Integrate the supplied text-roll animation across appropriate landing-page, shop, and merchant-dashboard headings without changing navigation or workflows.
 - [x] Integrate the supplied in-view numeric animation across relevant landing-page, shop, and merchant-dashboard metrics without fabricating business data.
-- [ ] Add animation regression coverage, validate desktop/mobile rendering, run the full suite and production build, then checkpoint and synchronize the scoped update to GitHub.
+- [x] Add animation regression coverage, validate desktop/mobile rendering, run the full suite and production build, then checkpoint and synchronize the scoped update to GitHub.
