@@ -77,11 +77,6 @@
   .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,4rem);align-items:center;}
   .hero h1{font-size:clamp(2rem,4vw,3rem);line-height:1.1;font-weight:500;}
   .hero h1 em{font-style:italic;color:var(--gold-deep);}
-  .text-roll{display:inline-block;overflow:hidden;line-height:1.08;vertical-align:baseline;white-space:nowrap;}
-  .text-roll-char{display:inline-block;position:relative;transition:transform .28s cubic-bezier(.77,0,.175,1);will-change:transform;}
-  .text-roll-char::after{content:attr(data-roll);position:absolute;top:100%;left:0;white-space:pre;}
-  .text-roll:hover .text-roll-char,.text-roll:focus-visible .text-roll-char{transform:translateY(-100%);}
-  .count-flow{font-variant-numeric:tabular-nums;}
   .hero p.lede{color:var(--ink-soft);font-size:1.05rem;max-width:44ch;margin-top:1.1rem;}
   .cta-row{display:flex;gap:.85rem;flex-wrap:wrap;margin-top:1.9rem;}
   .hero-photo{position:relative;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--line);background:var(--ink);}
@@ -234,7 +229,6 @@
     .cart-item img{width:60px;height:60px;}
     .cart-item .line-total{grid-column:2;text-align:left;}
   }
-  @media (prefers-reduced-motion:reduce){.text-roll-char{transition:none;}.text-roll:hover .text-roll-char,.text-roll:focus-visible .text-roll-char{transform:none;}}
   @media (max-width:640px){
     body{overflow-x:hidden;}
     .wrap{padding:0 1rem;}
@@ -287,10 +281,6 @@
   .how-card p{font-size:.85rem;color:var(--ink-soft);}
   @media (max-width:860px){.how-grid{grid-template-columns:1fr 1fr;}}
   @media (max-width:520px){.how-grid{grid-template-columns:1fr;}}
-  @media (min-width:861px) and (prefers-reduced-motion:no-preference){
-    .how-grid.sticky-stack{display:block;padding-bottom:24vh;}
-    .how-grid.sticky-stack .how-card{position:sticky;top:calc(5rem + var(--stack-offset,0px));z-index:var(--stack-index,1);margin-bottom:1rem;border:1px solid var(--line);border-top:2px solid var(--gold);box-shadow:0 24px 42px -32px rgba(20,15,5,.45);transform:scale(var(--stack-scale,1));transform-origin:top center;will-change:transform;}
-  }
 
   /* ---------- DAB at work ---------- */
   .layers{padding:clamp(3rem,6vw,4.2rem) 0;background:var(--cream-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
@@ -392,7 +382,7 @@
       <div class="wrap hero-grid">
         <div>
           <div class="label">Dear Dentist</div>
-          <h1>A simple barrier against <em><span class="text-roll" data-text-roll tabindex="0">aerosol</span></em> cross&#8209;infection.</h1>
+          <h1>A simple barrier against <em>aerosol</em> cross&#8209;infection.</h1>
           <p class="lede">DAB is a single&#8209;use dental aerosol blocker, fitted before a procedure to cut down spray and splatter at the chair. Order a pack below — paid straight to 91DAB's account by UPI.</p>
           <div class="cta-row">
             <button class="btn gold lg" onclick="scrollToPlans()">
@@ -477,7 +467,7 @@
           <h2>How DAB works</h2>
           <p>A straightforward four-stage routine that fits into any existing chairside workflow — no extra training required.</p>
         </div>
-        <div class="how-grid sticky-stack" data-sticky-stack>
+        <div class="how-grid">
           <div class="how-card">
             <div class="num">01 — Mount</div>
             <h3>Fit before the procedure</h3>
@@ -523,7 +513,7 @@
             </video>
           </figure>
         </div>
-        <div class="dab-work-result" data-animation-claim="Blocks 60%"><b>Blocks <span class="count-flow" data-count-flow data-count-to="60" data-count-suffix="%">60%</span></b> aerosol spread</div>
+        <div class="dab-work-result"><b>Blocks 60%</b> aerosol spread</div>
       </div>
     </div>
 
@@ -1431,85 +1421,6 @@ function upsertShopOrder(record){
     observer.observe(section);
     playDabWorkVideos();
   }
-  function prepareTextRoll(el){
-    const text=el.textContent||'';
-    el.setAttribute('aria-label',text);
-    el.textContent='';
-    [...text].forEach((character,index)=>{
-      const glyph=document.createElement('span');
-      const displayCharacter=character===' '?'\u00A0':character;
-      glyph.className='text-roll-char';
-      glyph.dataset.roll=displayCharacter;
-      glyph.textContent=displayCharacter;
-      glyph.style.transitionDelay=`${Math.abs(index-(text.length-1)/2)*24}ms`;
-      el.appendChild(glyph);
-    });
-  }
-  function renderCountFlow(el,value){
-    const prefix=el.dataset.countPrefix||'';
-    const suffix=el.dataset.countSuffix||'';
-    el.textContent=`${prefix}${Math.round(value).toLocaleString('en-IN')}${suffix}`;
-  }
-  function animateCountFlow(el){
-    const target=Number(el.dataset.countTo||0);
-    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduceMotion||!Number.isFinite(target)){renderCountFlow(el,target||0);return;}
-    const startedAt=performance.now(); const duration=300;
-    const frame=(now)=>{
-      const progress=Math.min((now-startedAt)/duration,1);
-      renderCountFlow(el,target*(1-Math.pow(1-progress,3)));
-      if(progress<1)requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-  }
-  function setupDisplayAnimations(){
-    document.querySelectorAll('[data-text-roll]').forEach(prepareTextRoll);
-    const counts=document.querySelectorAll('[data-count-flow]');
-    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if('IntersectionObserver' in window&&!reduceMotion){
-      const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
-        if(!entry.isIntersecting)return;
-        animateCountFlow(entry.target); observer.unobserve(entry.target);
-      }),{threshold:.5});
-      counts.forEach(el=>observer.observe(el));
-    }else counts.forEach(animateCountFlow);
-  }
-  function setupStickyCardStack(cardSelector,desktopMin){
-    if(!document.querySelectorAll||typeof window==='undefined')return;
-    const stacks=Array.from(document.querySelectorAll('[data-sticky-stack]'));
-    const reduceMotion=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const updateStack=()=>{
-      const enabled=!reduceMotion&&window.innerWidth>=desktopMin;
-      stacks.forEach(stack=>{
-        const cards=Array.from(stack.querySelectorAll(cardSelector));
-        cards.forEach((card,index)=>{
-          if(!enabled||typeof stack.getBoundingClientRect!=='function'){
-            card.style.removeProperty('--stack-scale'); card.style.removeProperty('--stack-index'); card.style.removeProperty('--stack-offset'); return;
-          }
-          const rect=stack.getBoundingClientRect(); const viewport=window.innerHeight||800;
-          const travel=Math.max((stack.offsetHeight||rect.height)-viewport*.62,1);
-          const progress=Math.min(Math.max((-rect.top+viewport*.18)/travel,0),1);
-          const start=index/cards.length;
-          const local=Math.min(Math.max((progress-start)/Math.max(1-start,.01),0),1);
-          const eased=local*local*(3-2*local);
-          const target=Math.max(.84,1-(cards.length-index-1)*.07);
-          card.style.setProperty('--stack-scale',String(1-(1-target)*eased));
-          card.style.setProperty('--stack-index',String(index+1));
-          card.style.setProperty('--stack-offset',`${index*20}px`);
-        });
-      });
-    };
-    let ticking=false;
-    const requestUpdate=()=>{
-      if(ticking)return;
-      if(typeof requestAnimationFrame!=='function'){updateStack();return;}
-      ticking=true; requestAnimationFrame(()=>{ticking=false;updateStack();});
-    };
-    window.addEventListener('scroll',requestUpdate,{passive:true});
-    window.addEventListener('resize',requestUpdate); requestUpdate();
-  }
-  setupDisplayAnimations();
-  setupStickyCardStack('.how-card',861);
   setupDabWorkVideos();
 </script>
 </body>

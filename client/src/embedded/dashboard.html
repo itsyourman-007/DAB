@@ -140,23 +140,13 @@ svg{display:block;}
 .stat-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;}
 .stat-top .lbl{font-size:.86rem;color:var(--text-soft);}
 .stat-top svg{width:18px;height:18px;color:var(--text-faint);}
-  .stat-num{font-size:1.9rem;font-weight:700;letter-spacing:-.02em;font-family:'IBM Plex Mono',monospace;transition:opacity .15s;}
-  .text-roll{display:inline-block;overflow:hidden;line-height:1.08;vertical-align:baseline;white-space:nowrap;}
-  .text-roll-char{display:inline-block;position:relative;transition:transform .28s cubic-bezier(.77,0,.175,1);will-change:transform;}
-  .text-roll-char::after{content:attr(data-roll);position:absolute;top:100%;left:0;white-space:pre;}
-  .text-roll:hover .text-roll-char,.text-roll:focus-visible .text-roll-char{transform:translateY(-100%);}
-  .metric-flow{font-variant-numeric:tabular-nums;}
-  @media (prefers-reduced-motion:reduce){.text-roll-char{transition:none;}.text-roll:hover .text-roll-char,.text-roll:focus-visible .text-roll-char{transform:none;}}
+.stat-num{font-size:1.9rem;font-weight:700;letter-spacing:-.02em;font-family:'IBM Plex Mono',monospace;transition:opacity .15s;}
 .stat-delta{font-size:.78rem;color:var(--text-faint);margin-top:.35rem;}
 .stat-delta b{color:var(--success);font-weight:700;}
 .stat-delta.down b{color:var(--danger);}
 
-	/* content grid */
-	@media (min-width:1051px) and (prefers-reduced-motion:no-preference){
-	  .stat-grid.sticky-stack{display:block;padding-bottom:22vh;}
-	  .stat-grid.sticky-stack .stat-card{position:sticky;top:calc(5.5rem + var(--stack-offset,0px));z-index:var(--stack-index,1);margin-bottom:.9rem;box-shadow:0 24px 42px -32px rgba(14,16,28,.52);transform:scale(var(--stack-scale,1));transform-origin:top center;will-change:transform;}
-	}
-	.grid-2{display:grid;grid-template-columns:1.65fr 1fr;gap:1.1rem;margin-bottom:1.1rem;align-items:start;}
+/* content grid */
+.grid-2{display:grid;grid-template-columns:1.65fr 1fr;gap:1.1rem;margin-bottom:1.1rem;align-items:start;}
 @media (max-width:1050px){.grid-2{grid-template-columns:1fr;}.stat-grid{grid-template-columns:repeat(2,1fr);}}
 
 .panel-head{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.4rem .8rem;gap:1rem;flex-wrap:wrap;}
@@ -607,7 +597,7 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
         <button class="mobile-toggle icon-btn" style="margin-right:.4rem;" onclick="document.getElementById('app').classList.toggle('mobile-open')">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <span class="text-roll" data-text-roll tabindex="0">Dashboard</span> <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg> <b id="crumbCurrent">Overview</b>
+        Dashboard <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg> <b id="crumbCurrent">Overview</b>
       </div>
       <div class="top-actions">
         <button class="live-store-monitor connecting hide-mobile" id="liveStoreMonitor" type="button" onclick="showLiveStoreStatus()" aria-live="polite" title="Checking protected Live Store Data connection">
@@ -644,33 +634,33 @@ html[data-theme="dark"] .toast{background:#eef0f4;color:#0e1015;}
       <!-- ============ HOME ============ -->
       <section class="screen active" id="screen-home">
         <div id="lowStockAlert" style="display:none;margin-bottom:1rem;"></div>
-        <div class="stat-grid sticky-stack" data-sticky-stack>
+        <div class="stat-grid">
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Total Revenue</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            <div class="stat-num metric-flow" id="statRevenue">₹0</div>
+            <div class="stat-num" id="statRevenue">₹0</div>
             <div class="stat-delta"><b id="statRevenueDelta">0</b> confirmed sales</div>
           </div>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Active Customers</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="stat-num metric-flow" id="statUsers">0</div>
+            <div class="stat-num" id="statUsers">0</div>
             <div class="stat-delta"><b id="statUsersDelta">0</b> active customers · <b id="statCustomUnits">0</b> custom DAB units</div>
           </div>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Orders</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
             </div>
-            <div class="stat-num metric-flow" id="statOrders">0</div>
+            <div class="stat-num" id="statOrders">0</div>
             <div class="stat-delta"><b id="statOrdersDelta">0</b> qualifying orders and custom sales</div>
           </div>
           <div class="card stat-card">
             <div class="stat-top"><span class="lbl">Conversion Rate</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             </div>
-            <div class="stat-num metric-flow" id="statConv">0%</div>
+            <div class="stat-num" id="statConv">0%</div>
             <div class="stat-delta"><b id="statConvDelta">0</b> paid-order ratio</div>
           </div>
         </div>
@@ -2429,75 +2419,6 @@ function pulseStat(id){
   el.style.opacity = '.35';
   setTimeout(()=> el.style.opacity = '1', 250);
 }
-function prepareTextRoll(el){
-  const text=el.textContent||'';
-  el.setAttribute('aria-label',text);
-  el.textContent='';
-  [...text].forEach((character,index)=>{
-    const glyph=document.createElement('span');
-    const displayCharacter=character===' '?'\u00A0':character;
-    glyph.className='text-roll-char';
-    glyph.dataset.roll=displayCharacter;
-    glyph.textContent=displayCharacter;
-    glyph.style.transitionDelay=`${Math.abs(index-(text.length-1)/2)*24}ms`;
-    el.appendChild(glyph);
-  });
-}
-function formatDashboardMetric(value,options){
-  const opts=options||{};
-  const decimals=Number.isInteger(opts.decimals)?opts.decimals:0;
-  return `${opts.prefix||''}${Number(value||0).toLocaleString('en-IN',{minimumFractionDigits:decimals,maximumFractionDigits:decimals})}${opts.suffix||''}`;
-}
-function animateDashboardMetric(id,value,options){
-  const el=document.getElementById(id); if(!el)return;
-  const target=Number(value)||0;
-  const start=Number((el.dataset&&el.dataset.metricValue)||0);
-  if(el.dataset)el.dataset.metricValue=String(target);
-  if(el._metricRaf&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(el._metricRaf);
-  const reduceMotion=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduceMotion||start===target||typeof requestAnimationFrame!=='function'){el.textContent=formatDashboardMetric(target,options);return;}
-  const startedAt=performance.now(); const duration=300;
-  const frame=(now)=>{
-    const progress=Math.min((now-startedAt)/duration,1);
-    el.textContent=formatDashboardMetric(start+(target-start)*(1-Math.pow(1-progress,3)),options);
-    if(progress<1)el._metricRaf=requestAnimationFrame(frame);
-  };
-  el._metricRaf=requestAnimationFrame(frame);
-}
-function setupStickyCardStack(cardSelector,desktopMin){
-  if(!document.querySelectorAll||typeof window==='undefined')return;
-  const stacks=Array.from(document.querySelectorAll('[data-sticky-stack]'));
-  const reduceMotion=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const updateStack=()=>{
-    const enabled=!reduceMotion&&window.innerWidth>=desktopMin;
-    stacks.forEach(stack=>{
-      const cards=Array.from(stack.querySelectorAll(cardSelector));
-      cards.forEach((card,index)=>{
-        if(!enabled||typeof stack.getBoundingClientRect!=='function'){
-          card.style.removeProperty('--stack-scale'); card.style.removeProperty('--stack-index'); card.style.removeProperty('--stack-offset'); return;
-        }
-        const rect=stack.getBoundingClientRect(); const viewport=window.innerHeight||800;
-        const travel=Math.max((stack.offsetHeight||rect.height)-viewport*.62,1);
-        const progress=Math.min(Math.max((-rect.top+viewport*.18)/travel,0),1);
-        const start=index/cards.length;
-        const local=Math.min(Math.max((progress-start)/Math.max(1-start,.01),0),1);
-        const eased=local*local*(3-2*local);
-        const target=Math.max(.84,1-(cards.length-index-1)*.07);
-        card.style.setProperty('--stack-scale',String(1-(1-target)*eased));
-        card.style.setProperty('--stack-index',String(index+1));
-        card.style.setProperty('--stack-offset',`${index*20}px`);
-      });
-    });
-  };
-  let ticking=false;
-  const requestUpdate=()=>{
-    if(ticking)return;
-    if(typeof requestAnimationFrame!=='function'){updateStack();return;}
-    ticking=true; requestAnimationFrame(()=>{ticking=false;updateStack();});
-  };
-  window.addEventListener('scroll',requestUpdate,{passive:true});
-  window.addEventListener('resize',requestUpdate); requestUpdate();
-}
 function refreshHomeStats(){
   const paid=orders.filter(o=>o.paymentStatus==='paid');
   const customRevenue=quoteClientCustomizations.reduce((sum,item)=>sum+(Number(item.revenueInr)||0),0);
@@ -2508,20 +2429,18 @@ function refreshHomeStats(){
   const commercialEntries=orders.length+quoteClientCustomizations.length;
   const confirmedSales=paid.length+quoteClientCustomizations.length;
   const revenue=revenueEntries().reduce((sum,entry)=>sum+entry.amount,0);
-  animateDashboardMetric('statRevenue',revenue,{prefix:'₹'});
-  animateDashboardMetric('statUsers',customers);
+  const revenueEl=document.getElementById('statRevenue'); if(revenueEl) revenueEl.textContent=fmtINR(revenue);
+  const usersEl=document.getElementById('statUsers'); if(usersEl) usersEl.textContent=customers.toLocaleString('en-IN');
   const customUnitsEl=document.getElementById('statCustomUnits'); if(customUnitsEl) customUnitsEl.textContent=customUnits.toLocaleString('en-IN');
   const revenueDelta=document.getElementById('statRevenueDelta'); if(revenueDelta) revenueDelta.textContent=confirmedSales.toLocaleString('en-IN');
   const usersDelta=document.getElementById('statUsersDelta'); if(usersDelta) usersDelta.textContent=customers.toLocaleString('en-IN');
-  animateDashboardMetric('statOrders',commercialEntries);
+  const ordersEl=document.getElementById('statOrders'); if(ordersEl) ordersEl.textContent=commercialEntries.toLocaleString('en-IN');
   const ordersDelta=document.getElementById('statOrdersDelta'); if(ordersDelta) ordersDelta.textContent=commercialEntries.toLocaleString('en-IN');
-  animateDashboardMetric('statConv',commercialEntries ? (confirmedSales/commercialEntries)*100 : 0,{suffix:'%',decimals:2});
+  const convEl=document.getElementById('statConv'); if(convEl) convEl.textContent=commercialEntries ? ((confirmedSales/commercialEntries)*100).toFixed(2)+'%' : '0%';
 }
 /* ============================================================
    INIT
    ============================================================ */
-document.querySelectorAll('[data-text-roll]').forEach(prepareTextRoll);
-setupStickyCardStack('.stat-card',1051);
 hydrateShopData();
 renderBars();
 renderTopProducts();
